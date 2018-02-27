@@ -1,0 +1,47 @@
+version: '3'
+
+services:
+  db:
+    image: postgres
+    ports:
+      - "5434:5432"
+    volumes:
+      - postgres:/var/lib/postgresql/data
+  web:
+    build:
+      context: .
+      dockerfile: docks/python/Dockerfile
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - .:/code
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+
+  redis:
+    image: redis
+    hostname: redis
+
+  ganache:
+    image: trufflesuite/ganache-cli
+    entrypoint: ["node", "./build/cli.node.js", "-i", "5888", "-h", "0.0.0.0"]
+    hostname: ganache
+    ports:
+      - "8545:8545"
+
+  celery:
+    build:
+      context: .
+      dockerfile: docks/python/Dockerfile
+    environment:
+      - DJANGO_SETTINGS_MODULE=bdn.settings
+    command: celery -A bdn worker -l info
+    volumes:
+      - .:/code
+    depends_on:
+      - db
+      - redis
+
+volumes:
+  postgres:
