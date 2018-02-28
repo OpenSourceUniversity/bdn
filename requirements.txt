@@ -29,4 +29,4 @@ six==1.11.0
 toolz==0.9.0
 urllib3==1.22
 vine==1.1.4
--e git://github.com/jordanjambazov/web3.py.git#egg=web3
+git+git://github.com/jordanjambazov/web3.py.git#egg=web3
