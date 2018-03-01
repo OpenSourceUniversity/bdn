@@ -1,7 +1,9 @@
 from django.db import models as m
 
+
 # Create your models here.
 class Certificate(m.Model):
+    uid = m.PositiveIntegerField(unique=True)
     index = m.PositiveIntegerField(unique=True)
     academy = m.CharField(max_length=42)
     course = m.CharField(max_length=42)

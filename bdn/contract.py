@@ -1,11 +1,10 @@
 import os
-import functools
 import json
 import web3
 from django.conf import settings
 
 
-w3 = web3.Web3(web3.HTTPProvider('http://ganache:8545'))
+w3 = web3.Web3(web3.HTTPProvider(os.environ['ETHEREUM_NODE']))
 
 
 _contracts = {}

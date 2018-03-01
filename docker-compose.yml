@@ -12,6 +12,8 @@ services:
       context: .
       dockerfile: docks/python/Dockerfile
     command: python manage.py runserver 0.0.0.0:8000
+    environment:
+      - ETHEREUM_NODE=http://ganache:8545
     volumes:
       - .:/code
     ports:
@@ -29,6 +31,8 @@ services:
     hostname: ganache
     ports:
       - "8545:8545"
+    logging:
+      driver: "none"
 
   celery:
     build:
@@ -36,6 +40,7 @@ services:
       dockerfile: docks/python/Dockerfile
     environment:
       - DJANGO_SETTINGS_MODULE=bdn.settings
+      - ETHEREUM_NODE=http://ganache:8545
     command: celery -A bdn worker -l info
     volumes:
       - .:/code
