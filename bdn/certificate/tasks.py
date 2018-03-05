@@ -1,7 +1,7 @@
 import logging
 from celery import shared_task
+from web3 import Web3
 from datetime import datetime
-from eth_utils import force_text
 from django.utils.timezone import make_aware
 from bdn.certificate.models import Certificate
 from bdn.contract import contract
@@ -19,7 +19,7 @@ def create_certificate(index):
     academy, course, learner, creator = addresses
     uid, name, subject, verified, score, expiration_date = certificate_data
 
-    def normalize(s): return force_text(s.rstrip(b'\0'))
+    def normalize(s): return Web3.toText(s.rstrip(b'\0'))
     name = normalize(name[0]) + normalize(name[1])
     subject = normalize(subject[0]) + normalize(subject[1])
     expiration_date = datetime.utcfromtimestamp(expiration_date)
