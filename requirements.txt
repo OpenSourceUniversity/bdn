@@ -4,9 +4,12 @@ billiard==3.5.0.3
 celery==4.1.0
 certifi==2018.1.18
 chardet==3.0.4
+coreapi==2.3.3
+coreschema==0.0.4
 cytoolz==0.9.0
 Django==2.0.2
 django-celery-results==1.0.1
+djangorestframework==3.7.7
 eth-abi==1.0.0b1
 eth-account==0.1.0a2
 eth-hash==0.1.0a4
@@ -16,8 +19,11 @@ eth-rlp==0.1.0a2
 eth-utils==1.0.0b2
 hexbytes==0.1.0b1
 idna==2.6
+itypes==1.1.0
+Jinja2==2.10
 kombu==4.1.0
 lru-dict==1.1.6
+MarkupSafe==1.0
 psycopg2==2.7.4
 pycryptodome==3.4.11
 pysha3==1.0.2
@@ -27,6 +33,7 @@ requests==2.18.4
 rlp==0.6.0
 six==1.11.0
 toolz==0.9.0
+uritemplate==3.0.0
 urllib3==1.22
 vine==1.1.4
 git+git://github.com/jordanjambazov/web3.py.git#egg=web3
