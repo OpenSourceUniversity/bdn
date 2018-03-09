@@ -1,3 +1,30 @@
+# Available Accounts
+# ==================
+# (0) 0x26006236eab6409d9fdecb16ed841033d6b4a6bc
+# (1) 0xa8d5f39f3ccd4795b0e38feacb4f2ee22486ca44
+# (2) 0x3596ddf5181c9f6aa1bce87d967bf227dde70ddf
+# (3) 0x79182b3fa375ce9c8a4c3c611594aaf38a508477
+# (4) 0x3c9a6014424cbdeea0d75cbaa752fc0a1fefe327
+# (5) 0x52368f0c52c8b038fa34f3b33ca5460576941485
+# (6) 0xd9b8cbfdd0cf9b695ec69290eecf32ca524677bc
+# (7) 0x817ff9c7e1a856e2ecefbe0d35a64d5f318a2181
+# (8) 0xb20f90853edb0421742d385a18d34d8d08dd7023
+# (9) 0xcf026e727c1a5a71058316d223ca5bdb51c962a6
+#
+# Private Keys
+# ==================
+# (0) 1ce6a4cc4c9941a4781349f988e129accdc35a55bb3d5b1a7b342bc2171db484
+# (1) c7ab5af90a9373bdd03d5708cfba1a4117dbd204237b90d55e9842c71e631d97
+# (2) a4471ac58369b9df99f5d9e4ff4170e5a068db13ee23a0c5af8731245fc174c2
+# (3) 33d60e49207d6d89f83cb435d4da87413b72617efd9249fe825c267b2e77c4de
+# (4) dcaf0add96529d56e5411e4108f17fdb30dfe64bb1575229c8dfa325ceb6c045
+# (5) 2c88b2e35ce934d91a9fe78be093471eb66ee78a9fe7499a247c465c80446879
+# (6) 119ac62abb4ccb172efff1aa8a131d5488cc6aef5c23735385ab760189d7b869
+# (7) f2fdb869a4a0532353fdf9b49ff2a3c78fc007278c52e611aaf038c5c6aa2b33
+# (8) 44ac9ba42c7a41bf654709867fc1a3a31d35b72b46ce0539353c49349edb98bc
+# (9) 91478b9ed07e05d331f3eb12be41541d61ffaefee8ccaec3249897c597814bf8
+
+
 version: '3'
 
 services:
@@ -27,7 +54,7 @@ services:
 
   ganache:
     image: trufflesuite/ganache-cli
-    entrypoint: ["node", "./build/cli.node.js", "-i", "5888", "-h", "0.0.0.0"]
+    entrypoint: ["node", "./build/cli.node.js", "-i", "5888", "-h", "0.0.0.0", "-m", "test"]
     hostname: ganache
     ports:
       - "8545:8545"
