@@ -107,3 +107,5 @@ var/
 db.sqlite3
 
 contracts/
+
+data/

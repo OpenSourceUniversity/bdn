@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'corsheaders',
     'bdn.certificate',
+    'bdn.course',
 ]
 
 MIDDLEWARE = [
