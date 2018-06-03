@@ -1,6 +1,6 @@
 import json
 from django.core.management.base import BaseCommand
-from bdn.course.models import Provider, Course, Category
+from bdn.course.models import Provider, Course, Category, Skill
 
 
 class Command(BaseCommand):
@@ -25,13 +25,20 @@ class Command(BaseCommand):
                     name=course['provider'])
                 tutor = course['tutor']
 
-                course = Course(
-                    title=title,
-                    description=description,
-                    external_link=external_link,
-                    provider=provider,
-                    tutor=tutor
-                )
-                course.save()
+                try:
+                    course_obj = Course(
+                        title=title,
+                        description=description,
+                        external_link=external_link,
+                        provider=provider,
+                        tutor=tutor
+                    )
+                    course_obj.save()
 
-                course.categories.add(category)
+                    course_obj.categories.add(category)
+
+                    for skill_name in course['skills']:
+                        skill, _ = Skill.objects.get_or_create(name=skill_name)
+                        course_obj.skills.add(skill)
+                except Exception:
+                    continue
