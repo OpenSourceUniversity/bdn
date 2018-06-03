@@ -32,6 +32,7 @@ class ProviderSerializer(serializers.ModelSerializer):
 class CourseSerializer(serializers.ModelSerializer):
     categories = CategorySerializer(many=True, read_only=True)
     skills = SkillSerializer(many=True, read_only=True)
+    provider = ProviderSerializer(many=False, read_only=True)
 
     class Meta:
         model = Course
