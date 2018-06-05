@@ -1,0 +1,6 @@
+{{ object.title }}
+{{ object.description }}
+{{ object.tutor }}
+
+{% for category in object.categories.all %}{{ category.name }} {% endfor %}
+{% for skill in object.skills.all %}{{ skill.name }} {% endfor %}

@@ -20,6 +20,12 @@ Create project directory and execute the following command in order to clone the
 
 ### Running
 
+## Increase the VM max map count
+
+    docker-machine ssh
+    sudo sysctl -w vm.max_map_count=262144
+    exit
+
 Within the project directory execute the following commands:
 
     docker-compose up
