@@ -16,13 +16,14 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import include, path
 from bdn.certificate.views import CertificateViewSet
-from bdn.course.views import CourseViewSet
+from bdn.course.views import CourseViewSet, CategoryViewSet
 from rest_framework import routers
 
 
 router = routers.DefaultRouter()
 router.register(r'certificates', CertificateViewSet)
 router.register(r'courses', CourseViewSet)
+router.register(r'categories', CategoryViewSet, base_name='Category')
 
 
 urlpatterns = [
