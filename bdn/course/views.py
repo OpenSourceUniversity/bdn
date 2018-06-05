@@ -21,7 +21,7 @@ class CourseViewSet(viewsets.ModelViewSet):
 
     @list_route(methods=['get'])
     def autocomplete(self, request):
-        sqs = SearchQuerySet().filter(title_auto=request.GET.get('q', ''))
+        sqs = SearchQuerySet().filter(title_auto=request.GET.get('q', ''))[:10]
         serializer = self.get_serializer([s.object for s in sqs], many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
