@@ -1,3 +1,5 @@
+from uuid import UUID
+from django.db.models import Q
 from rest_framework import status, viewsets
 from rest_framework.decorators import list_route
 from rest_framework.pagination import LimitOffsetPagination
@@ -11,6 +13,23 @@ class CourseViewSet(viewsets.ModelViewSet):
     queryset = Course.objects.all()
     serializer_class = CourseSerializer
     pagination_class = LimitOffsetPagination
+
+    def get_queryset(self):
+        qs = Course.objects.all()
+        return qs.filter(self.category_filter())
+
+    def category_filter(self):
+        filtered_categories_ids = self.request.query_params.get(
+            'filter_category', '').split('|')
+        category_filter = Q()
+        for filtered_category_id in filtered_categories_ids:
+            try:
+                UUID(filtered_category_id, version=4)
+            except ValueError:
+                continue
+            if filtered_category_id:
+                category_filter |= Q(categories__id=filtered_category_id)
+        return category_filter
 
     @list_route(methods=['get'])
     def search(self, request):
