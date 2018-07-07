@@ -56,6 +56,12 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+
+CORS_ALLOW_HEADERS = (
+    'Auth-Signature',
+    'Auth-Eth-Address',
+)
+
 CORS_ORIGIN_ALLOW_ALL = True
 
 ROOT_URLCONF = 'bdn.urls'
