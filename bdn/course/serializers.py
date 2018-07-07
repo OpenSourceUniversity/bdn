@@ -41,8 +41,10 @@ class CourseSerializer(serializers.ModelSerializer):
             'title',
             'description',
             'external_link',
+            'image_url',
             'provider',
             'tutor',
             'categories',
             'skills',
+            'is_featured',
         )
