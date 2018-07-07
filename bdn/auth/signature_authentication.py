@@ -11,7 +11,10 @@ class SignatureAuthentication(authentication.BaseAuthentication):
         if not signature or not eth_address:
             return None
 
-        recovered_eth_address = recover_to_addr(eth_address, signature)
+        try:
+            recovered_eth_address = recover_to_addr(eth_address, signature)
+        except ValueError:
+            return None
 
         if eth_address.lower() != recovered_eth_address[2:].lower():
             return None
