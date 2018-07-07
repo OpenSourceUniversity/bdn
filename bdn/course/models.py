@@ -31,11 +31,13 @@ class Course(m.Model):
     title = m.CharField(max_length=130)
     description = m.TextField()
     external_link = m.URLField(blank=True, null=True)
+    image_url = m.URLField(blank=True, null=True)
     provider = m.ForeignKey(
         Provider, blank=True, null=True, on_delete=m.SET_NULL)
     tutor = m.CharField(max_length=270, blank=True, null=True)
     categories = m.ManyToManyField(Category)
     skills = m.ManyToManyField(Skill)
+    is_featured = m.BooleanField(default=False)
 
     def __str__(self):
         return self.title
