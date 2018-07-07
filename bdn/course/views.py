@@ -3,8 +3,10 @@ from django.db.models import Q
 from rest_framework import status, viewsets
 from rest_framework.decorators import list_route
 from rest_framework.pagination import LimitOffsetPagination
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from haystack.query import SearchQuerySet
+from bdn.auth.signature_authentication import SignatureAuthentication
 from .models import Course, Category
 from .serializers import CourseSerializer, CategorySerializer
 
@@ -13,6 +15,8 @@ class CourseViewSet(viewsets.ModelViewSet):
     queryset = Course.objects.all()
     serializer_class = CourseSerializer
     pagination_class = LimitOffsetPagination
+    authentication_classes = (SignatureAuthentication,)
+    permission_classes = (IsAuthenticated,)
 
     def get_queryset(self):
         qs = Course.objects.all()
