@@ -21,14 +21,6 @@ class AuthTests(TestCase):
         addr = recover_to_addr('12345', sig)
         self.assertEqual(addr, '0xc2d7cf95645d33006175b78989035c7c9061d3f9')
 
-    def test_recover_to_addr_0x_number(self):
-        sig = (
-            '0x2d1693bb4c335caa2ecfca2a76c192a5158e15369bf83190624a33033ae30f'
-            'f90cf02ee869846d245fe09c2e121d2c6691ab161ecd4ee9c14f201593a5836d'
-            '231c')
-        addr = recover_to_addr('0x12345', sig)
-        self.assertEqual(addr, '0xc2d7cf95645d33006175b78989035c7c9061d3f9')
-
     def test_recover_to_addr_a0x_number(self):
         sig = (
             '0x410010ca0cf0adf3c78646eca1eb2562e48a223a9687d7e422d1700477dbb2'
