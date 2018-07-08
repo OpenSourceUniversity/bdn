@@ -16,7 +16,8 @@ class CourseViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         qs = Course.objects.all()
-        return qs.filter(self.category_filter())
+        qs = qs.filter(self.category_filter())
+        return qs.filter(self.featured_filter())
 
     def category_filter(self):
         filtered_categories_ids = self.request.query_params.get(
@@ -30,6 +31,12 @@ class CourseViewSet(viewsets.ModelViewSet):
             if filtered_category_id:
                 category_filter |= Q(categories__id=filtered_category_id)
         return category_filter
+
+    def featured_filter(self):
+        featured_filter = Q()
+        if int(self.request.query_params.get('is_featured', 0)) == 1:
+            featured_filter = Q(is_featured=True)
+        return featured_filter
 
     @list_route(methods=['get'])
     def search(self, request):
