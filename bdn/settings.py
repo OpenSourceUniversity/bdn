@@ -56,6 +56,12 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+
+CORS_ALLOW_HEADERS = (
+    'Auth-Signature',
+    'Auth-Eth-Address',
+)
+
 CORS_ORIGIN_ALLOW_ALL = True
 
 ROOT_URLCONF = 'bdn.urls'
@@ -113,6 +119,13 @@ CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_RESULT_BACKEND = 'django-db'
+
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'bdn.auth.signature_authentication.SignatureAuthentication',
+    )
+}
 
 
 # Password validation
