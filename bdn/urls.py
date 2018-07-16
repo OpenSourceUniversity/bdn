@@ -14,19 +14,26 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
+from django.conf.urls import url
 from django.urls import include, path
 from bdn.certificate.views import CertificateViewSet
+from bdn.profiles.views import ProfileViewSet
 from bdn.course.views import CourseViewSet, CategoryViewSet
+from bdn.profiles.views import ProfileView
+from django.views.decorators.csrf import csrf_exempt
 from rest_framework import routers
 
 
 router = routers.DefaultRouter()
 router.register(r'certificates', CertificateViewSet)
 router.register(r'courses', CourseViewSet)
+router.register(r'profiles', ProfileViewSet)
 router.register(r'categories', CategoryViewSet, base_name='Category')
 
 
 urlpatterns = [
     path('api/v1/', include((router.urls, 'rest_framework'))),
     path('admin/', admin.site.urls),
+    url(r'^api/profile/$', csrf_exempt(ProfileView.as_view()),
+        name='profile'),
 ]

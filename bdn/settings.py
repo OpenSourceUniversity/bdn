@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'bdn.certificate',
     'bdn.course',
+    'bdn.profiles',
 ]
 
 MIDDLEWARE = [
