@@ -30,12 +30,12 @@ class ProfileViewSet(viewsets.ModelViewSet):
 
 
 class ProfileView(View):
-    #authentication_classes = (SignatureAuthentication,)
-    #permission_classes = (IsAuthenticated,)
+    authentication_classes = (SignatureAuthentication,)
+    permission_classes = (IsAuthenticated,)
     serializer_class = ProfileSerializer
     def get(self, request):
-        #eth_address = '0x' + str(request.META.get('HTTP_AUTH_ETH_ADDRESS')).lower()
-        user = User.objects.get(username='FrankieRafie')
+        eth_address = '0x' + str(request.META.get('HTTP_AUTH_ETH_ADDRESS')).lower()
+        user = User.objects.get(username=eth_address)
         profile = Profile.objects.get(user=user)
         serializer = self.serializer_class(data=model_to_dict(profile))
         serializer.is_valid(raise_exception=True)
