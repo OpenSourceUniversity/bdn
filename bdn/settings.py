@@ -61,6 +61,8 @@ MIDDLEWARE = [
 CORS_ALLOW_HEADERS = (
     'Auth-Signature',
     'Auth-Eth-Address',
+    'Content-Type',
+    'Profile-Type',
 )
 
 CORS_ORIGIN_ALLOW_ALL = True
