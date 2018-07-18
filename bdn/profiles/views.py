@@ -33,15 +33,13 @@ class ProfileViewSet(viewsets.ModelViewSet):
         profile_type = request.META.get('HTTP_PROFILE_TYPE')
         user = User.objects.get(username=eth_address)
         profile = Profile.objects.get(user=user)
-        print(profile_type)
         if profile_type == '1':
             serializer = LearnerProfileSerializer(data=request.data, instance=profile, partial=True)
         elif profile_type == '2':
             serializer = AcademyProfileSerializer(data=request.data, instance=profile, partial=True)
-        else:
+        elif profile_type == '3':
             serializer = CompanyProfileSerializer(data=request.data, instance=profile, partial=True)
         if serializer.is_valid():
-            print(serializer.validated_data)
             serializer.save()
             return Response({'status': 'ok'})
         else:
