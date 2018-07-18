@@ -14,12 +14,6 @@ from rest_framework.response import Response
 from .models import Profile
 from .serializers import ProfileSerializer, LearnerProfileSerializer, AcademyProfileSerializer, CompanyProfileSerializer
 
-# Create your views here.
-# def update_profile(request, user_id):
-#     user = User.objects.get(pk=user_id)
-#     user.profile.learner_position = 'Lorem ipsum dolor sit'
-#     user.save()
-
 
 class ProfileViewSet(viewsets.ModelViewSet):
     serializer_class = ProfileSerializer
@@ -36,17 +30,18 @@ class ProfileViewSet(viewsets.ModelViewSet):
 
     def create(self, request, pk=None):
         eth_address = '0x' + str(request.META.get('HTTP_AUTH_ETH_ADDRESS')).lower()
+        profile_type = request.META.get('HTTP_PROFILE_TYPE')
         user = User.objects.get(username=eth_address)
         profile = Profile.objects.get(user=user)
-        serializer = ProfileSerializer(data=request.data, instance=profile)
+        print(profile_type)
+        if profile_type == '1':
+            serializer = LearnerProfileSerializer(data=request.data, instance=profile, partial=True)
+        elif profile_type == '2':
+            serializer = AcademyProfileSerializer(data=request.data, instance=profile, partial=True)
+        else:
+            serializer = CompanyProfileSerializer(data=request.data, instance=profile, partial=True)
         if serializer.is_valid():
-            profile_type = request.META.get('HTTP_PROFILE_TYPE')
-            if profile_type == 1:
-                serializer = LearnerProfileSerializer(data=request.data, instance=profile)
-            if profile_type == 2:
-                serializer = AcademyProfileSerializer(data=request.data, instance=profile)
-            if profile_type == 3:
-                serializer = CompanyProfileSerializer(data=request.data, instance=profile)
+            print(serializer.validated_data)
             serializer.save()
             return Response({'status': 'ok'})
         else:
