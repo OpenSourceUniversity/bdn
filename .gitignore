@@ -101,6 +101,9 @@ venv.bak/
 # mypy
 .mypy_cache/
 
+# macDS
+*.DS_Store
+
 
 var/
 
