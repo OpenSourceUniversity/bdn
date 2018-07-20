@@ -1,3 +1,6 @@
+# -*- coding: utf-8 -*-
+from __future__ import unicode_literals
+
 from rest_framework import viewsets, status
 from rest_framework.permissions import IsAuthenticated
 from bdn.auth.signature_authentication import SignatureAuthentication

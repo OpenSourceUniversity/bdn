@@ -16,6 +16,7 @@ class Certificate(m.Model):
     skills = ArrayField(m.CharField(max_length=70), default=[])
     learner_eth_address = m.CharField(max_length=42)
     verified = m.BooleanField(default=False)
+    ipfs_hash = m.CharField(max_length=100, blank=True, null=True)
     score = m.FloatField(default=0.0)
     duration = m.DurationField(blank=True, null=True)
     expiration_date = m.DateTimeField(blank=True, null=True)

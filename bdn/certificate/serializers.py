@@ -6,6 +6,7 @@ class CertificateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Certificate
         fields = (
+            'id',
             'user_eth_address',
             'academy_title',
             'academy_address',
@@ -17,6 +18,7 @@ class CertificateSerializer(serializers.ModelSerializer):
             'skills',
             'learner_eth_address',
             'verified',
+            'ipfs_hash',
             'score',
             'duration',
             'expiration_date',
