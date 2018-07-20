@@ -17,7 +17,7 @@ class Profile(models.Model):
     learner_site = models.CharField(max_length=70, blank=True, null=True)
     phone_number = models.CharField(max_length=70, blank=True, null=True)
     learner_country = models.CharField(max_length=70, blank=True, null=True)
-    #lerner_avatar = models.ImageField(upload_to=avatar_upload_path, blank=True, null=True)
+    #learner_avatar = models.ImageField(upload_to=avatar_upload_path, blank=True, null=True)
     academy_name = models.CharField(max_length=70, blank=True, null=True)
     academy_website = models.CharField(max_length=70, blank=True, null=True)
     academy_email = models.EmailField(max_length=70, blank=True, null=True)

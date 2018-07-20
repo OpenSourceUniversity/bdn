@@ -15,7 +15,7 @@ class ProfileSerializer(serializers.ModelSerializer):
             'learner_site',
             'phone_number',
             'learner_country',
-            #'lerner_avatar',
+            #'learner_avatar',
             'academy_name',
             'academy_website',
             'academy_email',
@@ -42,7 +42,7 @@ class LearnerProfileSerializer(serializers.ModelSerializer):
             'learner_site',
             'phone_number',
             'learner_country',
-            #'lerner_avatar',
+            #'learner_avatar',
         )
 class AcademyProfileSerializer(serializers.ModelSerializer):
     class Meta:
