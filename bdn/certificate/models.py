@@ -1,25 +1,24 @@
+import uuid
 from django.db import models as m
-from django.contrib.auth.models import User
-from django.db.models.signals import post_save
-from django.dispatch import receiver
 from django.contrib.postgres.fields import ArrayField
 
 
-# Create your models here.
 class Certificate(m.Model):
-    user_eth_address = m.CharField(max_length=70, default='None')
-    uid = m.PositiveIntegerField(unique=True)
-    index = m.PositiveIntegerField(unique=True)
-    academy = m.CharField(max_length=42)
-    course = m.CharField(max_length=42)
-    learner = m.CharField(max_length=42)
-    name = m.CharField(max_length=70)
-    subject = m.CharField(max_length=70)
+    id = m.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    user_eth_address = m.CharField(max_length=42, default='None')
+    academy_title = m.CharField(max_length=70)
+    academy_address = m.CharField(max_length=42, blank=True, null=True)
+    academy_link = m.URLField()
+    program_title = m.CharField(max_length=70, blank=True, null=True)
+    course_title = m.CharField(max_length=70)
+    course_link = m.URLField(blank=True, null=True)
+    subject = ArrayField(m.CharField(max_length=70), default=[])
     skills = ArrayField(m.CharField(max_length=70), default=[])
+    learner_eth_address = m.CharField(max_length=42)
     verified = m.BooleanField(default=False)
-    score = m.PositiveSmallIntegerField(default=0)
-    creator = m.CharField(max_length=42)
-    expiration_date = m.DateTimeField()
+    score = m.FloatField(default=0.0)
+    duration = m.DurationField(blank=True, null=True)
+    expiration_date = m.DateTimeField(blank=True, null=True)
 
     def __str__(self):
-        return self.name
+        return self.course_title
