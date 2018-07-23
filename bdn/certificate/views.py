@@ -6,6 +6,7 @@ from rest_framework.permissions import IsAuthenticated
 from bdn.auth.signature_authentication import SignatureAuthentication
 from rest_framework.response import Response
 from .models import Certificate
+from rest_framework.decorators import detail_route
 from .serializers import CertificateSerializer
 
 
@@ -20,6 +21,12 @@ class CertificateViewSet(viewsets.ModelViewSet):
         certificates = Certificate.objects.filter(user_eth_address=eth_address)
         serializer = CertificateSerializer(certificates, many=True)
         return Response(serializer.data)
+
+    @detail_route(methods=['get'])
+    def get_certificates_count(self, request, pk=None):
+        eth_address = request.GET.get('eth_address')
+        certificates_count = len(Certificate.objects.filter(user_eth_address=eth_address))
+        return Response({'certificates_count': certificates_count})
 
     def create(self, request, pk=None):
         eth_address = '0x' + str(request.META.get('HTTP_AUTH_ETH_ADDRESS')).lower()

@@ -1,10 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-import json
-from django.http import JsonResponse
-
-from django.forms.models import model_to_dict
 from rest_framework import status, viewsets
 from rest_framework.decorators import detail_route
 from django.contrib.auth.models import User
@@ -27,6 +23,31 @@ class ProfileViewSet(viewsets.ModelViewSet):
         profile = Profile.objects.get(user=user)
         serializer = ProfileSerializer(profile)
         return Response(serializer.data)
+
+    @detail_route(methods=['get'])
+    def get_academy(self, request, pk=None):
+        eth_address = request.GET.get('eth_address')
+        user = User.objects.get(username=eth_address)
+        profile = Profile.objects.get(user=user)
+        serializer = AcademyProfileSerializer(profile)
+        return Response(serializer.data)
+
+    @detail_route(methods=['get'])
+    def get_learner(self, request, pk=None):
+        eth_address = request.GET.get('eth_address')
+        user = User.objects.get(username=eth_address)
+        profile = Profile.objects.get(user=user)
+        serializer = LearnerProfileSerializer(profile)
+        return Response(serializer.data)
+
+    @detail_route(methods=['get'])
+    def get_business(self, request, pk=None):
+        eth_address = request.GET.get('eth_address')
+        user = User.objects.get(username=eth_address)
+        profile = Profile.objects.get(user=user)
+        serializer = CompanyProfileSerializer(profile)
+        return Response(serializer.data)
+
 
     def create(self, request, pk=None):
         eth_address = '0x' + str(request.META.get('HTTP_AUTH_ETH_ADDRESS')).lower()
