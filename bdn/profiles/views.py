@@ -37,8 +37,11 @@ class ProfileViewSet(viewsets.ModelViewSet):
         eth_address = request.GET.get('eth_address')
         user = User.objects.get(username=eth_address)
         profile = Profile.objects.get(user=user)
-        serializer = LearnerProfileSerializer(profile)
-        return Response(serializer.data)
+        if profile.public_profile:
+            serializer = LearnerProfileSerializer(profile)
+            return Response(serializer.data)
+        else:
+            return Response({'status': 'not_public'})
 
     @detail_route(methods=['get'])
     def get_business(self, request, pk=None):

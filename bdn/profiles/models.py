@@ -14,6 +14,7 @@ class Profile(models.Model):
     learner_position = models.CharField(max_length=70, blank=True, null=True)
     learner_specialisation = models.CharField(max_length=70, blank=True, null=True)
     learner_about = models.TextField(max_length=500, blank=True, null=True)
+    public_profile = models.BooleanField(default=False)
     learner_site = models.CharField(max_length=70, blank=True, null=True)
     phone_number = models.CharField(max_length=70, blank=True, null=True)
     learner_country = models.CharField(max_length=70, blank=True, null=True)
