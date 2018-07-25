@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Course, Skill, Category, Provider, Department
+from .models import Course, Skill, Category, Provider
 
 
 class SkillSerializer(serializers.ModelSerializer):
@@ -19,15 +19,6 @@ class CategorySerializer(serializers.ModelSerializer):
             'name',
         )
 
-class DepartmentSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Department
-        fields = (
-            'id',
-            'name',
-            'eth_address',
-        )
-
 
 class ProviderSerializer(serializers.ModelSerializer):
     class Meta:
@@ -35,6 +26,7 @@ class ProviderSerializer(serializers.ModelSerializer):
         fields = (
             'id',
             'name',
+            'eth_address',
         )
 
 
@@ -42,7 +34,6 @@ class CourseSerializer(serializers.ModelSerializer):
     categories = CategorySerializer(many=True, read_only=True)
     skills = SkillSerializer(many=True, read_only=True)
     provider = ProviderSerializer(many=False, read_only=True)
-    department = DepartmentSerializer(many=False, read_only=True)
 
     class Meta:
         model = Course
@@ -53,7 +44,6 @@ class CourseSerializer(serializers.ModelSerializer):
             'external_link',
             'image_url',
             'provider',
-            'department',
             'tutor',
             'categories',
             'skills',

@@ -1,6 +1,12 @@
 from rest_framework import serializers
+from django.contrib.auth.models import User
 from .models import Profile
 
+
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ('username',)
 
 class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
@@ -31,9 +37,11 @@ class ProfileSerializer(serializers.ModelSerializer):
             #'company_logo',
         )
 class LearnerProfileSerializer(serializers.ModelSerializer):
+    user = UserSerializer(many=False, read_only=True)
     class Meta:
         model = Profile
         fields = (
+            'user',
             'first_name',
             'last_name',
             'learner_email',
@@ -47,9 +55,11 @@ class LearnerProfileSerializer(serializers.ModelSerializer):
             #'learner_avatar',
         )
 class AcademyProfileSerializer(serializers.ModelSerializer):
+    user = UserSerializer(many=False, read_only=True)
     class Meta:
         model = Profile
         fields = (
+            'user',
             'academy_name',
             'academy_website',
             'academy_email',
@@ -58,9 +68,11 @@ class AcademyProfileSerializer(serializers.ModelSerializer):
             #'academy_logo',
         )
 class CompanyProfileSerializer(serializers.ModelSerializer):
+    user = UserSerializer(many=False, read_only=True)
     class Meta:
         model = Profile
         fields = (
+            'user',
             'company_name',
             'company_website',
             'company_email',

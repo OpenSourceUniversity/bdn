@@ -7,7 +7,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from haystack.query import SearchQuerySet
 from bdn.auth.signature_authentication import SignatureAuthentication
-from .models import Course, Category, Department
+from .models import Course, Category, Provider
 from .serializers import CourseSerializer, CategorySerializer
 
 
@@ -50,10 +50,10 @@ class CourseViewSet(viewsets.ModelViewSet):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     @list_route(methods=['get'])
-    def get_by_department(self, request, pk=None):
+    def get_by_provider(self, request, pk=None):
         eth_address = request.GET.get('eth_address')
-        department = Department.objects.get(eth_address = eth_address)
-        sqs = Course.objects.all().filter(department=department)
+        provider = Provider.objects.get(eth_address = eth_address)
+        sqs = Course.objects.all().filter(provider=provider)
         serializer = self.get_serializer([s for s in sqs], many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
