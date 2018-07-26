@@ -9,7 +9,7 @@ from rest_framework.permissions import IsAuthenticated
 from bdn.auth.signature_authentication import SignatureAuthentication
 from rest_framework.response import Response
 from .models import Profile
-from bdn.course.models import Provider
+from bdn.course.models import Provider, Course
 from .serializers import ProfileSerializer, LearnerProfileSerializer, AcademyProfileSerializer, CompanyProfileSerializer
 
 
@@ -62,7 +62,13 @@ class ProfileViewSet(viewsets.ModelViewSet):
         users = User.objects.filter(username__in=eth_addresses)
         profiles = Profile.objects.filter(user__in=users)
         serializer = AcademyProfileSerializer(profiles, many=True)
-        return Response(serializer.data)
+        newdata = []
+        for data in serializer.data:
+            provider = Provider.objects.get(eth_address = data.get('user').get('username'))
+            courses_count = len(Course.objects.all().filter(provider=provider))
+            data['courses_count'] = courses_count
+            newdata.append(data)
+        return Response(newdata)
 
 
 

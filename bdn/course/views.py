@@ -1,7 +1,7 @@
 from uuid import UUID
 from django.db.models import Q
 from rest_framework import status, viewsets
-from rest_framework.decorators import list_route
+from rest_framework.decorators import list_route, detail_route
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -50,12 +50,13 @@ class CourseViewSet(viewsets.ModelViewSet):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     @list_route(methods=['get'])
-    def get_by_provider(self, request, pk=None):
+    def get_by_provider(self, request):
         eth_address = request.GET.get('eth_address')
         provider = Provider.objects.get(eth_address = eth_address)
         sqs = Course.objects.all().filter(provider=provider)
         serializer = self.get_serializer([s for s in sqs], many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
 
     @list_route(methods=['get'])
     def autocomplete(self, request):
