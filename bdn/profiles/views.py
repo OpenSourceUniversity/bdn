@@ -10,6 +10,7 @@ from bdn.auth.signature_authentication import SignatureAuthentication
 from rest_framework.response import Response
 from .models import Profile
 from bdn.course.models import Provider, Course
+from bdn.job.models import Company, Job
 from .serializers import ProfileSerializer, LearnerProfileSerializer, AcademyProfileSerializer, CompanyProfileSerializer
 
 
@@ -67,6 +68,23 @@ class ProfileViewSet(viewsets.ModelViewSet):
             provider = Provider.objects.get(eth_address = data.get('user').get('username'))
             courses_count = len(Course.objects.all().filter(provider=provider))
             data['courses_count'] = courses_count
+            newdata.append(data)
+        return Response(newdata)
+
+    @list_route(methods=['get'])
+    def get_businesses(self, request, pk=None):
+        companies_obj = Company.objects.all()
+        eth_addresses = set()
+        for obj in companies_obj:
+            eth_addresses.add(obj.eth_address)
+        users = User.objects.filter(username__in=eth_addresses)
+        profiles = Profile.objects.filter(user__in=users)
+        serializer = CompanyProfileSerializer(profiles, many=True)
+        newdata = []
+        for data in serializer.data:
+            company = Company.objects.get(eth_address = data.get('user').get('username'))
+            jobs_count = len(Job.objects.all().filter(company=company))
+            data['jobs_count'] = jobs_count
             newdata.append(data)
         return Response(newdata)
 

@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'bdn.certificate',
     'bdn.course',
     'bdn.profiles',
+    'bdn.job',
 ]
 
 MIDDLEWARE = [
