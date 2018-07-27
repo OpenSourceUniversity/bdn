@@ -24,7 +24,7 @@ class Job(m.Model):
     image_url = m.URLField(blank=True, null=True)
     company = m.ForeignKey(
         Company, blank=True, null=True, on_delete=m.SET_NULL)
-    industries = m.ManyToManyField(Category)
+    categories = m.ManyToManyField(Category)
     posted = m.DateField(auto_now_add=True)
     closes = m.DateField(blank=True, null=True)
     experience = m.CharField(max_length=130)

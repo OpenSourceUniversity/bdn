@@ -20,8 +20,8 @@ class JobViewSet(viewsets.ModelViewSet):
     queryset = Job.objects.all()
     serializer_class = JobSerializer
     pagination_class = LimitOffsetPagination
-    authentication_classes = (SignatureAuthentication,)
-    permission_classes = (IsAuthenticated,)
+    # authentication_classes = (SignatureAuthentication,)
+    # permission_classes = (IsAuthenticated,)
 
     def get_queryset(self):
         qs = Job.objects.all()
@@ -68,6 +68,26 @@ class JobViewSet(viewsets.ModelViewSet):
         sqs = SearchQuerySet().filter(title_auto=request.GET.get('q', ''))[:10]
         serializer = self.get_serializer([s.object for s in sqs], many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def create(self, request, pk=None):
+        eth_address = '0x' + str(request.META.get('HTTP_AUTH_ETH_ADDRESS')).lower()
+        company = Company.objects.get(eth_address = eth_address)
+        skills_post = request.data.get('skills')
+        skills_lower = []
+        for skill in skills_post:
+            skills_lower.append(skill.lower())
+        print(skills_lower)
+        skills = Skill.objects.filter(name__in=skills_lower)
+        print(skills)
+        categories = Category.objects.filter(name__in=request.data.get('categories'))
+        serializer = JobSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save(company=company, categories=categories, skills=skills)
+            return Response({'status': 'ok'})
+        else:
+            print(serializer.errors)
+            return Response(serializer.errors,
+                            status=status.HTTP_400_BAD_REQUEST)
 
 
 class CategoryViewSet(viewsets.ModelViewSet):

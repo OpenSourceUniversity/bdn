@@ -14,7 +14,7 @@ class CompanySerializer(serializers.ModelSerializer):
 
 
 class JobSerializer(serializers.ModelSerializer):
-    industries = CategorySerializer(many=True, read_only=True)
+    categories = CategorySerializer(many=True, read_only=True)
     skills = SkillSerializer(many=True, read_only=True)
     company = CompanySerializer(many=False, read_only=True)
 
@@ -31,7 +31,7 @@ class JobSerializer(serializers.ModelSerializer):
             'external_link',
             'image_url',
             'company',
-            'industries',
+            'categories',
             'posted',
             'closes',
             'experience',

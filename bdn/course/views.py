@@ -15,8 +15,8 @@ class CourseViewSet(viewsets.ModelViewSet):
     queryset = Course.objects.all()
     serializer_class = CourseSerializer
     pagination_class = LimitOffsetPagination
-    authentication_classes = (SignatureAuthentication,)
-    permission_classes = (IsAuthenticated,)
+    # authentication_classes = (SignatureAuthentication,)
+    # permission_classes = (IsAuthenticated,)
 
     def get_queryset(self):
         qs = Course.objects.all()
