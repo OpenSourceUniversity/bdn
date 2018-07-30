@@ -20,8 +20,8 @@ class JobViewSet(viewsets.ModelViewSet):
     queryset = Job.objects.all()
     serializer_class = JobSerializer
     pagination_class = LimitOffsetPagination
-    # authentication_classes = (SignatureAuthentication,)
-    # permission_classes = (IsAuthenticated,)
+    authentication_classes = (SignatureAuthentication,)
+    permission_classes = (IsAuthenticated,)
 
     def get_queryset(self):
         qs = Job.objects.all()
@@ -62,12 +62,50 @@ class JobViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer([s for s in sqs], many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+    @detail_route(methods=['get'])
+    def get_by_id(self, request, pk=None):
+        eth_address = '0x' + str(request.META.get('HTTP_AUTH_ETH_ADDRESS')).lower()
+        job_id = request.GET.get('id')
+        job_position = Job.objects.get(id=job_id)
+        if job_position.company.eth_address == eth_address:
+            serializer = self.get_serializer(job_position)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        else:
+            return Response({'status': 'denied'})
 
     @list_route(methods=['get'])
     def autocomplete(self, request):
         sqs = SearchQuerySet().filter(title_auto=request.GET.get('q', ''))[:10]
         serializer = self.get_serializer([s.object for s in sqs], many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @detail_route(methods=['post'])
+    def edit_by_id(self, request, pk=None):
+        eth_address = '0x' + str(request.META.get('HTTP_AUTH_ETH_ADDRESS')).lower()
+        job_id = request.data.get('id')
+        print(job_id)
+        job_position = Job.objects.get(id=job_id)
+        if job_position.company.eth_address == eth_address:
+            serializer = self.get_serializer(data=request.data, instance=job_position, partial=True)
+            if serializer.is_valid():
+                serializer.save()
+                return Response({'status': 'ok'})
+            else:
+                return Response(serializer.errors,
+                            status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response({'status': 'denied'})
+
+    @detail_route(methods=['post'])
+    def delete_by_id(self, request, pk=None):
+        eth_address = '0x' + str(request.META.get('HTTP_AUTH_ETH_ADDRESS')).lower()
+        job_id = request.data.get('id')
+        job_position = Job.objects.get(id=job_id)
+        if job_position.company.eth_address == eth_address:
+            job_position.delete()
+            return Response({'status': 'ok'})
+        else:
+            return Response({'status': 'denied'})
 
     def create(self, request, pk=None):
         eth_address = '0x' + str(request.META.get('HTTP_AUTH_ETH_ADDRESS')).lower()
