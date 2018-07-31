@@ -1,8 +1,10 @@
 from rest_framework import serializers
 from .models import Certificate
+from bdn.course.serializers import ProviderSerializer
 
 
 class CertificateSerializer(serializers.ModelSerializer):
+    provider = ProviderSerializer(many=False, read_only=True)
     class Meta:
         model = Certificate
         fields = (
@@ -10,6 +12,7 @@ class CertificateSerializer(serializers.ModelSerializer):
             'user_eth_address',
             'academy_title',
             'academy_address',
+            'provider',
             'academy_link',
             'program_title',
             'course_title',

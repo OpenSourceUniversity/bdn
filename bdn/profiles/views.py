@@ -11,6 +11,7 @@ from rest_framework.response import Response
 from .models import Profile
 from bdn.course.models import Provider, Course
 from bdn.job.models import Company, Job
+from bdn.course.serializers import ProviderSerializer
 from .serializers import ProfileSerializer, LearnerProfileSerializer, AcademyProfileSerializer, CompanyProfileSerializer
 
 
@@ -21,7 +22,8 @@ class ProfileViewSet(viewsets.ModelViewSet):
     queryset = Profile.objects.all()
 
     def list(self, request):
-        eth_address = '0x' + str(request.META.get('HTTP_AUTH_ETH_ADDRESS')).lower()
+        eth_address = '0x' + str(request.META.get(
+            'HTTP_AUTH_ETH_ADDRESS')).lower()
         user = User.objects.get(username=eth_address)
         profile = Profile.objects.get(user=user)
         serializer = ProfileSerializer(profile)
@@ -65,8 +67,10 @@ class ProfileViewSet(viewsets.ModelViewSet):
         serializer = AcademyProfileSerializer(profiles, many=True)
         newdata = []
         for data in serializer.data:
-            provider = Provider.objects.get(eth_address = data.get('user').get('username'))
-            courses_count = len(Course.objects.all().filter(provider=provider))
+            provider = Provider.objects.get(
+                eth_address = data.get('user').get('username'))
+            courses_count = len(Course.objects.all().filter(
+                provider=provider))
             data['courses_count'] = courses_count
             newdata.append(data)
         return Response(newdata)
@@ -82,7 +86,8 @@ class ProfileViewSet(viewsets.ModelViewSet):
         serializer = CompanyProfileSerializer(profiles, many=True)
         newdata = []
         for data in serializer.data:
-            company = Company.objects.get(eth_address = data.get('user').get('username'))
+            company = Company.objects.get(
+                eth_address = data.get('user').get('username'))
             jobs_count = len(Job.objects.all().filter(company=company))
             data['jobs_count'] = jobs_count
             newdata.append(data)
@@ -91,16 +96,41 @@ class ProfileViewSet(viewsets.ModelViewSet):
 
 
     def create(self, request, pk=None):
-        eth_address = '0x' + str(request.META.get('HTTP_AUTH_ETH_ADDRESS')).lower()
+        eth_address = '0x' + str(request.META.get(
+            'HTTP_AUTH_ETH_ADDRESS')).lower()
         profile_type = request.META.get('HTTP_PROFILE_TYPE')
         user = User.objects.get(username=eth_address)
         profile = Profile.objects.get(user=user)
         if profile_type == '1':
-            serializer = LearnerProfileSerializer(data=request.data, instance=profile, partial=True)
+            serializer = LearnerProfileSerializer(
+                data=request.data, instance=profile, partial=True)
         elif profile_type == '2':
-            serializer = AcademyProfileSerializer(data=request.data, instance=profile, partial=True)
+            serializer = AcademyProfileSerializer(
+                data=request.data, instance=profile, partial=True)
+            provider, created = Provider.objects.get_or_create(
+                    eth_address=eth_address)
+            if created:
+                provider_serializer = ProviderSerializer(
+                    data={'name': request.data.get('academy_name'),
+                    'eth_address': eth_address}, partial=True)
+                if provider_serializer.is_valid():
+                    provider_serializer.save()
+                else:
+                    return Response(provider.errors,
+                                    status=status.HTTP_400_BAD_REQUEST)
+            else:
+                provider_serializer = ProviderSerializer(
+                    data={'name': request.data.get('academy_name')},
+                    instance=provider, partial=True)
+                if provider_serializer.is_valid():
+                    provider_serializer.save()
+                else:
+                    return Response(provider.errors,
+                                    status=status.HTTP_400_BAD_REQUEST)
+                
         elif profile_type == '3':
-            serializer = CompanyProfileSerializer(data=request.data, instance=profile, partial=True)
+            serializer = CompanyProfileSerializer(
+                data=request.data, instance=profile, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response({'status': 'ok'})

@@ -1,6 +1,7 @@
 import uuid
 from django.db import models as m
 from django.contrib.postgres.fields import ArrayField
+from bdn.course.models import Provider
 
 
 class Certificate(m.Model):
@@ -8,6 +9,8 @@ class Certificate(m.Model):
     user_eth_address = m.CharField(max_length=42, default='None')
     academy_title = m.CharField(max_length=70)
     academy_address = m.CharField(max_length=42, blank=True, null=True)
+    provider = m.ForeignKey(
+        Provider, blank=True, null=True, on_delete=m.SET_NULL)
     academy_link = m.URLField()
     program_title = m.CharField(max_length=70, blank=True, null=True)
     course_title = m.CharField(max_length=70)
