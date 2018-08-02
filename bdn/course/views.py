@@ -19,9 +19,18 @@ class CourseViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated,)
 
     def get_queryset(self):
-        qs = Course.objects.all()
+        search_query = self.request.GET.get('q', '')
+        if search_query:
+            qs = [
+                _.object
+                for _ in SearchQuerySet().filter(title=search_query)
+            ]
+            return qs
+        else:
+            qs = Course.objects.all()
         qs = qs.filter(self.category_filter())
-        return qs.filter(self.featured_filter())
+        qs = qs.filter(self.featured_filter())
+        return qs
 
     def category_filter(self):
         filtered_categories_ids = self.request.query_params.get(
