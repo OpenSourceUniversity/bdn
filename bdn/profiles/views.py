@@ -12,6 +12,7 @@ from .models import Profile
 from bdn.course.models import Provider, Course
 from bdn.job.models import Company, Job
 from bdn.course.serializers import ProviderSerializer
+from bdn.job.serializers import CompanySerializer
 from .serializers import ProfileSerializer, LearnerProfileSerializer, AcademyProfileSerializer, CompanyProfileSerializer
 
 
@@ -111,12 +112,12 @@ class ProfileViewSet(viewsets.ModelViewSet):
                     eth_address=eth_address)
             if created:
                 provider_serializer = ProviderSerializer(
-                    data={'name': request.data.get('academy_name'),
-                    'eth_address': eth_address}, partial=True)
+                    data={'name': request.data.get('academy_name')},
+                    instance=provider, partial=True)
                 if provider_serializer.is_valid():
                     provider_serializer.save()
                 else:
-                    return Response(provider.errors,
+                    return Response(provider_serializer.errors,
                                     status=status.HTTP_400_BAD_REQUEST)
             else:
                 provider_serializer = ProviderSerializer(
@@ -125,12 +126,31 @@ class ProfileViewSet(viewsets.ModelViewSet):
                 if provider_serializer.is_valid():
                     provider_serializer.save()
                 else:
-                    return Response(provider.errors,
+                    return Response(provider_serializer.errors,
                                     status=status.HTTP_400_BAD_REQUEST)
-                
         elif profile_type == '3':
             serializer = CompanyProfileSerializer(
                 data=request.data, instance=profile, partial=True)
+            company, created = Company.objects.get_or_create(
+                    eth_address=eth_address)
+            if created:
+                company_serializer = CompanySerializer(
+                    data={'name': request.data.get('company_name')},
+                    instance=company, partial=True)
+                if company_serializer.is_valid():
+                    company_serializer.save()
+                else:
+                    return Response(company_serializer.errors,
+                                    status=status.HTTP_400_BAD_REQUEST)
+            else:
+                company_serializer = CompanySerializer(
+                    data={'name': request.data.get('company_name')},
+                    instance=company, partial=True)
+                if company_serializer.is_valid():
+                    company_serializer.save()
+                else:
+                    return Response(company_serializer.errors,
+                                    status=status.HTTP_400_BAD_REQUEST)
         if serializer.is_valid():
             serializer.save()
             return Response({'status': 'ok'})
