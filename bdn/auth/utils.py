@@ -20,3 +20,7 @@ def recover_to_addr(msg, sig):
     vrs = sig_to_vrs(sig)
     pub = ethereum.utils.ecrecover_to_pub(msghash, *vrs)
     return '0x' + sha3.keccak_256(pub).hexdigest()[24:]
+
+
+def get_auth_eth_address(meta):
+    return '0x{0}'.format(str(meta.get('HTTP_AUTH_ETH_ADDRESS')).lower())

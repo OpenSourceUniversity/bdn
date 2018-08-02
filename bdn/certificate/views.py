@@ -6,6 +6,7 @@ from rest_framework.permissions import IsAuthenticated
 from bdn.auth.signature_authentication import SignatureAuthentication
 from rest_framework.response import Response
 from .models import Certificate
+from bdn.auth.utils import get_auth_eth_address
 from bdn.course.models import Provider
 from rest_framework.decorators import detail_route, list_route
 from .serializers import CertificateSerializer, CertificateLearnerSerializer
@@ -19,32 +20,31 @@ class CertificateViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated,)
 
     def list(self, request):
-        eth_address = '0x{0}'.format(
-            str(request.META.get('HTTP_AUTH_ETH_ADDRESS')).lower())
+        eth_address = get_auth_eth_address(request.META)
         certificates = Certificate.objects.filter(user_eth_address=eth_address)
         serializer = CertificateSerializer(certificates, many=True)
         return Response(serializer.data)
 
     @detail_route(methods=['get'])
     def get_certificates_count(self, request, pk=None):
+        # TODO: instead of passing over unused pk, pass over the ETH address
+        # instead of getting it through the GET parameters
         eth_address = request.GET.get('eth_address')
-        certificates_count = len(
-            Certificate.objects.filter(user_eth_address=eth_address))
+        certificates_count = Certificate.objects.filter(
+            user_eth_address=eth_address).count()
         return Response({'certificates_count': certificates_count})
 
     @list_route(methods=['get'])
-    def get_certificates_by_academy(self, request, pk=None):
-        eth_address = '0x{0}'.format(
-            str(request.META.get('HTTP_AUTH_ETH_ADDRESS')).lower())
+    def get_certificates_by_academy(self, request):
+        eth_address = get_auth_eth_address(request.META)
         certificates = Certificate.objects.filter(
             academy_address=eth_address).order_by('verified', 'course_title')
         serializer = CertificateSerializer(certificates, many=True)
         return Response(serializer.data)
 
     @list_route(methods=['post'])
-    def update_certificate_by_id(self, request, pk=None):
-        eth_address = '0x{0}'.format(
-            str(request.META.get('HTTP_AUTH_ETH_ADDRESS')).lower())
+    def update_certificate_by_id(self, request):
+        eth_address = get_auth_eth_address(request.META)
         certificate = Certificate.objects.get(id=request.data.get('id'))
         data = request.data.copy()
         date_format = '%Y-%m-%d'
@@ -71,12 +71,13 @@ class CertificateViewSet(viewsets.ModelViewSet):
                 return Response(serializer.errors,
                                 status=status.HTTP_400_BAD_REQUEST)
         else:
-            return Response({'status': 'denied'})
+            return Response({
+                'status': 'denied'
+            }, status=status.HTTP_401_UNAUTHORIZED)
 
     @list_route(methods=['post'])
     def mass_verification(self, request, pk=None):
-        eth_address = '0x{0}'.format(
-            str(request.META.get('HTTP_AUTH_ETH_ADDRESS')).lower())
+        eth_address = get_auth_eth_address(request.META)
         ids = filter(lambda i: bool(i), request.data.get('ids').split('|'))
         certificates = Certificate.objects.filter(id__in=ids)
         for certificate in certificates:
@@ -84,23 +85,23 @@ class CertificateViewSet(viewsets.ModelViewSet):
                 certificate.verified = True
                 certificate.save()
             else:
-                return Response({'status': 'denied'})
+                return Response({
+                    'status': 'denied'}, status=status.HTTP_401_UNAUTHORIZED)
         return Response({'status': 'ok'})
 
     @list_route(methods=['post'])
     def delete_by_id(self, request, pk=None):
-        eth_address = '0x{0}'.format(
-            str(request.META.get('HTTP_AUTH_ETH_ADDRESS')).lower())
+        eth_address = get_auth_eth_address(request.META)
         certificate = Certificate.objects.get(id=request.data.get('id'))
         if certificate.academy_address == eth_address:
             certificate.delete()
             return Response({'status': 'ok'})
         else:
-            return Response({'status': 'denied'})
+            return Response({
+                'status': 'denied'}, status=status.HTTP_401_UNAUTHORIZED)
 
     def create(self, request, pk=None):
-        eth_address = '0x{0}'.format(
-            str(request.META.get('HTTP_AUTH_ETH_ADDRESS')).lower())
+        eth_address = get_auth_eth_address(request.META)
         academy_address = str(request.data.get('academy_address')).lower()
         data = request.data.copy()
         date_format = '%Y-%m-%d'

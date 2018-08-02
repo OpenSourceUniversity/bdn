@@ -7,6 +7,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from haystack.query import SearchQuerySet
 from bdn.auth.signature_authentication import SignatureAuthentication
+from bdn.auth.utils import get_auth_eth_address
 from .models import Course, Category, Provider, Skill
 from .serializers import CourseSerializer, CategorySerializer
 
@@ -26,8 +27,8 @@ class CourseViewSet(viewsets.ModelViewSet):
                 for _ in SearchQuerySet().filter(title=search_query)
             ]
             return qs
-        else:
-            qs = Course.objects.all()
+
+        qs = Course.objects.all()
         qs = qs.filter(self.category_filter())
         qs = qs.filter(self.featured_filter())
         return qs
@@ -59,29 +60,36 @@ class CourseViewSet(viewsets.ModelViewSet):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     @list_route(methods=['get'])
+    def autocomplete(self, request):
+        AUTOCOMPLETE_SIZE = 10
+        sqs = SearchQuerySet().filter(
+            title_auto=request.GET.get('q', ''))[:AUTOCOMPLETE_SIZE]
+        serializer = self.get_serializer([s.object for s in sqs], many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @list_route(methods=['get'])
     def get_by_provider(self, request):
         eth_address = request.GET.get('eth_address')
         provider = Provider.objects.get(eth_address=eth_address)
-        sqs = Course.objects.all().filter(provider=provider)
-        serializer = self.get_serializer([s for s in sqs], many=True)
+        qs = Course.objects.all().filter(provider=provider)
+        serializer = self.get_serializer(qs, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     @detail_route(methods=['get'])
-    def get_by_id(self, request, pk=None):
-        eth_address = '0x{0}'.format(
-            str(request.META.get('HTTP_AUTH_ETH_ADDRESS')).lower())
+    def get_by_id(self, request):
+        eth_address = get_auth_eth_address(request.META)
         course_id = request.GET.get('id')
         course = Course.objects.get(id=course_id)
         if course.provider.eth_address == eth_address:
             serializer = self.get_serializer(course)
             return Response(serializer.data, status=status.HTTP_200_OK)
         else:
-            return Response({'status': 'denied'})
+            return Response({
+                'status': 'denied'}, status=status.HTTP_401_UNAUTHORIZED)
 
     @detail_route(methods=['post'])
-    def edit_by_id(self, request, pk=None):
-        eth_address = '0x{0}'.format(
-            str(request.META.get('HTTP_AUTH_ETH_ADDRESS')).lower())
+    def edit_by_id(self, request):
+        eth_address = get_auth_eth_address(request.META)
         course_id = request.data.get('id')
         course = Course.objects.get(id=course_id)
         if course.provider.eth_address == eth_address:
@@ -90,20 +98,16 @@ class CourseViewSet(viewsets.ModelViewSet):
             if serializer.is_valid():
                 serializer.save()
                 return Response({'status': 'ok'})
-            else:
-                return Response(serializer.errors,
-                                status=status.HTTP_400_BAD_REQUEST)
-        else:
-            return Response({'status': 'denied'})
+            return Response(serializer.errors,
+                            status=status.HTTP_400_BAD_REQUEST)
+        return Response({
+            'status': 'denied'}, status=status.HTTP_401_UNAUTHORIZED)
 
     def create(self, request, pk=None):
-        eth_address = '0x{0}'.format(
-            str(request.META.get('HTTP_AUTH_ETH_ADDRESS')).lower())
+        eth_address = get_auth_eth_address(request.META)
         provider = Provider.objects.get(eth_address=eth_address)
         skills_post = request.data.get('skills')
-        skills_lower = []
-        for skill in skills_post:
-            skills_lower.append(skill.lower())
+        skills_lower = [_.lower() for _ in skills_post]
         skills = Skill.objects.filter(name__in=skills_lower)
         categories = Category.objects.filter(
             name__in=request.data.get('categories'))
@@ -113,27 +117,20 @@ class CourseViewSet(viewsets.ModelViewSet):
                 provider=provider, categories=categories, skills=skills)
             return Response({'status': 'ok'})
         else:
-            print(serializer.errors)
             return Response(serializer.errors,
                             status=status.HTTP_400_BAD_REQUEST)
 
     @detail_route(methods=['post'])
-    def delete_by_id(self, request, pk=None):
-        eth_address = '0x{0}'.format(
-            str(request.META.get('HTTP_AUTH_ETH_ADDRESS')).lower())
+    def delete_by_id(self, request):
+        eth_address = get_auth_eth_address(request.META)
         course_id = request.data.get('id')
         course = Course.objects.get(id=course_id)
         if course.provider.eth_address == eth_address:
             course.delete()
             return Response({'status': 'ok'})
         else:
-            return Response({'status': 'denied'})
-
-    @list_route(methods=['get'])
-    def autocomplete(self, request):
-        sqs = SearchQuerySet().filter(title_auto=request.GET.get('q', ''))[:10]
-        serializer = self.get_serializer([s.object for s in sqs], many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response(
+                {'status': 'denied'}, status=status.HTTP_401_UNAUTHORIZED)
 
 
 class CategoryViewSet(viewsets.ModelViewSet):
