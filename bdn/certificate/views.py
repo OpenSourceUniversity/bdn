@@ -19,7 +19,8 @@ class CertificateViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated,)
 
     def list(self, request):
-        eth_address = '0x' + str(request.META.get('HTTP_AUTH_ETH_ADDRESS')).lower()
+        eth_address = '0x{0}'.format(
+            str(request.META.get('HTTP_AUTH_ETH_ADDRESS')).lower())
         certificates = Certificate.objects.filter(user_eth_address=eth_address)
         serializer = CertificateSerializer(certificates, many=True)
         return Response(serializer.data)
@@ -27,33 +28,39 @@ class CertificateViewSet(viewsets.ModelViewSet):
     @detail_route(methods=['get'])
     def get_certificates_count(self, request, pk=None):
         eth_address = request.GET.get('eth_address')
-        certificates_count = len(Certificate.objects.filter(user_eth_address=eth_address))
+        certificates_count = len(
+            Certificate.objects.filter(user_eth_address=eth_address))
         return Response({'certificates_count': certificates_count})
 
     @list_route(methods=['get'])
     def get_certificates_by_academy(self, request, pk=None):
-        eth_address = '0x' + str(request.META.get('HTTP_AUTH_ETH_ADDRESS')).lower()
-        certificates = Certificate.objects.filter(academy_address=eth_address).order_by('verified', 'course_title')
+        eth_address = '0x{0}'.format(
+            str(request.META.get('HTTP_AUTH_ETH_ADDRESS')).lower())
+        certificates = Certificate.objects.filter(
+            academy_address=eth_address).order_by('verified', 'course_title')
         serializer = CertificateSerializer(certificates, many=True)
         return Response(serializer.data)
 
     @list_route(methods=['post'])
     def update_certificate_by_id(self, request, pk=None):
-        eth_address = '0x' + str(request.META.get('HTTP_AUTH_ETH_ADDRESS')).lower()
+        eth_address = '0x{0}'.format(
+            str(request.META.get('HTTP_AUTH_ETH_ADDRESS')).lower())
         certificate = Certificate.objects.get(id=request.data.get('id'))
         data = request.data.copy()
         date_format = '%Y-%m-%d'
-        provider = None
+
         data['academy_address'] = certificate.academy_address
         data['learner_eth_address'] = certificate.learner_eth_address
         try:
-            data['expiration_date'] = datetime.datetime.strptime(data['expiration_date'], date_format)
-        except Exception:
-            print("Incorrect data format")
+            data['expiration_date'] = datetime.datetime.strptime(
+                data['expiration_date'], date_format)
+        except (ValueError, KeyError):
+            data['expiration_date'] = None
         try:
             provider = Provider.objects.get(eth_address=eth_address)
-        except Exception:
-            print("Provider doesn't exist")
+        except Provider.DoesNotExist:
+            provider = None
+
         if certificate.academy_address == eth_address:
             serializer = CertificateSerializer(
                 data=data, instance=certificate, partial=True)
@@ -62,13 +69,14 @@ class CertificateViewSet(viewsets.ModelViewSet):
                 return Response({'status': 'ok'})
             else:
                 return Response(serializer.errors,
-                            status=status.HTTP_400_BAD_REQUEST)
+                                status=status.HTTP_400_BAD_REQUEST)
         else:
             return Response({'status': 'denied'})
 
     @list_route(methods=['post'])
     def mass_verification(self, request, pk=None):
-        eth_address = '0x' + str(request.META.get('HTTP_AUTH_ETH_ADDRESS')).lower()
+        eth_address = '0x{0}'.format(
+            str(request.META.get('HTTP_AUTH_ETH_ADDRESS')).lower())
         ids = filter(lambda i: bool(i), request.data.get('ids').split('|'))
         certificates = Certificate.objects.filter(id__in=ids)
         for certificate in certificates:
@@ -81,7 +89,8 @@ class CertificateViewSet(viewsets.ModelViewSet):
 
     @list_route(methods=['post'])
     def delete_by_id(self, request, pk=None):
-        eth_address = '0x' + str(request.META.get('HTTP_AUTH_ETH_ADDRESS')).lower()
+        eth_address = '0x{0}'.format(
+            str(request.META.get('HTTP_AUTH_ETH_ADDRESS')).lower())
         certificate = Certificate.objects.get(id=request.data.get('id'))
         if certificate.academy_address == eth_address:
             certificate.delete()
@@ -90,22 +99,28 @@ class CertificateViewSet(viewsets.ModelViewSet):
             return Response({'status': 'denied'})
 
     def create(self, request, pk=None):
-        eth_address = '0x' + str(request.META.get('HTTP_AUTH_ETH_ADDRESS')).lower()
+        eth_address = '0x{0}'.format(
+            str(request.META.get('HTTP_AUTH_ETH_ADDRESS')).lower())
         academy_address = str(request.data.get('academy_address')).lower()
         data = request.data.copy()
         date_format = '%Y-%m-%d'
-        provider = None
+
         try:
-            data['expiration_date'] = datetime.datetime.strptime(data['expiration_date'], date_format)
-        except Exception:
-            print("Incorrect data format")
+            data['expiration_date'] = datetime.datetime.strptime(
+                data['expiration_date'], date_format)
+        except (ValueError, KeyError):
+            data['expiration_date'] = None
         try:
             provider = Provider.objects.get(eth_address=academy_address)
-        except Exception:
-            print("Provider doesn't exist")
+        except Provider.DoesNotExist:
+            provider = None
+
         serializer = CertificateLearnerSerializer(data=data)
         if serializer.is_valid():
-            serializer.save(user_eth_address=eth_address, academy_address=academy_address, provider=provider)
+            serializer.save(
+                user_eth_address=eth_address,
+                academy_address=academy_address,
+                provider=provider)
             return Response({'status': 'ok'})
         else:
             return Response(serializer.errors,

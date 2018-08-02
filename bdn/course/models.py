@@ -9,6 +9,7 @@ class Skill(m.Model):
     def __str__(self):
         return self.name
 
+
 class Provider(m.Model):
     id = m.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = m.CharField(max_length=70)
@@ -17,6 +18,7 @@ class Provider(m.Model):
 
     def __str__(self):
         return self.name
+
 
 class Category(m.Model):
     id = m.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)

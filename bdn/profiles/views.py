@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from django.db.models import Q
 from rest_framework import status, viewsets
 from rest_framework.decorators import detail_route, list_route
 from django.contrib.auth.models import User
@@ -13,7 +12,9 @@ from bdn.course.models import Provider, Course
 from bdn.job.models import Company, Job
 from bdn.course.serializers import ProviderSerializer
 from bdn.job.serializers import CompanySerializer
-from .serializers import ProfileSerializer, LearnerProfileSerializer, AcademyProfileSerializer, CompanyProfileSerializer
+from .serializers import (
+    ProfileSerializer, LearnerProfileSerializer, AcademyProfileSerializer,
+    CompanyProfileSerializer)
 
 
 class ProfileViewSet(viewsets.ModelViewSet):
@@ -69,7 +70,7 @@ class ProfileViewSet(viewsets.ModelViewSet):
         newdata = []
         for data in serializer.data:
             provider = Provider.objects.get(
-                eth_address = data.get('user').get('username'))
+                eth_address=data.get('user').get('username'))
             courses_count = len(Course.objects.all().filter(
                 provider=provider))
             data['courses_count'] = courses_count
@@ -88,13 +89,11 @@ class ProfileViewSet(viewsets.ModelViewSet):
         newdata = []
         for data in serializer.data:
             company = Company.objects.get(
-                eth_address = data.get('user').get('username'))
+                eth_address=data.get('user').get('username'))
             jobs_count = len(Job.objects.all().filter(company=company))
             data['jobs_count'] = jobs_count
             newdata.append(data)
         return Response(newdata)
-
-
 
     def create(self, request, pk=None):
         eth_address = '0x' + str(request.META.get(
@@ -157,4 +156,3 @@ class ProfileViewSet(viewsets.ModelViewSet):
         else:
             return Response(serializer.errors,
                             status=status.HTTP_400_BAD_REQUEST)
-

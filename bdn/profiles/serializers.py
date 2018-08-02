@@ -8,6 +8,7 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         fields = ('username',)
 
+
 class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
@@ -22,22 +23,25 @@ class ProfileSerializer(serializers.ModelSerializer):
             'learner_site',
             'phone_number',
             'learner_country',
-            #'learner_avatar',
+            # 'learner_avatar',
             'academy_name',
             'academy_website',
             'academy_email',
             'academy_country',
             'academy_about',
-            #'academy_logo',
+            # 'academy_logo',
             'company_name',
             'company_website',
             'company_email',
             'company_country',
             'company_about',
-            #'company_logo',
+            # 'company_logo',
         )
+
+
 class LearnerProfileSerializer(serializers.ModelSerializer):
     user = UserSerializer(many=False, read_only=True)
+
     class Meta:
         model = Profile
         fields = (
@@ -52,10 +56,13 @@ class LearnerProfileSerializer(serializers.ModelSerializer):
             'learner_site',
             'phone_number',
             'learner_country',
-            #'learner_avatar',
+            # 'learner_avatar',
         )
+
+
 class AcademyProfileSerializer(serializers.ModelSerializer):
     user = UserSerializer(many=False, read_only=True)
+
     class Meta:
         model = Profile
         fields = (
@@ -65,10 +72,13 @@ class AcademyProfileSerializer(serializers.ModelSerializer):
             'academy_email',
             'academy_country',
             'academy_about',
-            #'academy_logo',
+            # 'academy_logo',
         )
+
+
 class CompanyProfileSerializer(serializers.ModelSerializer):
     user = UserSerializer(many=False, read_only=True)
+
     class Meta:
         model = Profile
         fields = (
@@ -78,5 +88,5 @@ class CompanyProfileSerializer(serializers.ModelSerializer):
             'company_email',
             'company_country',
             'company_about',
-            #'company_logo',
+            # 'company_logo',
         )

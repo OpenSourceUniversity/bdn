@@ -61,14 +61,15 @@ class CourseViewSet(viewsets.ModelViewSet):
     @list_route(methods=['get'])
     def get_by_provider(self, request):
         eth_address = request.GET.get('eth_address')
-        provider = Provider.objects.get(eth_address = eth_address)
+        provider = Provider.objects.get(eth_address=eth_address)
         sqs = Course.objects.all().filter(provider=provider)
         serializer = self.get_serializer([s for s in sqs], many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     @detail_route(methods=['get'])
     def get_by_id(self, request, pk=None):
-        eth_address = '0x' + str(request.META.get('HTTP_AUTH_ETH_ADDRESS')).lower()
+        eth_address = '0x{0}'.format(
+            str(request.META.get('HTTP_AUTH_ETH_ADDRESS')).lower())
         course_id = request.GET.get('id')
         course = Course.objects.get(id=course_id)
         if course.provider.eth_address == eth_address:
@@ -79,32 +80,37 @@ class CourseViewSet(viewsets.ModelViewSet):
 
     @detail_route(methods=['post'])
     def edit_by_id(self, request, pk=None):
-        eth_address = '0x' + str(request.META.get('HTTP_AUTH_ETH_ADDRESS')).lower()
+        eth_address = '0x{0}'.format(
+            str(request.META.get('HTTP_AUTH_ETH_ADDRESS')).lower())
         course_id = request.data.get('id')
         course = Course.objects.get(id=course_id)
         if course.provider.eth_address == eth_address:
-            serializer = self.get_serializer(data=request.data, instance=course, partial=True)
+            serializer = self.get_serializer(
+                data=request.data, instance=course, partial=True)
             if serializer.is_valid():
                 serializer.save()
                 return Response({'status': 'ok'})
             else:
                 return Response(serializer.errors,
-                            status=status.HTTP_400_BAD_REQUEST)
+                                status=status.HTTP_400_BAD_REQUEST)
         else:
             return Response({'status': 'denied'})
 
     def create(self, request, pk=None):
-        eth_address = '0x' + str(request.META.get('HTTP_AUTH_ETH_ADDRESS')).lower()
-        provider = Provider.objects.get(eth_address = eth_address)
+        eth_address = '0x{0}'.format(
+            str(request.META.get('HTTP_AUTH_ETH_ADDRESS')).lower())
+        provider = Provider.objects.get(eth_address=eth_address)
         skills_post = request.data.get('skills')
         skills_lower = []
         for skill in skills_post:
             skills_lower.append(skill.lower())
         skills = Skill.objects.filter(name__in=skills_lower)
-        categories = Category.objects.filter(name__in=request.data.get('categories'))
+        categories = Category.objects.filter(
+            name__in=request.data.get('categories'))
         serializer = CourseSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save(provider=provider, categories=categories, skills=skills)
+            serializer.save(
+                provider=provider, categories=categories, skills=skills)
             return Response({'status': 'ok'})
         else:
             print(serializer.errors)
@@ -113,7 +119,8 @@ class CourseViewSet(viewsets.ModelViewSet):
 
     @detail_route(methods=['post'])
     def delete_by_id(self, request, pk=None):
-        eth_address = '0x' + str(request.META.get('HTTP_AUTH_ETH_ADDRESS')).lower()
+        eth_address = '0x{0}'.format(
+            str(request.META.get('HTTP_AUTH_ETH_ADDRESS')).lower())
         course_id = request.data.get('id')
         course = Course.objects.get(id=course_id)
         if course.provider.eth_address == eth_address:
@@ -121,7 +128,6 @@ class CourseViewSet(viewsets.ModelViewSet):
             return Response({'status': 'ok'})
         else:
             return Response({'status': 'denied'})
-
 
     @list_route(methods=['get'])
     def autocomplete(self, request):

@@ -1,5 +1,3 @@
-from django.shortcuts import render
-
 # Create your views here.
 from uuid import UUID
 from django.db.models import Q
@@ -12,8 +10,8 @@ from haystack.query import SearchQuerySet
 from bdn.auth.signature_authentication import SignatureAuthentication
 from .models import Company, Job
 from bdn.course.models import Skill, Category
-from .serializers import CompanySerializer, JobSerializer
-from bdn.course.serializers import SkillSerializer, CategorySerializer
+from .serializers import JobSerializer
+from bdn.course.serializers import CategorySerializer
 
 
 class JobViewSet(viewsets.ModelViewSet):
@@ -57,14 +55,15 @@ class JobViewSet(viewsets.ModelViewSet):
     @list_route(methods=['get'])
     def get_by_company(self, request):
         eth_address = request.GET.get('eth_address')
-        company = Company.objects.get(eth_address = eth_address)
+        company = Company.objects.get(eth_address=eth_address)
         sqs = Job.objects.all().filter(company=company)
         serializer = self.get_serializer([s for s in sqs], many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     @detail_route(methods=['get'])
     def get_by_id(self, request, pk=None):
-        eth_address = '0x' + str(request.META.get('HTTP_AUTH_ETH_ADDRESS')).lower()
+        eth_address = '0x{0}'.format(
+            str(request.META.get('HTTP_AUTH_ETH_ADDRESS')).lower())
         job_id = request.GET.get('id')
         job_position = Job.objects.get(id=job_id)
         if job_position.company.eth_address == eth_address:
@@ -81,24 +80,27 @@ class JobViewSet(viewsets.ModelViewSet):
 
     @detail_route(methods=['post'])
     def edit_by_id(self, request, pk=None):
-        eth_address = '0x' + str(request.META.get('HTTP_AUTH_ETH_ADDRESS')).lower()
+        eth_address = '0x{0}'.format(
+            str(request.META.get('HTTP_AUTH_ETH_ADDRESS')).lower())
         job_id = request.data.get('id')
         print(job_id)
         job_position = Job.objects.get(id=job_id)
         if job_position.company.eth_address == eth_address:
-            serializer = self.get_serializer(data=request.data, instance=job_position, partial=True)
+            serializer = self.get_serializer(
+                data=request.data, instance=job_position, partial=True)
             if serializer.is_valid():
                 serializer.save()
                 return Response({'status': 'ok'})
             else:
                 return Response(serializer.errors,
-                            status=status.HTTP_400_BAD_REQUEST)
+                                status=status.HTTP_400_BAD_REQUEST)
         else:
             return Response({'status': 'denied'})
 
     @detail_route(methods=['post'])
     def delete_by_id(self, request, pk=None):
-        eth_address = '0x' + str(request.META.get('HTTP_AUTH_ETH_ADDRESS')).lower()
+        eth_address = '0x{0}'.format(
+            str(request.META.get('HTTP_AUTH_ETH_ADDRESS')).lower())
         job_id = request.data.get('id')
         job_position = Job.objects.get(id=job_id)
         if job_position.company.eth_address == eth_address:
@@ -108,22 +110,22 @@ class JobViewSet(viewsets.ModelViewSet):
             return Response({'status': 'denied'})
 
     def create(self, request, pk=None):
-        eth_address = '0x' + str(request.META.get('HTTP_AUTH_ETH_ADDRESS')).lower()
-        company = Company.objects.get(eth_address = eth_address)
+        eth_address = '0x{0}'.format(
+            str(request.META.get('HTTP_AUTH_ETH_ADDRESS')).lower())
+        company = Company.objects.get(eth_address=eth_address)
         skills_post = request.data.get('skills')
         skills_lower = []
         for skill in skills_post:
             skills_lower.append(skill.lower())
-        print(skills_lower)
         skills = Skill.objects.filter(name__in=skills_lower)
-        print(skills)
-        categories = Category.objects.filter(name__in=request.data.get('categories'))
+        categories = Category.objects.filter(
+            name__in=request.data.get('categories'))
         serializer = JobSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save(company=company, categories=categories, skills=skills)
+            serializer.save(
+                company=company, categories=categories, skills=skills)
             return Response({'status': 'ok'})
         else:
-            print(serializer.errors)
             return Response(serializer.errors,
                             status=status.HTTP_400_BAD_REQUEST)
 

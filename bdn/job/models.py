@@ -13,6 +13,7 @@ class Company(m.Model):
     def __str__(self):
         return self.name
 
+
 class Job(m.Model):
     id = m.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     title = m.CharField(max_length=130)
