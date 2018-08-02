@@ -19,6 +19,18 @@ class CourseViewSet(viewsets.ModelViewSet):
     authentication_classes = (SignatureAuthentication,)
     permission_classes = (IsAuthenticated,)
 
+    def update(self, request):
+        return Response({
+                    'status': 'denied'}, status=status.HTTP_401_UNAUTHORIZED)
+
+    def partial_update(self, request):
+        return Response({
+                    'status': 'denied'}, status=status.HTTP_401_UNAUTHORIZED)
+
+    def destroy(self, request):
+        return Response({
+                    'status': 'denied'}, status=status.HTTP_401_UNAUTHORIZED)
+
     def get_queryset(self):
         search_query = self.request.GET.get('q', '')
         if search_query:
@@ -69,16 +81,16 @@ class CourseViewSet(viewsets.ModelViewSet):
 
     @list_route(methods=['get'])
     def get_by_provider(self, request):
-        eth_address = request.GET.get('eth_address')
+        eth_address = str(request.GET.get('eth_address')).lower()
         provider = Provider.objects.get(eth_address=eth_address)
         qs = Course.objects.all().filter(provider=provider)
         serializer = self.get_serializer(qs, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     @detail_route(methods=['get'])
-    def get_by_id(self, request):
+    def get_by_id(self, request, pk=None):
         eth_address = get_auth_eth_address(request.META)
-        course_id = request.GET.get('id')
+        course_id = pk
         course = Course.objects.get(id=course_id)
         if course.provider.eth_address == eth_address:
             serializer = self.get_serializer(course)
@@ -88,9 +100,9 @@ class CourseViewSet(viewsets.ModelViewSet):
                 'status': 'denied'}, status=status.HTTP_401_UNAUTHORIZED)
 
     @detail_route(methods=['post'])
-    def edit_by_id(self, request):
+    def edit_by_id(self, request, pk=None):
         eth_address = get_auth_eth_address(request.META)
-        course_id = request.data.get('id')
+        course_id = pk
         course = Course.objects.get(id=course_id)
         if course.provider.eth_address == eth_address:
             serializer = self.get_serializer(
@@ -121,9 +133,9 @@ class CourseViewSet(viewsets.ModelViewSet):
                             status=status.HTTP_400_BAD_REQUEST)
 
     @detail_route(methods=['post'])
-    def delete_by_id(self, request):
+    def delete_by_id(self, request, pk=None):
         eth_address = get_auth_eth_address(request.META)
-        course_id = request.data.get('id')
+        course_id = pk
         course = Course.objects.get(id=course_id)
         if course.provider.eth_address == eth_address:
             course.delete()

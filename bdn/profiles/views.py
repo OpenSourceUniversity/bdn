@@ -7,6 +7,7 @@ from django.contrib.auth.models import User
 from rest_framework.permissions import IsAuthenticated
 from bdn.auth.signature_authentication import SignatureAuthentication
 from rest_framework.response import Response
+from bdn.auth.utils import get_auth_eth_address
 from .models import Profile
 from bdn.course.models import Provider, Course
 from bdn.job.models import Company, Job
@@ -23,9 +24,24 @@ class ProfileViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated,)
     queryset = Profile.objects.all()
 
+    def retrieve(self, request):
+        return Response({
+                    'status': 'denied'}, status=status.HTTP_401_UNAUTHORIZED)
+
+    def update(self, request):
+        return Response({
+                    'status': 'denied'}, status=status.HTTP_401_UNAUTHORIZED)
+
+    def partial_update(self, request):
+        return Response({
+                    'status': 'denied'}, status=status.HTTP_401_UNAUTHORIZED)
+
+    def destroy(self, request):
+        return Response({
+                    'status': 'denied'}, status=status.HTTP_401_UNAUTHORIZED)
+
     def list(self, request):
-        eth_address = '0x' + str(request.META.get(
-            'HTTP_AUTH_ETH_ADDRESS')).lower()
+        eth_address = get_auth_eth_address(request.META)
         user = User.objects.get(username=eth_address)
         profile = Profile.objects.get(user=user)
         serializer = ProfileSerializer(profile)
@@ -33,7 +49,7 @@ class ProfileViewSet(viewsets.ModelViewSet):
 
     @detail_route(methods=['get'])
     def get_academy(self, request, pk=None):
-        eth_address = request.GET.get('eth_address')
+        eth_address = pk.lower()
         user = User.objects.get(username=eth_address)
         profile = Profile.objects.get(user=user)
         serializer = AcademyProfileSerializer(profile)
@@ -41,7 +57,7 @@ class ProfileViewSet(viewsets.ModelViewSet):
 
     @detail_route(methods=['get'])
     def get_learner(self, request, pk=None):
-        eth_address = request.GET.get('eth_address')
+        eth_address = pk.lower()
         user = User.objects.get(username=eth_address)
         profile = Profile.objects.get(user=user)
         if profile.public_profile:
@@ -52,14 +68,14 @@ class ProfileViewSet(viewsets.ModelViewSet):
 
     @detail_route(methods=['get'])
     def get_business(self, request, pk=None):
-        eth_address = request.GET.get('eth_address')
+        eth_address = pk.lower()
         user = User.objects.get(username=eth_address)
         profile = Profile.objects.get(user=user)
         serializer = CompanyProfileSerializer(profile)
         return Response(serializer.data)
 
     @list_route(methods=['get'])
-    def get_academies(self, request, pk=None):
+    def get_academies(self, request):
         providers_obj = Provider.objects.all()
         eth_addresses = set()
         for obj in providers_obj:
@@ -78,7 +94,7 @@ class ProfileViewSet(viewsets.ModelViewSet):
         return Response(newdata)
 
     @list_route(methods=['get'])
-    def get_businesses(self, request, pk=None):
+    def get_businesses(self, request):
         companies_obj = Company.objects.all()
         eth_addresses = set()
         for obj in companies_obj:
@@ -96,8 +112,7 @@ class ProfileViewSet(viewsets.ModelViewSet):
         return Response(newdata)
 
     def create(self, request, pk=None):
-        eth_address = '0x' + str(request.META.get(
-            'HTTP_AUTH_ETH_ADDRESS')).lower()
+        eth_address = get_auth_eth_address(request.META)
         profile_type = request.META.get('HTTP_PROFILE_TYPE')
         user = User.objects.get(username=eth_address)
         profile = Profile.objects.get(user=user)

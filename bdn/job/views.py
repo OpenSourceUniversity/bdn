@@ -6,6 +6,7 @@ from rest_framework.decorators import list_route, detail_route
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from bdn.auth.utils import get_auth_eth_address
 from haystack.query import SearchQuerySet
 from bdn.auth.signature_authentication import SignatureAuthentication
 from .models import Company, Job
@@ -20,6 +21,18 @@ class JobViewSet(viewsets.ModelViewSet):
     pagination_class = LimitOffsetPagination
     authentication_classes = (SignatureAuthentication,)
     permission_classes = (IsAuthenticated,)
+
+    def update(self, request):
+        return Response({
+                    'status': 'denied'}, status=status.HTTP_401_UNAUTHORIZED)
+
+    def partial_update(self, request):
+        return Response({
+                    'status': 'denied'}, status=status.HTTP_401_UNAUTHORIZED)
+
+    def destroy(self, request):
+        return Response({
+                    'status': 'denied'}, status=status.HTTP_401_UNAUTHORIZED)
 
     def get_queryset(self):
         qs = Job.objects.all()
@@ -53,8 +66,14 @@ class JobViewSet(viewsets.ModelViewSet):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     @list_route(methods=['get'])
+    def autocomplete(self, request):
+        sqs = SearchQuerySet().filter(title_auto=request.GET.get('q', ''))[:10]
+        serializer = self.get_serializer([s.object for s in sqs], many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @list_route(methods=['get'])
     def get_by_company(self, request):
-        eth_address = request.GET.get('eth_address')
+        eth_address = str(request.GET.get('eth_address')).lower()
         company = Company.objects.get(eth_address=eth_address)
         sqs = Job.objects.all().filter(company=company)
         serializer = self.get_serializer([s for s in sqs], many=True)
@@ -62,28 +81,20 @@ class JobViewSet(viewsets.ModelViewSet):
 
     @detail_route(methods=['get'])
     def get_by_id(self, request, pk=None):
-        eth_address = '0x{0}'.format(
-            str(request.META.get('HTTP_AUTH_ETH_ADDRESS')).lower())
-        job_id = request.GET.get('id')
+        eth_address = get_auth_eth_address(request.META)
+        job_id = pk
         job_position = Job.objects.get(id=job_id)
         if job_position.company.eth_address == eth_address:
             serializer = self.get_serializer(job_position)
             return Response(serializer.data, status=status.HTTP_200_OK)
         else:
-            return Response({'status': 'denied'})
-
-    @list_route(methods=['get'])
-    def autocomplete(self, request):
-        sqs = SearchQuerySet().filter(title_auto=request.GET.get('q', ''))[:10]
-        serializer = self.get_serializer([s.object for s in sqs], many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response({
+                'status': 'denied'}, status=status.HTTP_401_UNAUTHORIZED)
 
     @detail_route(methods=['post'])
     def edit_by_id(self, request, pk=None):
-        eth_address = '0x{0}'.format(
-            str(request.META.get('HTTP_AUTH_ETH_ADDRESS')).lower())
-        job_id = request.data.get('id')
-        print(job_id)
+        eth_address = get_auth_eth_address(request.META)
+        job_id = pk
         job_position = Job.objects.get(id=job_id)
         if job_position.company.eth_address == eth_address:
             serializer = self.get_serializer(
@@ -95,23 +106,23 @@ class JobViewSet(viewsets.ModelViewSet):
                 return Response(serializer.errors,
                                 status=status.HTTP_400_BAD_REQUEST)
         else:
-            return Response({'status': 'denied'})
+            return Response({
+                'status': 'denied'}, status=status.HTTP_401_UNAUTHORIZED)
 
     @detail_route(methods=['post'])
     def delete_by_id(self, request, pk=None):
-        eth_address = '0x{0}'.format(
-            str(request.META.get('HTTP_AUTH_ETH_ADDRESS')).lower())
-        job_id = request.data.get('id')
+        eth_address = get_auth_eth_address(request.META)
+        job_id = pk
         job_position = Job.objects.get(id=job_id)
         if job_position.company.eth_address == eth_address:
             job_position.delete()
             return Response({'status': 'ok'})
         else:
-            return Response({'status': 'denied'})
+            return Response({
+                'status': 'denied'}, status=status.HTTP_401_UNAUTHORIZED)
 
     def create(self, request, pk=None):
-        eth_address = '0x{0}'.format(
-            str(request.META.get('HTTP_AUTH_ETH_ADDRESS')).lower())
+        eth_address = get_auth_eth_address(request.META)
         company = Company.objects.get(eth_address=eth_address)
         skills_post = request.data.get('skills')
         skills_lower = []

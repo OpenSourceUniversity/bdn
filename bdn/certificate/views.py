@@ -19,6 +19,27 @@ class CertificateViewSet(viewsets.ModelViewSet):
     authentication_classes = (SignatureAuthentication,)
     permission_classes = (IsAuthenticated,)
 
+    def retrieve(self, request, pk=None):
+        eth_address = get_auth_eth_address(request.META)
+        certificate = Certificate.objects.get(id=pk)
+        if (certificate.academy_address == eth_address or certificate.learner_eth_address == eth_address):
+            serializer = CertificateSerializer(certificate)
+            return Response(serializer.data)
+        return Response({
+                    'status': 'denied'}, status=status.HTTP_401_UNAUTHORIZED)
+
+    def update(self, request):
+        return Response({
+                    'status': 'denied'}, status=status.HTTP_401_UNAUTHORIZED)
+
+    def partial_update(self, request):
+        return Response({
+                    'status': 'denied'}, status=status.HTTP_401_UNAUTHORIZED)
+
+    def destroy(self, request):
+        return Response({
+                    'status': 'denied'}, status=status.HTTP_401_UNAUTHORIZED)
+
     def list(self, request):
         eth_address = get_auth_eth_address(request.META)
         certificates = Certificate.objects.filter(user_eth_address=eth_address)
@@ -29,7 +50,7 @@ class CertificateViewSet(viewsets.ModelViewSet):
     def get_certificates_count(self, request, pk=None):
         # TODO: instead of passing over unused pk, pass over the ETH address
         # instead of getting it through the GET parameters
-        eth_address = request.GET.get('eth_address')
+        eth_address = pk.lower()
         certificates_count = Certificate.objects.filter(
             user_eth_address=eth_address).count()
         return Response({'certificates_count': certificates_count})
@@ -54,7 +75,7 @@ class CertificateViewSet(viewsets.ModelViewSet):
         try:
             data['expiration_date'] = datetime.datetime.strptime(
                 data['expiration_date'], date_format)
-        except (ValueError, KeyError):
+        except (ValueError, KeyError, TypeError):
             data['expiration_date'] = None
         try:
             provider = Provider.objects.get(eth_address=eth_address)
@@ -76,7 +97,7 @@ class CertificateViewSet(viewsets.ModelViewSet):
             }, status=status.HTTP_401_UNAUTHORIZED)
 
     @list_route(methods=['post'])
-    def mass_verification(self, request, pk=None):
+    def mass_verification(self, request):
         eth_address = get_auth_eth_address(request.META)
         ids = filter(lambda i: bool(i), request.data.get('ids').split('|'))
         certificates = Certificate.objects.filter(id__in=ids)
@@ -90,9 +111,9 @@ class CertificateViewSet(viewsets.ModelViewSet):
         return Response({'status': 'ok'})
 
     @list_route(methods=['post'])
-    def delete_by_id(self, request, pk=None):
+    def delete_by_id(self, request):
         eth_address = get_auth_eth_address(request.META)
-        certificate = Certificate.objects.get(id=request.data.get('id'))
+        certificate = Certificate.objects.get(id=str(request.data.get('id')))
         if certificate.academy_address == eth_address:
             certificate.delete()
             return Response({'status': 'ok'})
