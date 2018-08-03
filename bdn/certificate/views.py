@@ -126,11 +126,10 @@ class CertificateViewSet(viewsets.ModelViewSet):
         academy_address = str(request.data.get('academy_address')).lower()
         data = request.data.copy()
         date_format = '%Y-%m-%d'
-
         try:
             data['expiration_date'] = datetime.datetime.strptime(
                 data['expiration_date'], date_format)
-        except (ValueError, KeyError):
+        except (ValueError, KeyError, TypeError):
             data['expiration_date'] = None
         try:
             provider = Provider.objects.get(eth_address=academy_address)
