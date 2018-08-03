@@ -1,6 +1,6 @@
 import unittest
 from django.test import TestCase
-from .utils import recover_to_addr
+from .utils import recover_to_addr, get_auth_eth_address
 
 
 class AuthTests(TestCase):
@@ -28,6 +28,12 @@ class AuthTests(TestCase):
             '131c')
         addr = recover_to_addr('a0x12345', sig)
         self.assertEqual(addr, '0xc2d7cf95645d33006175b78989035c7c9061d3f9')
+
+    def test_get_auth_eth_address(self):
+        eth_address = get_auth_eth_address({
+            'HTTP_AUTH_ETH_ADDRESS': '0' * 40
+        })
+        self.assertEqual(eth_address, '0x{0}'.format('0' * 40))
 
 
 if __name__ == '__main__':

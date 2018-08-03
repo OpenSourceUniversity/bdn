@@ -22,7 +22,8 @@ class CertificateViewSet(viewsets.ModelViewSet):
     def retrieve(self, request, pk=None):
         eth_address = get_auth_eth_address(request.META)
         certificate = Certificate.objects.get(id=pk)
-        if (certificate.academy_address == eth_address or certificate.learner_eth_address == eth_address):
+        if (certificate.academy_address == eth_address or
+                certificate.learner_eth_address == eth_address):
             serializer = CertificateSerializer(certificate)
             return Response(serializer.data)
         return Response({
