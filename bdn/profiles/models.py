@@ -21,22 +21,19 @@ class Profile(models.Model):
     learner_site = models.CharField(max_length=70, blank=True, null=True)
     phone_number = models.CharField(max_length=70, blank=True, null=True)
     learner_country = models.CharField(max_length=70, blank=True, null=True)
-    # learner_avatar = models.ImageField(
-    #    upload_to=avatar_upload_path, blank=True, null=True)
+    learner_avatar = models.CharField(max_length=100, blank=True, null=True)
     academy_name = models.CharField(max_length=70, blank=True, null=True)
     academy_website = models.CharField(max_length=70, blank=True, null=True)
     academy_email = models.EmailField(max_length=70, blank=True, null=True)
     academy_country = models.CharField(max_length=70, blank=True, null=True)
     academy_about = models.TextField(max_length=500, blank=True, null=True)
-    # academy_logo = models.ImageField(
-    #    upload_to=avatar_upload_path, blank=True, null=True)
+    academy_logo = models.CharField(max_length=100, blank=True, null=True)
     company_name = models.CharField(max_length=70, blank=True, null=True)
     company_website = models.CharField(max_length=70, blank=True, null=True)
     company_email = models.EmailField(max_length=70, blank=True, null=True)
     company_country = models.CharField(max_length=70, blank=True, null=True)
     company_about = models.TextField(max_length=500, blank=True, null=True)
-    # company_logo = models.ImageField(
-    #    upload_to=avatar_upload_path, blank=True, null=True)
+    company_logo = models.CharField(max_length=100, blank=True, null=True)
 
     def __str__(self):
         return self.user.username

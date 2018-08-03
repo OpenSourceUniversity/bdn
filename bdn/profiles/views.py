@@ -116,12 +116,17 @@ class ProfileViewSet(viewsets.ModelViewSet):
         profile_type = request.META.get('HTTP_PROFILE_TYPE')
         user = User.objects.get(username=eth_address)
         profile = Profile.objects.get(user=user)
+        data = request.data.copy()
         if profile_type == '1':
+            if data['learner_avatar'] == None:
+                data['learner_avatar'] = profile.learner_avatar
             serializer = LearnerProfileSerializer(
-                data=request.data, instance=profile, partial=True)
+                data=data, instance=profile, partial=True)
         elif profile_type == '2':
+            if data['academy_logo'] == None:
+                data['academy_logo'] = profile.academy_logo
             serializer = AcademyProfileSerializer(
-                data=request.data, instance=profile, partial=True)
+                data=data, instance=profile, partial=True)
             provider, created = Provider.objects.get_or_create(
                     eth_address=eth_address)
             if created:
@@ -143,8 +148,10 @@ class ProfileViewSet(viewsets.ModelViewSet):
                     return Response(provider_serializer.errors,
                                     status=status.HTTP_400_BAD_REQUEST)
         elif profile_type == '3':
+            if data['company_logo'] == None:
+                    data['company_logo'] = profile.company_logo
             serializer = CompanyProfileSerializer(
-                data=request.data, instance=profile, partial=True)
+                data=data, instance=profile, partial=True)
             company, created = Company.objects.get_or_create(
                     eth_address=eth_address)
             if created:
