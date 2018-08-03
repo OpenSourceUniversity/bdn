@@ -48,8 +48,6 @@ class CertificateViewSet(viewsets.ModelViewSet):
 
     @detail_route(methods=['get'])
     def get_certificates_count(self, request, pk=None):
-        # TODO: instead of passing over unused pk, pass over the ETH address
-        # instead of getting it through the GET parameters
         eth_address = pk.lower()
         certificates_count = Certificate.objects.filter(
             user_eth_address=eth_address).count()
@@ -72,6 +70,7 @@ class CertificateViewSet(viewsets.ModelViewSet):
 
         data['academy_address'] = certificate.academy_address
         data['learner_eth_address'] = certificate.learner_eth_address
+        data['ipfs_hash'] = certificate.ipfs_hash
         try:
             data['expiration_date'] = datetime.datetime.strptime(
                 data['expiration_date'], date_format)

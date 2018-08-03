@@ -22,6 +22,7 @@ class CertificateSerializer(serializers.ModelSerializer):
             'skills',
             'learner_eth_address',
             'verified',
+            'verification_tx',
             'ipfs_hash',
             'score',
             'duration',
