@@ -10,6 +10,7 @@ from rest_framework.response import Response
 from bdn.auth.utils import get_auth_eth_address
 from .models import Profile
 from bdn.course.models import Provider, Course
+from bdn.certificate.models import Certificate
 from bdn.job.models import Company, Job
 from bdn.course.serializers import ProviderSerializer
 from bdn.job.serializers import CompanySerializer
@@ -81,14 +82,14 @@ class ProfileViewSet(viewsets.ModelViewSet):
         for obj in providers_obj:
             eth_addresses.add(obj.eth_address)
         users = User.objects.filter(username__in=eth_addresses)
-        profiles = Profile.objects.filter(user__in=users)
+        profiles = Profile.objects.filter(user__in=users).order_by('academy_name')
         serializer = AcademyProfileSerializer(profiles, many=True)
         newdata = []
         for data in serializer.data:
             provider = Provider.objects.get(
                 eth_address=data.get('user').get('username'))
-            courses_count = len(Course.objects.all().filter(
-                provider=provider))
+            courses_count = Course.objects.all().filter(
+                provider=provider).count()
             data['courses_count'] = courses_count
             newdata.append(data)
         return Response(newdata)
@@ -100,14 +101,26 @@ class ProfileViewSet(viewsets.ModelViewSet):
         for obj in companies_obj:
             eth_addresses.add(obj.eth_address)
         users = User.objects.filter(username__in=eth_addresses)
-        profiles = Profile.objects.filter(user__in=users)
+        profiles = Profile.objects.filter(user__in=users).order_by('company_name')
         serializer = CompanyProfileSerializer(profiles, many=True)
         newdata = []
         for data in serializer.data:
             company = Company.objects.get(
                 eth_address=data.get('user').get('username'))
-            jobs_count = len(Job.objects.all().filter(company=company))
+            jobs_count = Job.objects.all().filter(company=company).count()
             data['jobs_count'] = jobs_count
+            newdata.append(data)
+        return Response(newdata)
+
+    @list_route(methods=['get'])
+    def get_learners(self, request):
+        profiles = Profile.objects.filter(public_profile=True).order_by('first_name')
+        serializer = LearnerProfileSerializer(profiles, many=True)
+        newdata = []
+        for data in serializer.data:
+            certificates_count = Certificate.objects.all().filter(
+                learner_eth_address=data.get('user').get('username')).count()
+            data['certificates_count'] = certificates_count
             newdata.append(data)
         return Response(newdata)
 

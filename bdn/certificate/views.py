@@ -9,7 +9,8 @@ from .models import Certificate
 from bdn.auth.utils import get_auth_eth_address
 from bdn.course.models import Provider
 from rest_framework.decorators import detail_route, list_route
-from .serializers import CertificateSerializer, CertificateLearnerSerializer
+from .serializers import (CertificateSerializer, CertificateLearnerSerializer,
+                            CertificateViewProfileSerializer)
 import datetime
 
 
@@ -43,7 +44,8 @@ class CertificateViewSet(viewsets.ModelViewSet):
 
     def list(self, request):
         eth_address = get_auth_eth_address(request.META)
-        certificates = Certificate.objects.filter(user_eth_address=eth_address)
+        certificates = Certificate.objects.filter(
+            learner_eth_address=eth_address).order_by('-verified', 'course_title')
         serializer = CertificateSerializer(certificates, many=True)
         return Response(serializer.data)
 
@@ -51,7 +53,7 @@ class CertificateViewSet(viewsets.ModelViewSet):
     def get_certificates_count(self, request, pk=None):
         eth_address = pk.lower()
         certificates_count = Certificate.objects.filter(
-            user_eth_address=eth_address).count()
+            learner_eth_address=eth_address).count()
         return Response({'certificates_count': certificates_count})
 
     @list_route(methods=['get'])
@@ -60,6 +62,14 @@ class CertificateViewSet(viewsets.ModelViewSet):
         certificates = Certificate.objects.filter(
             academy_address=eth_address).order_by('verified', 'course_title')
         serializer = CertificateSerializer(certificates, many=True)
+        return Response(serializer.data)
+
+    @list_route(methods=['get'])
+    def get_certificates_by_learner(self, request):
+        eth_address = str(request.GET.get('eth_address')).lower()
+        certificates = Certificate.objects.filter(
+            learner_eth_address=eth_address).order_by('-verified', 'course_title')
+        serializer = CertificateViewProfileSerializer(certificates, many=True)
         return Response(serializer.data)
 
     @list_route(methods=['post'])
@@ -72,6 +82,7 @@ class CertificateViewSet(viewsets.ModelViewSet):
         data['academy_address'] = certificate.academy_address
         data['learner_eth_address'] = certificate.learner_eth_address
         data['ipfs_hash'] = certificate.ipfs_hash
+        data['user_eth_address'] = certificate.user_eth_address
         try:
             data['expiration_date'] = datetime.datetime.strptime(
                 data['expiration_date'], date_format)
@@ -135,12 +146,13 @@ class CertificateViewSet(viewsets.ModelViewSet):
             provider = Provider.objects.get(eth_address=academy_address)
         except Provider.DoesNotExist:
             provider = None
-
+        learner_eth_address = request.data.get('learner_eth_address').lower()
         serializer = CertificateLearnerSerializer(data=data)
         if serializer.is_valid():
             serializer.save(
                 user_eth_address=eth_address,
                 academy_address=academy_address,
+                learner_eth_address=learner_eth_address,
                 provider=provider)
             return Response({'status': 'ok'})
         else:
