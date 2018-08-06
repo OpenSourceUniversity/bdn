@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from .models import Certificate
-from bdn.course.serializers import ProviderSerializer, SkillSerializer, CategorySerializer
+from bdn.course.serializers import ProviderSerializer, CategorySerializer
+from bdn.skill.serializers import SkillSerializer
 
 
 class CertificateSerializer(serializers.ModelSerializer):

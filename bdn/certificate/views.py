@@ -10,7 +10,7 @@ from bdn.auth.utils import get_auth_eth_address
 from bdn.course.models import Provider, Skill, Category
 from rest_framework.decorators import detail_route, list_route
 from .serializers import (CertificateSerializer, CertificateLearnerSerializer,
-                            CertificateViewProfileSerializer)
+                          CertificateViewProfileSerializer)
 import datetime
 
 
@@ -27,25 +27,27 @@ class CertificateViewSet(viewsets.ModelViewSet):
                 certificate.learner_eth_address == eth_address):
             serializer = CertificateSerializer(certificate)
             return Response(serializer.data)
-        return Response({
-                    'status': 'denied'}, status=status.HTTP_401_UNAUTHORIZED)
+        return self.deny()
 
     def update(self, request):
-        return Response({
-                    'status': 'denied'}, status=status.HTTP_401_UNAUTHORIZED)
+        return self.deny()
 
     def partial_update(self, request):
-        return Response({
-                    'status': 'denied'}, status=status.HTTP_401_UNAUTHORIZED)
+        return self.deny()
 
     def destroy(self, request):
+        return self.deny()
+
+    @staticmethod
+    def deny():
         return Response({
                     'status': 'denied'}, status=status.HTTP_401_UNAUTHORIZED)
 
     def list(self, request):
         eth_address = get_auth_eth_address(request.META)
-        certificates = Certificate.objects.filter(
-            learner_eth_address=eth_address).order_by('-verified', 'course_title')
+        certificates = Certificate.objects\
+            .filter(learner_eth_address=eth_address)\
+            .order_by('-verified', 'course_title')
         serializer = CertificateSerializer(certificates, many=True)
         return Response(serializer.data)
 
@@ -67,8 +69,9 @@ class CertificateViewSet(viewsets.ModelViewSet):
     @list_route(methods=['get'])
     def get_certificates_by_learner(self, request):
         eth_address = str(request.GET.get('eth_address')).lower()
-        certificates = Certificate.objects.filter(
-            learner_eth_address=eth_address).order_by('-verified', 'course_title')
+        certificates = Certificate.objects\
+            .filter(learner_eth_address=eth_address)\
+            .order_by('-verified', 'course_title')
         serializer = CertificateViewProfileSerializer(certificates, many=True)
         return Response(serializer.data)
 
@@ -77,27 +80,17 @@ class CertificateViewSet(viewsets.ModelViewSet):
         eth_address = get_auth_eth_address(request.META)
         certificate = Certificate.objects.get(id=request.data.get('id'))
         data = request.data.copy()
-        date_format = '%Y-%m-%d'
-        skills_post = request.data.get('skills')
-        skills_lower = [_.lower() for _ in skills_post]
-        skills = Skill.objects.filter(name__in=skills_lower)
         categories = Category.objects.filter(
             name__in=request.data.get('categories'))
         data['academy_address'] = certificate.academy_address
         data['learner_eth_address'] = certificate.learner_eth_address
         data['ipfs_hash'] = certificate.ipfs_hash
         data['user_eth_address'] = certificate.user_eth_address
-        data['skills'] = skills
+        data['skills'] = self._normalized_skills(request.data.get('skills'))
         data['categories'] = categories
-        try:
-            data['expiration_date'] = datetime.datetime.strptime(
-                data['expiration_date'], date_format)
-        except (ValueError, KeyError, TypeError):
-            data['expiration_date'] = None
-        try:
-            provider = Provider.objects.get(eth_address=eth_address)
-        except Provider.DoesNotExist:
-            provider = None
+        expiration_date = self._normalized_date(data['expiration_date'])
+        data['expiration_date'] = expiration_date
+        provider = Provider.objects.filter(eth_address=eth_address).first()
 
         if certificate.academy_address == eth_address:
             serializer = CertificateSerializer(
@@ -109,9 +102,7 @@ class CertificateViewSet(viewsets.ModelViewSet):
                 return Response(serializer.errors,
                                 status=status.HTTP_400_BAD_REQUEST)
         else:
-            return Response({
-                'status': 'denied'
-            }, status=status.HTTP_401_UNAUTHORIZED)
+            return self.deny()
 
     @list_route(methods=['post'])
     def mass_verification(self, request):
@@ -123,8 +114,7 @@ class CertificateViewSet(viewsets.ModelViewSet):
                 certificate.verified = True
                 certificate.save()
             else:
-                return Response({
-                    'status': 'denied'}, status=status.HTTP_401_UNAUTHORIZED)
+                return self.deny()
         return Response({'status': 'ok'})
 
     @list_route(methods=['post'])
@@ -135,38 +125,48 @@ class CertificateViewSet(viewsets.ModelViewSet):
             certificate.delete()
             return Response({'status': 'ok'})
         else:
-            return Response({
-                'status': 'denied'}, status=status.HTTP_401_UNAUTHORIZED)
+            return self.deny()
 
     def create(self, request, pk=None):
         eth_address = get_auth_eth_address(request.META)
         academy_address = str(request.data.get('academy_address')).lower()
-        skills_post = request.data.get('skills')
-        skills_lower = [_.lower() for _ in skills_post]
-        skills = Skill.objects.filter(name__in=skills_lower)
         categories = Category.objects.filter(
             name__in=request.data.get('categories'))
         data = request.data.copy()
-        date_format = '%Y-%m-%d'
-        try:
-            data['expiration_date'] = datetime.datetime.strptime(
-                data['expiration_date'], date_format)
-        except (ValueError, KeyError, TypeError):
-            data['expiration_date'] = None
-        try:
-            provider = Provider.objects.get(eth_address=academy_address)
-        except Provider.DoesNotExist:
-            provider = None
-        data['skills'] = skills
-        data['learner_eth_address'] = request.data.get('learner_eth_address').lower()
+        expiration_date = self._normalized_date(data['expiration_date'])
+        data['expiration_date'] = expiration_date
+        provider = Provider.objects.filter(eth_address=academy_address).first()
+        learner_eth_address = request.data.get('learner_eth_address').lower()
+
+        skills = self._normalized_skills(request.data.get('skills'))
+        data['learner_eth_address'] = learner_eth_address
         data['academy_address'] = academy_address
         data['user_eth_address'] = eth_address
-        data['categories'] = categories
         serializer = CertificateLearnerSerializer(data=data)
         if serializer.is_valid():
             serializer.save(
-                provider=provider)
+                provider=provider, skills=skills, categories=categories)
             return Response({'status': 'ok'})
         else:
             return Response(serializer.errors,
                             status=status.HTTP_400_BAD_REQUEST)
+
+    @staticmethod
+    def _normalized_skills(skill_names):
+        skills = []
+        for skill_name in skill_names:
+            try:
+                skill_obj = Skill.objects.get(name__iexact=skill_name.strip())
+            except Skill.DoesNotExist:
+                skill_obj = Skill(name=skill_name, standardized=False)
+                skill_obj.save()
+            skills.append(skill_obj)
+        return skills
+
+    @staticmethod
+    def _normalized_date(date):
+        DATE_FORMAT = '%Y-%m-%d'
+        try:
+            return datetime.datetime.strptime(date, DATE_FORMAT)
+        except (ValueError, KeyError, TypeError):
+            pass

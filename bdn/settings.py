@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'bdn.certificate',
     'bdn.course',
+    'bdn.skill',
     'bdn.profiles',
     'bdn.job',
 ]

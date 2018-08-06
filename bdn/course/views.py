@@ -40,7 +40,10 @@ class CourseViewSet(viewsets.ModelViewSet):
         profile = Profile.objects.get(user=user)
         serializerProfile = AcademyProfileSerializer(profile)
         serializerCourse = CourseSerializer(course)
-        return Response({'course': serializerCourse.data, 'academy': serializerProfile.data})
+        return Response({
+            'course': serializerCourse.data,
+            'academy': serializerProfile.data
+        })
 
     def get_queryset(self):
         search_query = self.request.GET.get('q', '')

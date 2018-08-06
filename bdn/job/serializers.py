@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from .models import Company, Job
-from bdn.course.serializers import SkillSerializer, CategorySerializer
+from bdn.course.serializers import CategorySerializer
+from bdn.skill.serializers import SkillSerializer
 
 
 class CompanySerializer(serializers.ModelSerializer):

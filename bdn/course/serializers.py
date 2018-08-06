@@ -1,14 +1,6 @@
 from rest_framework import serializers
-from .models import Course, Skill, Category, Provider
-
-
-class SkillSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Skill
-        fields = (
-            'id',
-            'name',
-        )
+from bdn.skill.serializers import SkillSerializer
+from .models import Course, Category, Provider
 
 
 class CategorySerializer(serializers.ModelSerializer):
