@@ -1,10 +1,12 @@
 from rest_framework import serializers
 from .models import Certificate
-from bdn.course.serializers import ProviderSerializer
+from bdn.course.serializers import ProviderSerializer, SkillSerializer, CategorySerializer
 
 
 class CertificateSerializer(serializers.ModelSerializer):
     provider = ProviderSerializer(many=False, read_only=True)
+    skills = SkillSerializer(many=True, read_only=True)
+    categories = CategorySerializer(many=True, read_only=True)
 
     class Meta:
         model = Certificate
@@ -18,7 +20,7 @@ class CertificateSerializer(serializers.ModelSerializer):
             'program_title',
             'course_title',
             'course_link',
-            'subject',
+            'categories',
             'skills',
             'learner_eth_address',
             'verified',
@@ -32,6 +34,8 @@ class CertificateSerializer(serializers.ModelSerializer):
 
 class CertificateLearnerSerializer(serializers.ModelSerializer):
     provider = ProviderSerializer(many=False, read_only=True)
+    skills = SkillSerializer(many=True, read_only=True)
+    categories = CategorySerializer(many=True, read_only=True)
 
     class Meta:
         model = Certificate
@@ -45,7 +49,7 @@ class CertificateLearnerSerializer(serializers.ModelSerializer):
             'program_title',
             'course_title',
             'course_link',
-            'subject',
+            'categories',
             'skills',
             'learner_eth_address',
             'ipfs_hash',
@@ -56,6 +60,8 @@ class CertificateLearnerSerializer(serializers.ModelSerializer):
 
 class CertificateViewProfileSerializer(serializers.ModelSerializer):
     provider = ProviderSerializer(many=False, read_only=True)
+    skills = SkillSerializer(many=True, read_only=True)
+    categories = CategorySerializer(many=True, read_only=True)
 
     class Meta:
         model = Certificate
@@ -69,7 +75,7 @@ class CertificateViewProfileSerializer(serializers.ModelSerializer):
             'program_title',
             'course_title',
             'course_link',
-            'subject',
+            'categories',
             'skills',
             'learner_eth_address',
             'verified',

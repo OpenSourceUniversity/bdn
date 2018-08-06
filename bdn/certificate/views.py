@@ -7,7 +7,7 @@ from bdn.auth.signature_authentication import SignatureAuthentication
 from rest_framework.response import Response
 from .models import Certificate
 from bdn.auth.utils import get_auth_eth_address
-from bdn.course.models import Provider
+from bdn.course.models import Provider, Skill, Category
 from rest_framework.decorators import detail_route, list_route
 from .serializers import (CertificateSerializer, CertificateLearnerSerializer,
                             CertificateViewProfileSerializer)
@@ -78,11 +78,17 @@ class CertificateViewSet(viewsets.ModelViewSet):
         certificate = Certificate.objects.get(id=request.data.get('id'))
         data = request.data.copy()
         date_format = '%Y-%m-%d'
-
+        skills_post = request.data.get('skills')
+        skills_lower = [_.lower() for _ in skills_post]
+        skills = Skill.objects.filter(name__in=skills_lower)
+        categories = Category.objects.filter(
+            name__in=request.data.get('categories'))
         data['academy_address'] = certificate.academy_address
         data['learner_eth_address'] = certificate.learner_eth_address
         data['ipfs_hash'] = certificate.ipfs_hash
         data['user_eth_address'] = certificate.user_eth_address
+        data['skills'] = skills
+        data['categories'] = categories
         try:
             data['expiration_date'] = datetime.datetime.strptime(
                 data['expiration_date'], date_format)
@@ -135,6 +141,11 @@ class CertificateViewSet(viewsets.ModelViewSet):
     def create(self, request, pk=None):
         eth_address = get_auth_eth_address(request.META)
         academy_address = str(request.data.get('academy_address')).lower()
+        skills_post = request.data.get('skills')
+        skills_lower = [_.lower() for _ in skills_post]
+        skills = Skill.objects.filter(name__in=skills_lower)
+        categories = Category.objects.filter(
+            name__in=request.data.get('categories'))
         data = request.data.copy()
         date_format = '%Y-%m-%d'
         try:
@@ -146,13 +157,14 @@ class CertificateViewSet(viewsets.ModelViewSet):
             provider = Provider.objects.get(eth_address=academy_address)
         except Provider.DoesNotExist:
             provider = None
-        learner_eth_address = request.data.get('learner_eth_address').lower()
+        data['skills'] = skills
+        data['learner_eth_address'] = request.data.get('learner_eth_address').lower()
+        data['academy_address'] = academy_address
+        data['user_eth_address'] = eth_address
+        data['categories'] = categories
         serializer = CertificateLearnerSerializer(data=data)
         if serializer.is_valid():
             serializer.save(
-                user_eth_address=eth_address,
-                academy_address=academy_address,
-                learner_eth_address=learner_eth_address,
                 provider=provider)
             return Response({'status': 'ok'})
         else:

@@ -2,12 +2,15 @@ from uuid import UUID
 from django.db.models import Q
 from rest_framework import status, viewsets
 from rest_framework.decorators import list_route, detail_route
+from django.contrib.auth.models import User
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from haystack.query import SearchQuerySet
 from bdn.auth.signature_authentication import SignatureAuthentication
 from bdn.auth.utils import get_auth_eth_address
+from bdn.profiles.models import Profile
+from bdn.profiles.serializers import AcademyProfileSerializer
 from .models import Course, Category, Provider, Skill
 from .serializers import CourseSerializer, CategorySerializer
 
@@ -30,6 +33,14 @@ class CourseViewSet(viewsets.ModelViewSet):
     def destroy(self, request):
         return Response({
                     'status': 'denied'}, status=status.HTTP_401_UNAUTHORIZED)
+
+    def retrieve(self, request, pk=None):
+        course = Course.objects.get(id=pk)
+        user = User.objects.get(username=course.provider.eth_address)
+        profile = Profile.objects.get(user=user)
+        serializerProfile = AcademyProfileSerializer(profile)
+        serializerCourse = CourseSerializer(course)
+        return Response({'course': serializerCourse.data, 'academy': serializerProfile.data})
 
     def get_queryset(self):
         search_query = self.request.GET.get('q', '')

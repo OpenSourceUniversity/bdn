@@ -1,7 +1,7 @@
 import uuid
 from django.db import models as m
 from django.contrib.postgres.fields import ArrayField
-from bdn.course.models import Provider
+from bdn.course.models import Provider, Skill, Category
 
 
 class Certificate(m.Model):
@@ -15,8 +15,8 @@ class Certificate(m.Model):
     program_title = m.CharField(max_length=70, blank=True, null=True)
     course_title = m.CharField(max_length=70)
     course_link = m.URLField(blank=True, null=True)
-    subject = ArrayField(m.CharField(max_length=70), default=[])
-    skills = ArrayField(m.CharField(max_length=70), default=[])
+    categories = m.ManyToManyField(Category)
+    skills = m.ManyToManyField(Skill)
     learner_eth_address = m.CharField(max_length=42)
     verified = m.BooleanField(default=False)
     verification_tx= m.CharField(max_length=100, blank=True, null=True)
