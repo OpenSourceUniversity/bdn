@@ -1,6 +1,6 @@
 import uuid
 from django.db import models as m
-from bdn.category.models import Category
+from bdn.industry.models import Industry
 from bdn.skill.models import Skill
 from bdn.company.models import Company
 from django.contrib.postgres.fields import ArrayField
@@ -18,7 +18,7 @@ class Job(m.Model):
     image_url = m.URLField(blank=True, null=True)
     company = m.ForeignKey(
         Company, blank=True, null=True, on_delete=m.SET_NULL)
-    categories = m.ManyToManyField(Category)
+    industries = m.ManyToManyField(Industry)
     posted = m.DateField(auto_now_add=True)
     closes = m.DateField(blank=True, null=True)
     experience = m.CharField(max_length=130)

@@ -1,6 +1,6 @@
 import uuid
 from django.db import models as m
-from bdn.category.models import Category
+from bdn.industry.models import Industry
 from bdn.provider.models import Provider
 from bdn.skill.models import Skill
 
@@ -14,7 +14,7 @@ class Course(m.Model):
     provider = m.ForeignKey(
         Provider, blank=True, null=True, on_delete=m.SET_NULL)
     tutor = m.CharField(max_length=270, blank=True, null=True)
-    categories = m.ManyToManyField(Category)
+    industries = m.ManyToManyField(Industry)
     skills = m.ManyToManyField(Skill)
     is_featured = m.BooleanField(default=False)
 

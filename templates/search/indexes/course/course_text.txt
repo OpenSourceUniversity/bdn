@@ -2,5 +2,5 @@
 {{ object.description }}
 {{ object.tutor }}
 
-{% for category in object.categories.all %}{{ category.name }} {% endfor %}
+{% for industry in object.industries.all %}{{ industry.name }} {% endfor %}
 {% for skill in object.skills.all %}{{ skill.name }} {% endfor %}

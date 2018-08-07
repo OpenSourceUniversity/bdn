@@ -11,7 +11,7 @@ from bdn.auth.utils import get_auth_eth_address
 from haystack.query import SearchQuerySet
 from bdn.auth.signature_authentication import SignatureAuthentication
 from bdn.company.models import Company
-from bdn.category.models import Category
+from bdn.industry.models import Industry
 from bdn.skill.models import Skill
 from bdn.profiles.models import Profile
 from bdn.profiles.serializers import CompanyProfileSerializer
@@ -50,21 +50,21 @@ class JobViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         qs = Job.objects.all()
-        qs = qs.filter(self.category_filter())
+        qs = qs.filter(self.industry_filter())
         return qs.filter(self.featured_filter())
 
-    def category_filter(self):
-        filtered_categories_ids = self.request.query_params.get(
-            'filter_category', '').split('|')
-        category_filter = Q()
-        for filtered_category_id in filtered_categories_ids:
+    def industry_filter(self):
+        filtered_industries_ids = self.request.query_params.get(
+            'filter_industry', '').split('|')
+        industry_filter = Q()
+        for filtered_industry_id in filtered_industries_ids:
             try:
-                UUID(filtered_category_id, version=4)
+                UUID(filtered_industry_id, version=4)
             except ValueError:
                 continue
-            if filtered_category_id:
-                category_filter |= Q(categories__id=filtered_category_id)
-        return category_filter
+            if filtered_industry_id:
+                industry_filter |= Q(industries__id=filtered_industry_id)
+        return industry_filter
 
     def featured_filter(self):
         featured_filter = Q()
@@ -143,12 +143,12 @@ class JobViewSet(viewsets.ModelViewSet):
         for skill in skills_post:
             skills_lower.append(skill.lower())
         skills = Skill.objects.filter(name__in=skills_lower)
-        categories = Category.objects.filter(
-            name__in=request.data.get('categories'))
+        industries = Industry.objects.filter(
+            name__in=request.data.get('industries'))
         serializer = JobSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save(
-                company=company, categories=categories, skills=skills)
+                company=company, industries=industries, skills=skills)
             return Response({'status': 'ok'})
         else:
             return Response(serializer.errors,

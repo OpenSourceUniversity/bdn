@@ -17,7 +17,7 @@ from django.contrib import admin
 from django.urls import include, path
 from bdn.certificate.views import CertificateViewSet
 from bdn.profiles.views import ProfileViewSet
-from bdn.category.views import CategoryViewSet
+from bdn.industry.views import IndustryViewSet
 from bdn.course.views import CourseViewSet
 from bdn.skill.views import SkillViewSet
 from bdn.job.views import JobViewSet
@@ -28,7 +28,7 @@ router = routers.DefaultRouter()
 router.register(r'certificates', CertificateViewSet)
 router.register(r'courses', CourseViewSet)
 router.register(r'profile', ProfileViewSet)
-router.register(r'categories', CategoryViewSet, base_name='Category')
+router.register(r'industries', IndustryViewSet, base_name='Industry')
 router.register(r'skills', SkillViewSet, base_name='Skill')
 router.register(r'jobs', JobViewSet)
 

@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from bdn.provider.serializers import ProviderSerializer
-from bdn.category.serializers import CategorySerializer
+from bdn.industry.serializers import IndustrySerializer
 from bdn.skill.serializers import SkillSerializer
 from .models import Certificate
 
@@ -8,7 +8,7 @@ from .models import Certificate
 class CertificateSerializer(serializers.ModelSerializer):
     provider = ProviderSerializer(many=False, read_only=True)
     skills = SkillSerializer(many=True, read_only=True)
-    categories = CategorySerializer(many=True, read_only=True)
+    industries = IndustrySerializer(many=True, read_only=True)
 
     class Meta:
         model = Certificate
@@ -22,7 +22,7 @@ class CertificateSerializer(serializers.ModelSerializer):
             'program_title',
             'course_title',
             'course_link',
-            'categories',
+            'industries',
             'skills',
             'learner_eth_address',
             'verified',
@@ -37,7 +37,7 @@ class CertificateSerializer(serializers.ModelSerializer):
 class CertificateLearnerSerializer(serializers.ModelSerializer):
     provider = ProviderSerializer(many=False, read_only=True)
     skills = SkillSerializer(many=True, read_only=True)
-    categories = CategorySerializer(many=True, read_only=True)
+    industries = IndustrySerializer(many=True, read_only=True)
 
     class Meta:
         model = Certificate
@@ -51,7 +51,7 @@ class CertificateLearnerSerializer(serializers.ModelSerializer):
             'program_title',
             'course_title',
             'course_link',
-            'categories',
+            'industries',
             'skills',
             'learner_eth_address',
             'ipfs_hash',
@@ -64,7 +64,7 @@ class CertificateLearnerSerializer(serializers.ModelSerializer):
 class CertificateViewProfileSerializer(serializers.ModelSerializer):
     provider = ProviderSerializer(many=False, read_only=True)
     skills = SkillSerializer(many=True, read_only=True)
-    categories = CategorySerializer(many=True, read_only=True)
+    industries = IndustrySerializer(many=True, read_only=True)
 
     class Meta:
         model = Certificate
@@ -78,7 +78,7 @@ class CertificateViewProfileSerializer(serializers.ModelSerializer):
             'program_title',
             'course_title',
             'course_link',
-            'categories',
+            'industries',
             'skills',
             'learner_eth_address',
             'verified',
