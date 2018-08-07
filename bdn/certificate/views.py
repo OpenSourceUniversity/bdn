@@ -158,7 +158,7 @@ class CertificateViewSet(viewsets.ModelViewSet):
         skills = []
         for skill_name in skill_names:
             try:
-                skill_obj = Skill.objects.get(name__iexact=skill_name.strip())
+                skill_obj = Skill.objects.get(name=skill_name.strip())
             except Skill.DoesNotExist:
                 skill_obj = Skill(name=skill_name, standardized=False)
                 skill_obj.save()
