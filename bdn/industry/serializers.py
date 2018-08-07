@@ -1,10 +1,10 @@
 from rest_framework import serializers
-from .models import Category
+from .models import Industry
 
 
-class CategorySerializer(serializers.ModelSerializer):
+class IndustrySerializer(serializers.ModelSerializer):
     class Meta:
-        model = Category
+        model = Industry
         fields = (
             'id',
             'name',

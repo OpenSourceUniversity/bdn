@@ -2,7 +2,7 @@ import uuid
 from django.db import models as m
 from bdn.provider.models import Provider
 from bdn.skill.models import Skill
-from bdn.category.models import Category
+from bdn.industry.models import Industry
 
 
 class Certificate(m.Model):
@@ -16,7 +16,7 @@ class Certificate(m.Model):
     program_title = m.CharField(max_length=70, blank=True, null=True)
     course_title = m.CharField(max_length=70)
     course_link = m.URLField(blank=True, null=True)
-    categories = m.ManyToManyField(Category)
+    industries = m.ManyToManyField(Industry)
     skills = m.ManyToManyField(Skill)
     learner_eth_address = m.CharField(max_length=42)
     verified = m.BooleanField(default=False)

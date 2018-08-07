@@ -10,7 +10,7 @@ from bdn.auth.signature_authentication import SignatureAuthentication
 from bdn.auth.utils import get_auth_eth_address
 from bdn.provider.models import Provider
 from bdn.skill.models import Skill
-from bdn.category.models import Category
+from bdn.industry.models import Industry
 from .models import Certificate
 from .serializers import (CertificateSerializer, CertificateLearnerSerializer,
                           CertificateViewProfileSerializer)
@@ -82,14 +82,14 @@ class CertificateViewSet(viewsets.ModelViewSet):
         eth_address = get_auth_eth_address(request.META)
         certificate = Certificate.objects.get(id=request.data.get('id'))
         data = request.data.copy()
-        categories = Category.objects.filter(
-            name__in=request.data.get('categories'))
+        industries = Industry.objects.filter(
+            name__in=request.data.get('industries'))
         data['academy_address'] = certificate.academy_address
         data['learner_eth_address'] = certificate.learner_eth_address
         data['ipfs_hash'] = certificate.ipfs_hash
         data['user_eth_address'] = certificate.user_eth_address
         data['skills'] = self._normalized_skills(request.data.get('skills'))
-        data['categories'] = categories
+        data['industries'] = industries
         expiration_date = self._normalized_date(data['expiration_date'])
         data['expiration_date'] = expiration_date
         provider = Provider.objects.filter(eth_address=eth_address).first()
@@ -132,8 +132,8 @@ class CertificateViewSet(viewsets.ModelViewSet):
     def create(self, request, pk=None):
         eth_address = get_auth_eth_address(request.META)
         academy_address = str(request.data.get('academy_address')).lower()
-        categories = Category.objects.filter(
-            name__in=request.data.get('categories'))
+        industries = Industry.objects.filter(
+            name__in=request.data.get('industries'))
         data = request.data.copy()
         expiration_date = self._normalized_date(data['expiration_date'])
         data['expiration_date'] = expiration_date
@@ -147,7 +147,7 @@ class CertificateViewSet(viewsets.ModelViewSet):
         serializer = CertificateLearnerSerializer(data=data)
         if serializer.is_valid():
             serializer.save(
-                provider=provider, skills=skills, categories=categories)
+                provider=provider, skills=skills, industries=industries)
             return Response({'status': 'ok'})
         else:
             return Response(serializer.errors,

@@ -10,7 +10,7 @@ from haystack.query import SearchQuerySet
 from bdn.auth.signature_authentication import SignatureAuthentication
 from bdn.auth.utils import get_auth_eth_address
 from bdn.profiles.models import Profile
-from bdn.category.models import Category
+from bdn.industry.models import Industry
 from bdn.skill.models import Skill
 from bdn.provider.models import Provider
 from bdn.profiles.serializers import AcademyProfileSerializer
@@ -59,22 +59,22 @@ class CourseViewSet(viewsets.ModelViewSet):
             return qs
 
         qs = Course.objects.all()
-        qs = qs.filter(self.category_filter())
+        qs = qs.filter(self.industry_filter())
         qs = qs.filter(self.featured_filter())
         return qs
 
-    def category_filter(self):
-        filtered_categories_ids = self.request.query_params.get(
-            'filter_category', '').split('|')
-        category_filter = Q()
-        for filtered_category_id in filtered_categories_ids:
+    def industry_filter(self):
+        filtered_industries_ids = self.request.query_params.get(
+            'filter_industry', '').split('|')
+        industry_filter = Q()
+        for filtered_industry_id in filtered_industries_ids:
             try:
-                UUID(filtered_category_id, version=4)
+                UUID(filtered_industry_id, version=4)
             except ValueError:
                 continue
-            if filtered_category_id:
-                category_filter |= Q(categories__id=filtered_category_id)
-        return category_filter
+            if filtered_industry_id:
+                industry_filter |= Q(industries__id=filtered_industry_id)
+        return industry_filter
 
     def featured_filter(self):
         featured_filter = Q()
@@ -140,12 +140,12 @@ class CourseViewSet(viewsets.ModelViewSet):
         skills_post = request.data.get('skills')
         skills_lower = [_.lower() for _ in skills_post]
         skills = Skill.objects.filter(name__in=skills_lower)
-        categories = Category.objects.filter(
-            name__in=request.data.get('categories'))
+        industries = Industry.objects.filter(
+            name__in=request.data.get('industries'))
         serializer = CourseSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save(
-                provider=provider, categories=categories, skills=skills)
+                provider=provider, industries=industries, skills=skills)
             return Response({'status': 'ok'})
         else:
             return Response(serializer.errors,
