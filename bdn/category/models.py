@@ -6,6 +6,7 @@ class Category(m.Model):
     class Meta:
         verbose_name = 'Category'
         verbose_name_plural = 'Categories'
+        ordering = ('name',)
 
     id = m.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = m.CharField(max_length=70)
