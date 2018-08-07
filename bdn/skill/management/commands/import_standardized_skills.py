@@ -9,7 +9,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         skills_file_path = os.path.join(
-            settings.BASE_DIR, 'files', 'all_standardized_skills.txt')
+            settings.BASE_DIR, 'data', 'all_standardized_skills.txt')
         number_of_imported = 0
         with open(skills_file_path, 'r') as f:
             skills = [_.strip() for _ in f.readlines()]
