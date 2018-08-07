@@ -9,11 +9,13 @@ from bdn.auth.signature_authentication import SignatureAuthentication
 from rest_framework.response import Response
 from bdn.auth.utils import get_auth_eth_address
 from .models import Profile
-from bdn.course.models import Provider, Course
+from bdn.course.models import Course
+from bdn.provider.models import Provider
 from bdn.certificate.models import Certificate
-from bdn.job.models import Company, Job
-from bdn.course.serializers import ProviderSerializer
-from bdn.job.serializers import CompanySerializer
+from bdn.job.models import Job
+from bdn.company.models import Company
+from bdn.provider.serializers import ProviderSerializer
+from bdn.company.serializers import CompanySerializer
 from .serializers import (
     ProfileSerializer, LearnerProfileSerializer, AcademyProfileSerializer,
     CompanyProfileSerializer)
@@ -82,7 +84,8 @@ class ProfileViewSet(viewsets.ModelViewSet):
         for obj in providers_obj:
             eth_addresses.add(obj.eth_address)
         users = User.objects.filter(username__in=eth_addresses)
-        profiles = Profile.objects.filter(user__in=users).order_by('academy_name')
+        profiles = Profile.objects\
+            .filter(user__in=users).order_by('academy_name')
         serializer = AcademyProfileSerializer(profiles, many=True)
         newdata = []
         for data in serializer.data:
@@ -101,7 +104,9 @@ class ProfileViewSet(viewsets.ModelViewSet):
         for obj in companies_obj:
             eth_addresses.add(obj.eth_address)
         users = User.objects.filter(username__in=eth_addresses)
-        profiles = Profile.objects.filter(user__in=users).order_by('company_name')
+        profiles = Profile.objects\
+            .filter(user__in=users)\
+            .order_by('company_name')
         serializer = CompanyProfileSerializer(profiles, many=True)
         newdata = []
         for data in serializer.data:
@@ -131,12 +136,12 @@ class ProfileViewSet(viewsets.ModelViewSet):
         profile = Profile.objects.get(user=user)
         data = request.data.copy()
         if profile_type == '1':
-            if data['learner_avatar'] == None:
+            if data['learner_avatar'] is None:
                 data['learner_avatar'] = profile.learner_avatar
             serializer = LearnerProfileSerializer(
                 data=data, instance=profile, partial=True)
         elif profile_type == '2':
-            if data['academy_logo'] == None:
+            if data['academy_logo'] is None:
                 data['academy_logo'] = profile.academy_logo
             serializer = AcademyProfileSerializer(
                 data=data, instance=profile, partial=True)
@@ -161,7 +166,7 @@ class ProfileViewSet(viewsets.ModelViewSet):
                     return Response(provider_serializer.errors,
                                     status=status.HTTP_400_BAD_REQUEST)
         elif profile_type == '3':
-            if data['company_logo'] == None:
+            if data['company_logo'] is None:
                     data['company_logo'] = profile.company_logo
             serializer = CompanyProfileSerializer(
                 data=data, instance=profile, partial=True)

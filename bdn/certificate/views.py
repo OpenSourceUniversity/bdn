@@ -1,17 +1,19 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+import datetime
 from rest_framework import viewsets, status
 from rest_framework.permissions import IsAuthenticated
-from bdn.auth.signature_authentication import SignatureAuthentication
 from rest_framework.response import Response
-from .models import Certificate
-from bdn.auth.utils import get_auth_eth_address
-from bdn.course.models import Provider, Skill, Category
 from rest_framework.decorators import detail_route, list_route
+from bdn.auth.signature_authentication import SignatureAuthentication
+from bdn.auth.utils import get_auth_eth_address
+from bdn.provider.models import Provider
+from bdn.skill.models import Skill
+from bdn.category.models import Category
+from .models import Certificate
 from .serializers import (CertificateSerializer, CertificateLearnerSerializer,
                           CertificateViewProfileSerializer)
-import datetime
 
 
 class CertificateViewSet(viewsets.ModelViewSet):

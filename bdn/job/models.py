@@ -1,17 +1,9 @@
 import uuid
 from django.db import models as m
-from bdn.course.models import Skill, Category
+from bdn.category.models import Category
+from bdn.skill.models import Skill
+from bdn.company.models import Company
 from django.contrib.postgres.fields import ArrayField
-
-
-class Company(m.Model):
-    id = m.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    name = m.CharField(max_length=70)
-    eth_address = m.CharField(max_length=42, blank=True, null=True)
-    verified = m.BooleanField(default=False)
-
-    def __str__(self):
-        return self.name
 
 
 class Job(m.Model):

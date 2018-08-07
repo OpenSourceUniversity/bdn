@@ -1,17 +1,8 @@
 from rest_framework import serializers
-from .models import Company, Job
-from bdn.course.serializers import CategorySerializer
+from bdn.category.serializers import CategorySerializer
+from bdn.company.serializers import CompanySerializer
 from bdn.skill.serializers import SkillSerializer
-
-
-class CompanySerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Company
-        fields = (
-            'id',
-            'name',
-            'eth_address',
-        )
+from .models import Job
 
 
 class JobSerializer(serializers.ModelSerializer):

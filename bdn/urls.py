@@ -17,7 +17,8 @@ from django.contrib import admin
 from django.urls import include, path
 from bdn.certificate.views import CertificateViewSet
 from bdn.profiles.views import ProfileViewSet
-from bdn.course.views import CourseViewSet, CategoryViewSet
+from bdn.category.views import CategoryViewSet
+from bdn.course.views import CourseViewSet
 from bdn.skill.views import SkillViewSet
 from bdn.job.views import JobViewSet
 from rest_framework import routers

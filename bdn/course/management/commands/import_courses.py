@@ -1,6 +1,9 @@
 import json
 from django.core.management.base import BaseCommand
-from bdn.course.models import Provider, Course, Category, Skill
+from bdn.course.models import Course
+from bdn.provider.models import Provider
+from bdn.skill.models import Skill
+from bdn.category.models import Category
 
 
 class Command(BaseCommand):

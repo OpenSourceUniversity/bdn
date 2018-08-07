@@ -1,7 +1,8 @@
 from rest_framework import serializers
-from .models import Certificate
-from bdn.course.serializers import ProviderSerializer, CategorySerializer
+from bdn.provider.serializers import ProviderSerializer
+from bdn.category.serializers import CategorySerializer
 from bdn.skill.serializers import SkillSerializer
+from .models import Certificate
 
 
 class CertificateSerializer(serializers.ModelSerializer):
@@ -58,6 +59,7 @@ class CertificateLearnerSerializer(serializers.ModelSerializer):
             'duration',
             'expiration_date',
         )
+
 
 class CertificateViewProfileSerializer(serializers.ModelSerializer):
     provider = ProviderSerializer(many=False, read_only=True)

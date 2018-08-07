@@ -2,7 +2,7 @@ from haystack.query import SearchQuerySet
 from rest_framework import status, viewsets, mixins
 from rest_framework.response import Response
 from rest_framework.decorators import list_route
-from bdn.course.models import Skill
+from .models import Skill
 from .serializers import SkillSerializer
 
 

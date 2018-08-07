@@ -10,9 +10,12 @@ from haystack.query import SearchQuerySet
 from bdn.auth.signature_authentication import SignatureAuthentication
 from bdn.auth.utils import get_auth_eth_address
 from bdn.profiles.models import Profile
+from bdn.category.models import Category
+from bdn.skill.models import Skill
+from bdn.provider.models import Provider
 from bdn.profiles.serializers import AcademyProfileSerializer
-from .models import Course, Category, Provider, Skill
-from .serializers import CourseSerializer, CategorySerializer
+from .serializers import CourseSerializer
+from .models import Course
 
 
 class CourseViewSet(viewsets.ModelViewSet):
@@ -159,8 +162,3 @@ class CourseViewSet(viewsets.ModelViewSet):
         else:
             return Response(
                 {'status': 'denied'}, status=status.HTTP_401_UNAUTHORIZED)
-
-
-class CategoryViewSet(viewsets.ModelViewSet):
-    queryset = Category.objects.all().order_by('name')
-    serializer_class = CategorySerializer

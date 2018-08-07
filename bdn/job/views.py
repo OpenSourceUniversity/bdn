@@ -10,12 +10,13 @@ from rest_framework.response import Response
 from bdn.auth.utils import get_auth_eth_address
 from haystack.query import SearchQuerySet
 from bdn.auth.signature_authentication import SignatureAuthentication
-from .models import Company, Job
-from bdn.course.models import Skill, Category
+from bdn.company.models import Company
+from bdn.category.models import Category
+from bdn.skill.models import Skill
 from bdn.profiles.models import Profile
 from bdn.profiles.serializers import CompanyProfileSerializer
+from .models import Job
 from .serializers import JobSerializer
-from bdn.course.serializers import CategorySerializer
 
 
 class JobViewSet(viewsets.ModelViewSet):
@@ -43,7 +44,9 @@ class JobViewSet(viewsets.ModelViewSet):
         profile = Profile.objects.get(user=user)
         serializerProfile = CompanyProfileSerializer(profile)
         serializerJob = JobSerializer(job)
-        return Response({'job': serializerJob.data, 'company': serializerProfile.data})
+        return Response({
+            'job': serializerJob.data,
+            'company': serializerProfile.data})
 
     def get_queryset(self):
         qs = Job.objects.all()
@@ -150,8 +153,3 @@ class JobViewSet(viewsets.ModelViewSet):
         else:
             return Response(serializer.errors,
                             status=status.HTTP_400_BAD_REQUEST)
-
-
-class CategoryViewSet(viewsets.ModelViewSet):
-    queryset = Category.objects.all().order_by('name')
-    serializer_class = CategorySerializer

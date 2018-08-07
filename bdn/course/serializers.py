@@ -1,25 +1,8 @@
 from rest_framework import serializers
+from bdn.category.serializers import CategorySerializer
+from bdn.provider.serializers import ProviderSerializer
 from bdn.skill.serializers import SkillSerializer
-from .models import Course, Category, Provider
-
-
-class CategorySerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Category
-        fields = (
-            'id',
-            'name',
-        )
-
-
-class ProviderSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Provider
-        fields = (
-            'id',
-            'name',
-            'eth_address',
-        )
+from .models import Course
 
 
 class CourseSerializer(serializers.ModelSerializer):

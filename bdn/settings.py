@@ -45,9 +45,12 @@ INSTALLED_APPS = [
     'haystack',
     'rest_framework',
     'corsheaders',
+    'bdn.category',
     'bdn.certificate',
+    'bdn.company',
     'bdn.course',
     'bdn.skill',
+    'bdn.provider',
     'bdn.profiles',
     'bdn.job',
 ]

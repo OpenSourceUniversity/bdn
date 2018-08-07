@@ -1,6 +1,8 @@
 import uuid
 from django.db import models as m
-from bdn.course.models import Provider, Skill, Category
+from bdn.provider.models import Provider
+from bdn.skill.models import Skill
+from bdn.category.models import Category
 
 
 class Certificate(m.Model):

@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from bdn.course.models import Skill
+from bdn.skill.models import Skill
 
 
 class SkillSerializer(serializers.ModelSerializer):

@@ -1,5 +1,5 @@
 from haystack import indexes
-from bdn.course.models import Skill
+from bdn.skill.models import Skill
 
 
 class SkillIndex(indexes.SearchIndex, indexes.Indexable):
