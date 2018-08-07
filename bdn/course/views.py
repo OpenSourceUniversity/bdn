@@ -48,9 +48,10 @@ class CourseViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         search_query = self.request.GET.get('q', '')
         if search_query:
+            sqs = SearchQuerySet().filter(title=search_query).models(Course)
             qs = [
                 _.object
-                for _ in SearchQuerySet().filter(title=search_query)
+                for _ in sqs
             ]
             return qs
 
@@ -81,15 +82,16 @@ class CourseViewSet(viewsets.ModelViewSet):
     @list_route(methods=['get'])
     def search(self, request):
         query = self.request.GET.get('q', '')
-        sqs = SearchQuerySet().filter(title=query)
+        sqs = SearchQuerySet().filter(title=query).models(Course)
         serializer = self.get_serializer([s.object for s in sqs], many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     @list_route(methods=['get'])
     def autocomplete(self, request):
         AUTOCOMPLETE_SIZE = 10
-        sqs = SearchQuerySet().filter(
-            title_auto=request.GET.get('q', ''))[:AUTOCOMPLETE_SIZE]
+        sqs = SearchQuerySet()\
+            .filter(title_auto=request.GET.get('q', ''))\
+            .models(Course)[:AUTOCOMPLETE_SIZE]
         serializer = self.get_serializer([s.object for s in sqs], many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
