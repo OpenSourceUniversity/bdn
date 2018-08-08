@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django_celery_results',
+    'ajax_select',
     'haystack',
     'rest_framework',
     'corsheaders',

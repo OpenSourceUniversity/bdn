@@ -12,6 +12,7 @@ coreschema==0.0.4
 coverage==4.5.1
 cytoolz==0.9.0
 Django==2.0.2
+django-ajax-selects==1.7.0
 django-celery-results==1.0.1
 django-cors-headers==2.2.0
 django-haystack==2.8.1
