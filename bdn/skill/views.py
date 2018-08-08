@@ -14,8 +14,11 @@ class SkillViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
     def autocomplete(self, request):
         AUTOCOMPLETE_SIZE = 10
         query = request.GET.get('q', '')
-        sqs = SearchQuerySet()\
-            .filter(name_auto=query, standardized=True)\
-            .models(Skill)[:AUTOCOMPLETE_SIZE]
+        if not query:
+            sqs = Skill.objects.none()
+        else:
+            sqs = SearchQuerySet()\
+                .filter(name_auto=query, standardized=True)\
+                .models(Skill)[:AUTOCOMPLETE_SIZE]
         serializer = self.get_serializer(sqs, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
