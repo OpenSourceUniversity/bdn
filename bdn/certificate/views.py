@@ -12,7 +12,7 @@ from bdn.provider.models import Provider
 from bdn.skill.models import Skill
 from bdn.industry.models import Industry
 from .models import Certificate
-from .serializers import (CertificateSerializer, CertificateLearnerSerializer,
+from .serializers import (CertificateSerializer,
                           CertificateViewProfileSerializer)
 
 
@@ -129,7 +129,7 @@ class CertificateViewSet(viewsets.ModelViewSet):
         else:
             return self.deny()
 
-    def create(self, request, pk=None):
+    def create(self, request):
         eth_address = get_auth_eth_address(request.META)
         academy_address = str(request.data.get('academy_address')).lower()
         industries = Industry.objects.filter(
@@ -144,7 +144,7 @@ class CertificateViewSet(viewsets.ModelViewSet):
         data['learner_eth_address'] = learner_eth_address
         data['academy_address'] = academy_address
         data['user_eth_address'] = eth_address
-        serializer = CertificateLearnerSerializer(data=data)
+        serializer = CertificateSerializer(data=data)
         if serializer.is_valid():
             serializer.save(
                 provider=provider, skills=skills, industries=industries)

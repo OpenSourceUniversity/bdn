@@ -33,32 +33,10 @@ class CertificateSerializer(serializers.ModelSerializer):
             'expiration_date',
         )
 
-
-class CertificateLearnerSerializer(serializers.ModelSerializer):
-    provider = ProviderSerializer(many=False, read_only=True)
-    skills = SkillSerializer(many=True, read_only=True)
-    industries = IndustrySerializer(many=True, read_only=True)
-
-    class Meta:
-        model = Certificate
-        fields = (
-            'id',
-            'user_eth_address',
-            'academy_title',
-            'academy_address',
-            'provider',
-            'academy_link',
-            'program_title',
-            'course_title',
-            'course_link',
-            'industries',
-            'skills',
-            'learner_eth_address',
-            'ipfs_hash',
-            'score',
-            'duration',
-            'expiration_date',
-        )
+    def to_internal_value(self, data):
+        if data.get('score', None) == '':
+            data.pop('score')
+        return super(CertificateSerializer, self).to_internal_value(data)
 
 
 class CertificateViewProfileSerializer(serializers.ModelSerializer):
