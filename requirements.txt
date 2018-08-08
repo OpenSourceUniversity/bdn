@@ -30,6 +30,7 @@ flake8==3.5.0
 future==0.16.0
 hexbytes==0.1.0b1
 idna==2.6
+ipfsapi==0.4.3
 itypes==1.1.0
 Jinja2==2.10
 kombu==4.1.0
