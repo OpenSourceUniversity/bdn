@@ -84,7 +84,21 @@ services:
     environment:
       - DJANGO_SETTINGS_MODULE=bdn.settings
       - ETHEREUM_NODE=http://ganache:8545
-    command: celery -A bdn worker -l info
+    command: python start-celery-for-dev.py
+    volumes:
+      - .:/code
+    depends_on:
+      - db
+      - redis
+
+  beat:
+    build:
+      context: .
+      dockerfile: docks/python/Dockerfile
+    environment:
+      - DJANGO_SETTINGS_MODULE=bdn.settings
+      - ETHEREUM_NODE=http://ganache:8545
+    command: celery -A bdn beat -l info --scheduler django_celery_beat.schedulers:DatabaseScheduler
     volumes:
       - .:/code
     depends_on:

@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django_celery_results',
+    'django_celery_beat',
     'ajax_select',
     'haystack',
     'rest_framework',
@@ -54,6 +55,7 @@ INSTALLED_APPS = [
     'bdn.provider',
     'bdn.profiles',
     'bdn.job',
+    'bdn.verification',
 ]
 
 MIDDLEWARE = [

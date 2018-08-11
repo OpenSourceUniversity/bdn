@@ -114,3 +114,5 @@ contracts/
 data/
 
 .idea/
+
+celerybeat.pid
