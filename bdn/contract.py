@@ -21,9 +21,6 @@ def contract(contract_name):
     contract_interface = json.load(open(json_path))
     for _, network in contract_interface['networks'].items():
         _contracts[contract_name] = w3.eth.contract(
-            # TODO: remove .lower() - use proper EIP checksum address:
-            # https://github.com/ethereum/web3.py/issues/674
-            # Currently this only works because web3.py is forked
-            address=web3.Web3.toChecksumAddress(network['address']).lower(),
+            address=web3.Web3.toChecksumAddress(network['address']),
             abi=contract_interface['abi'])
         return _contracts[contract_name]

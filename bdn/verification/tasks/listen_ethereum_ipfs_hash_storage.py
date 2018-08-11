@@ -1,5 +1,8 @@
 import logging
 from celery import shared_task
+from bdn.contract import contract
+from bdn.redis import get_redis
+from bdn.verification.models import Verification
 
 
 logger = logging.getLogger(__name__)
@@ -7,5 +10,27 @@ logger = logging.getLogger(__name__)
 
 @shared_task
 def listen_ethereum_ipfs_hash_storage():
-    print("baba 4")
-    return 1
+    redis_db = get_redis()
+    verification_storage = contract('VerificationStorage')
+    event = verification_storage.events.Verification
+
+    last_block = redis_db.get('_verification_filter_block') or 0
+    if last_block != 0:
+        last_block = int(last_block)
+
+    hash_filter = event.createFilter(fromBlock=last_block)
+
+    for entry in hash_filter.get_all_entries():
+        tx_hash = entry['transactionHash'].hex()
+        block_hash = entry['blockHash'].hex()
+        block_number = int(entry['blockNumber'])
+        entry_args = entry['args']
+        ipfs_hash = entry_args['ipfsHash'].decode()
+        granted_to = entry_args['grantedTo']
+
+        verification, _ = Verification.objects.get_or_create(
+            tx_hash=tx_hash, block_hash=block_hash, block_number=block_number,
+            granted_to=granted_to, ipfs_hash=ipfs_hash)
+
+        if block_number > last_block:
+            redis_db.set('_verification_filter_block', block_number)

@@ -104,6 +104,8 @@ services:
     depends_on:
       - db
       - redis
+    logging:
+      driver: "none"
 
 volumes:
   postgres:
