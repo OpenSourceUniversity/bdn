@@ -7,7 +7,7 @@ import subprocess
 
 code_dir_to_monitor = '/code/bdn/'
 celery_working_dir = '/code/'
-celery_cmdline = 'celery -A bdn worker -l info -c 1'.split(" ")
+celery_cmdline = 'celery -A bdn worker -l WARNING -c 1'.split(" ")
 
 
 class MyHandler(PatternMatchingEventHandler):
