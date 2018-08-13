@@ -23,7 +23,7 @@ class Certificate(m.Model):
     verification_tx = m.CharField(max_length=100, blank=True, null=True)
     ipfs_hash = m.CharField(max_length=100, default='None')
     score = m.FloatField(default=0.0, blank=True, null=True)
-    duration = m.DurationField(blank=True, null=True)
+    duration = m.PositiveSmallIntegerField(blank=True, null=True)
     expiration_date = m.DateTimeField(blank=True, null=True)
 
     def __str__(self):
