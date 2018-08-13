@@ -3,6 +3,7 @@ from celery import shared_task
 from bdn.contract import contract
 from bdn.redis import get_redis
 from bdn.verification.models import Verification
+from . import perform_ipfs_meta_verification
 
 
 logger = logging.getLogger(__name__)
@@ -34,3 +35,5 @@ def listen_ethereum_ipfs_hash_storage():
 
         if block_number > last_block:
             redis_db.set('_verification_filter_block', block_number)
+
+        perform_ipfs_meta_verification.delay()
