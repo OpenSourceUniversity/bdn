@@ -101,7 +101,10 @@ class CourseViewSet(viewsets.ModelViewSet):
     @list_route(methods=['get'])
     def get_by_provider(self, request):
         eth_address = str(request.GET.get('eth_address')).lower()
-        provider = Provider.objects.get(eth_address=eth_address)
+        try:
+            provider = Provider.objects.get(eth_address=eth_address)
+        except Provider.DoesNotExist:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
         qs = Course.objects.all().filter(provider=provider)
         serializer = self.get_serializer(qs, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)

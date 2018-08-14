@@ -53,7 +53,10 @@ class ProfileViewSet(viewsets.ModelViewSet):
     @detail_route(methods=['get'])
     def get_academy(self, request, pk=None):
         eth_address = pk.lower()
-        user = User.objects.get(username=eth_address)
+        try:
+            user = User.objects.get(username=eth_address)
+        except User.DoesNotExist:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
         profile = Profile.objects.get(user=user)
         serializer = AcademyProfileSerializer(profile)
         return Response(serializer.data)
@@ -61,7 +64,10 @@ class ProfileViewSet(viewsets.ModelViewSet):
     @detail_route(methods=['get'])
     def get_learner(self, request, pk=None):
         eth_address = pk.lower()
-        user = User.objects.get(username=eth_address)
+        try:
+            user = User.objects.get(username=eth_address)
+        except User.DoesNotExist:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
         profile = Profile.objects.get(user=user)
         if profile.public_profile:
             serializer = LearnerProfileSerializer(profile)
@@ -72,7 +78,10 @@ class ProfileViewSet(viewsets.ModelViewSet):
     @detail_route(methods=['get'])
     def get_business(self, request, pk=None):
         eth_address = pk.lower()
-        user = User.objects.get(username=eth_address)
+        try:
+            user = User.objects.get(username=eth_address)
+        except User.DoesNotExist:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
         profile = Profile.objects.get(user=user)
         serializer = CompanyProfileSerializer(profile)
         return Response(serializer.data)
@@ -119,7 +128,8 @@ class ProfileViewSet(viewsets.ModelViewSet):
 
     @list_route(methods=['get'])
     def get_learners(self, request):
-        profiles = Profile.objects.filter(public_profile=True).order_by('first_name')
+        profiles = Profile.objects.filter(
+            public_profile=True).order_by('first_name')
         serializer = LearnerProfileSerializer(profiles, many=True)
         newdata = []
         for data in serializer.data:

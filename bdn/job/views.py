@@ -88,7 +88,10 @@ class JobViewSet(viewsets.ModelViewSet):
     @list_route(methods=['get'])
     def get_by_company(self, request):
         eth_address = str(request.GET.get('eth_address')).lower()
-        company = Company.objects.get(eth_address=eth_address)
+        try:
+            company = Company.objects.get(eth_address=eth_address)
+        except Company.DoesNotExist:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
         sqs = Job.objects.all().filter(company=company)
         serializer = self.get_serializer([s for s in sqs], many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
