@@ -116,3 +116,5 @@ data/
 .idea/
 
 celerybeat.pid
+
+.ethereum_data/

@@ -70,8 +70,10 @@ services:
 
   ganache:
     image: trufflesuite/ganache-cli
-    entrypoint: ["node", "./build/cli.node.js", "-i", "5888", "-h", "0.0.0.0", "-m", "test"]
+    entrypoint: ["node", "./build/cli.node.js", "-i", "5888", "-h", "0.0.0.0", "-m", "test", "--db=/ethereum_data"]
     hostname: ganache
+    volumes:
+      - ./.ethereum_data:/ethereum_data
     ports:
       - "8545:8545"
     logging:
