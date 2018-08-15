@@ -27,8 +27,11 @@ def listen_ethereum_ipfs_hash_storage():
         block_hash = entry['blockHash'].hex()
         block_number = int(entry['blockNumber'])
         entry_args = entry['args']
-        ipfs_hash = entry_args['ipfsHash'].decode()
-        granted_to_eth = entry_args['grantedTo']
+        meta_ipfs_hash = entry_args.get('meta_ipfs_hash', b'').decode()
+        granted_to_eth = entry_args.get('granted_to', '')
+        if not meta_ipfs_hash or not granted_to_eth:
+            continue
+
         try:
             granted_to = User.objects.get(username=granted_to_eth.lower())
         except User.DoesNotExist:
@@ -39,7 +42,7 @@ def listen_ethereum_ipfs_hash_storage():
             block_hash=block_hash,
             block_number=block_number,
             granted_to=granted_to,
-            meta_ipfs_hash=ipfs_hash)
+            meta_ipfs_hash=meta_ipfs_hash)
 
         if block_number > last_block:
             redis_db.set('_verification_filter_block', block_number)

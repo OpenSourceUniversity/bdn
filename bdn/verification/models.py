@@ -8,8 +8,8 @@ from bdn.profiles.models import ProfileType
 class Verification(m.Model):
     id = m.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     state = FSMField(default='open')
-    tx_hash = m.CharField(max_length=70)
-    block_hash = m.CharField(max_length=70)
+    tx_hash = m.CharField(max_length=70, null=True, blank=True)
+    block_hash = m.CharField(max_length=70, null=True, blank=True)
     block_number = m.IntegerField(default=0)
     certificate = m.ForeignKey(
         'certificate.Certificate', on_delete=m.SET_NULL, null=True)
@@ -22,8 +22,9 @@ class Verification(m.Model):
     verifier_type = m.PositiveSmallIntegerField(
         default=ProfileType.LEARNER,
         choices=[(_, _.value) for _ in ProfileType])
-    meta_ipfs_hash = m.CharField(max_length=50)
+    meta_ipfs_hash = m.CharField(max_length=50, null=True, blank=True)
     date_created = m.DateTimeField(auto_now_add=True)
+    date_last_modified = m.DateTimeField(auto_now=True)
 
     def __str__(self):
         return self.tx_hash
