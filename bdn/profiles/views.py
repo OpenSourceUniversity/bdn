@@ -8,7 +8,7 @@ from rest_framework.permissions import IsAuthenticated
 from bdn.auth.signature_authentication import SignatureAuthentication
 from rest_framework.response import Response
 from bdn.auth.utils import get_auth_eth_address
-from .models import Profile
+from .models import Profile, ProfileType
 from bdn.course.models import Course
 from bdn.provider.models import Provider
 from bdn.certificate.models import Certificate
@@ -141,16 +141,16 @@ class ProfileViewSet(viewsets.ModelViewSet):
 
     def create(self, request, pk=None):
         eth_address = get_auth_eth_address(request.META)
-        profile_type = request.META.get('HTTP_PROFILE_TYPE')
+        profile_type = int(request.META.get('HTTP_PROFILE_TYPE'))
         user = User.objects.get(username=eth_address)
         profile = Profile.objects.get(user=user)
         data = request.data.copy()
-        if profile_type == '1':
+        if profile_type == ProfileType.LEARNER:
             if data['learner_avatar'] is None:
                 data['learner_avatar'] = profile.learner_avatar
             serializer = LearnerProfileSerializer(
                 data=data, instance=profile, partial=True)
-        elif profile_type == '2':
+        elif profile_type == ProfileType.ACADEMY:
             if data['academy_logo'] is None:
                 data['academy_logo'] = profile.academy_logo
             serializer = AcademyProfileSerializer(
@@ -175,7 +175,7 @@ class ProfileViewSet(viewsets.ModelViewSet):
                 else:
                     return Response(provider_serializer.errors,
                                     status=status.HTTP_400_BAD_REQUEST)
-        elif profile_type == '3':
+        elif profile_type == ProfileType.BUSINESS:
             if data['company_logo'] is None:
                     data['company_logo'] = profile.company_logo
             serializer = CompanyProfileSerializer(

@@ -1,5 +1,6 @@
 import logging
 from celery import shared_task
+from django.contrib.auth.models import User
 from bdn.contract import contract
 from bdn.redis import get_redis
 from bdn.verification.models import Verification
@@ -27,11 +28,18 @@ def listen_ethereum_ipfs_hash_storage():
         block_number = int(entry['blockNumber'])
         entry_args = entry['args']
         ipfs_hash = entry_args['ipfsHash'].decode()
-        granted_to = entry_args['grantedTo']
+        granted_to_eth = entry_args['grantedTo']
+        try:
+            granted_to = User.objects.get(username=granted_to_eth.lower())
+        except User.DoesNotExist:
+            granted_to = None
 
         verification, _ = Verification.objects.get_or_create(
-            tx_hash=tx_hash, block_hash=block_hash, block_number=block_number,
-            granted_to=granted_to, ipfs_hash=ipfs_hash)
+            tx_hash=tx_hash,
+            block_hash=block_hash,
+            block_number=block_number,
+            granted_to=granted_to,
+            meta_ipfs_hash=ipfs_hash)
 
         if block_number > last_block:
             redis_db.set('_verification_filter_block', block_number)
