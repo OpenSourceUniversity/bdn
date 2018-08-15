@@ -3,7 +3,7 @@ from celery import shared_task
 from bdn.contract import contract
 from bdn.redis import get_redis
 from bdn.verification.models import Verification
-from . import perform_ipfs_meta_verification
+from .perform_ipfs_meta_verification import perform_ipfs_meta_verification
 
 
 logger = logging.getLogger(__name__)
