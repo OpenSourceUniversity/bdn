@@ -1,6 +1,6 @@
 import logging
 from celery import shared_task
-from django.contrib.auth.models import User
+from bdn.auth.models import User
 from bdn.contract import contract
 from bdn.redis import get_redis
 from bdn.verification.models import Verification

@@ -1,4 +1,4 @@
-from django.contrib.auth.models import User
+from bdn.auth.models import User
 from rest_framework import authentication
 from rest_framework import exceptions
 from bdn.auth.utils import recover_to_addr

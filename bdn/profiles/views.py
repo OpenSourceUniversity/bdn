@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 
 from rest_framework import status, viewsets
 from rest_framework.decorators import detail_route, list_route
-from django.contrib.auth.models import User
+from bdn.auth.models import User
 from rest_framework.permissions import IsAuthenticated
 from bdn.auth.signature_authentication import SignatureAuthentication
 from rest_framework.response import Response

@@ -1,6 +1,6 @@
 from enum import IntEnum
+from django.conf import settings
 from django.db import models as m
-from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
@@ -19,7 +19,7 @@ class Profile(m.Model):
     active_profile_type = m.PositiveSmallIntegerField(
         default=ProfileType.LEARNER,
         choices=[(_, _.value) for _ in ProfileType])
-    user = m.OneToOneField(User, on_delete=m.CASCADE)
+    user = m.OneToOneField(settings.AUTH_USER_MODEL, on_delete=m.CASCADE)
     first_name = m.CharField(max_length=70, blank=True, null=True)
     last_name = m.CharField(max_length=70, blank=True, null=True)
     learner_email = m.EmailField(max_length=70, blank=True, null=True)
@@ -49,12 +49,12 @@ class Profile(m.Model):
         return self.user.username
 
 
-@receiver(post_save, sender=User)
+@receiver(post_save, sender=settings.AUTH_USER_MODEL)
 def create_user_profile(sender, instance, created, **kwargs):
     if created:
         Profile.objects.create(user=instance)
 
 
-@receiver(post_save, sender=User)
+@receiver(post_save, sender=settings.AUTH_USER_MODEL)
 def save_user_profile(sender, instance, **kwargs):
     instance.profile.save()

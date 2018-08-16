@@ -2,7 +2,7 @@ from uuid import UUID
 from django.db.models import Q
 from rest_framework import status, viewsets
 from rest_framework.decorators import list_route, detail_route
-from django.contrib.auth.models import User
+from bdn.auth.models import User
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response

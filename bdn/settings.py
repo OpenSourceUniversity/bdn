@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'haystack',
     'rest_framework',
     'corsheaders',
+    'bdn.auth',
     'bdn.industry',
     'bdn.certificate',
     'bdn.company',
@@ -150,6 +151,9 @@ REST_FRAMEWORK = {
         'bdn.auth.signature_authentication.SignatureAuthentication',
     )
 }
+
+
+AUTH_USER_MODEL = 'bdn_auth.User'
 
 
 # Password validation

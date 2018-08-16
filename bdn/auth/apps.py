@@ -2,4 +2,5 @@ from django.apps import AppConfig
 
 
 class AuthConfig(AppConfig):
-    name = 'auth'
+    name = 'bdn.auth'
+    label = 'bdn_auth'

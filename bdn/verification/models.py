@@ -27,7 +27,7 @@ class Verification(m.Model):
     date_last_modified = m.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return self.tx_hash
+        return self.tx_hash or ''
 
     @transition(field=state, source=['requested', 'pending'], target='open')
     def move_to_open(self):
