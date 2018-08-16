@@ -8,9 +8,11 @@ from rest_framework.response import Response
 from rest_framework.decorators import detail_route, list_route
 from bdn.auth.signature_authentication import SignatureAuthentication
 from bdn.auth.utils import get_auth_eth_address
+from bdn.auth.models import User
 from bdn.provider.models import Provider
 from bdn.skill.models import Skill
 from bdn.industry.models import Industry
+from bdn.verification.models import Verification
 from .models import Certificate
 from .serializers import (CertificateSerializer,
                           CertificateViewProfileSerializer)
@@ -25,11 +27,19 @@ class CertificateViewSet(viewsets.ModelViewSet):
     def retrieve(self, request, pk=None):
         eth_address = get_auth_eth_address(request.META)
         certificate = Certificate.objects.get(id=pk)
-        if (certificate.academy_address == eth_address or
-                certificate.learner_eth_address == eth_address):
+        if (certificate.learner_eth_address == eth_address):
             serializer = CertificateSerializer(certificate)
             return Response(serializer.data)
-        return self.deny()
+        try:
+            user = User.objects.get(username=eth_address)
+        except User.DoesNotExist:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+        try:
+            Verification.objects.get(verifier=user, certificate=certificate)
+        except Verification.DoesNotExist:
+            return self.deny()
+        serializer = CertificateSerializer(certificate)
+        return Response(serializer.data)
 
     def update(self, request):
         return self.deny()
@@ -63,8 +73,16 @@ class CertificateViewSet(viewsets.ModelViewSet):
     @list_route(methods=['get'])
     def get_certificates_by_academy(self, request):
         eth_address = get_auth_eth_address(request.META)
-        certificates = Certificate.objects.filter(
-            academy_address=eth_address).order_by('verified', 'course_title')
+        try:
+            user = User.objects.get(username=eth_address)
+        except User.DoesNotExist:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+        verifications = Verification.objects.filter(
+            verifier=user).order_by('state')
+        certificates = []
+        for verification in verifications:
+            if verification.certificate:
+                certificates.append(verification.certificate)
         serializer = CertificateSerializer(certificates, many=True)
         return Response(serializer.data)
 
@@ -81,53 +99,64 @@ class CertificateViewSet(viewsets.ModelViewSet):
     def update_certificate_by_id(self, request):
         eth_address = get_auth_eth_address(request.META)
         certificate = Certificate.objects.get(id=request.data.get('id'))
+        try:
+            user = User.objects.get(username=eth_address)
+        except User.DoesNotExist:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+        try:
+            Verification.objects.get(verifier=user, certificate=certificate)
+        except Verification.DoesNotExist:
+            return self.deny()
+        skills = self._normalized_skills(request.data.get('skills'))
+        industries = Industry.objects.filter(
+            name__in=request.data.get('industries'))
         data = request.data.copy()
         industries = Industry.objects.filter(
             name__in=request.data.get('industries'))
-        data['academy_address'] = certificate.academy_address
         data['learner_eth_address'] = certificate.learner_eth_address
         data['ipfs_hash'] = certificate.ipfs_hash
         data['user_eth_address'] = certificate.user_eth_address
-        data['skills'] = self._normalized_skills(request.data.get('skills'))
-        data['industries'] = industries
         expiration_date = self._normalized_date(data['expiration_date'])
         data['expiration_date'] = expiration_date
         provider = Provider.objects.filter(eth_address=eth_address).first()
-
-        if certificate.academy_address == eth_address:
-            serializer = CertificateSerializer(
-                data=data, instance=certificate, partial=True)
-            if serializer.is_valid():
-                serializer.save(provider=provider)
-                return Response({'status': 'ok'})
-            else:
-                return Response(serializer.errors,
-                                status=status.HTTP_400_BAD_REQUEST)
+        serializer = CertificateSerializer(
+            data=data, instance=certificate, partial=True)
+        if serializer.is_valid():
+            serializer.save(
+                provider=provider, skills=skills, industries=industries)
+            return Response({'status': 'ok'})
         else:
-            return self.deny()
+            return Response(serializer.errors,
+                            status=status.HTTP_400_BAD_REQUEST)
+    # Depricated
 
-    @list_route(methods=['post'])
-    def mass_verification(self, request):
-        eth_address = get_auth_eth_address(request.META)
-        ids = filter(lambda i: bool(i), request.data.get('ids').split('|'))
-        certificates = Certificate.objects.filter(id__in=ids)
-        for certificate in certificates:
-            if certificate.academy_address == eth_address:
-                certificate.verified = True
-                certificate.save()
-            else:
-                return self.deny()
-        return Response({'status': 'ok'})
+    # @list_route(methods=['post'])
+    # def mass_verification(self, request):
+    #     eth_address = get_auth_eth_address(request.META)
+    #     ids = filter(lambda i: bool(i), request.data.get('ids').split('|'))
+    #     certificates = Certificate.objects.filter(id__in=ids)
+    #     for certificate in certificates:
+    #         if certificate.academy_address == eth_address:
+    #             certificate.verified = True
+    #             certificate.save()
+    #         else:
+    #             return self.deny()
+    #     return Response({'status': 'ok'})
 
     @list_route(methods=['post'])
     def delete_by_id(self, request):
         eth_address = get_auth_eth_address(request.META)
         certificate = Certificate.objects.get(id=str(request.data.get('id')))
-        if certificate.academy_address == eth_address:
-            certificate.delete()
-            return Response({'status': 'ok'})
-        else:
+        try:
+            user = User.objects.get(username=eth_address)
+        except User.DoesNotExist:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+        try:
+            Verification.objects.get(verifier=user, certificate=certificate)
+        except Verification.DoesNotExist:
             return self.deny()
+        certificate.delete()
+        return Response({'status': 'ok'})
 
     def create(self, request):
         eth_address = get_auth_eth_address(request.META)

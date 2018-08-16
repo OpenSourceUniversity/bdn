@@ -9,7 +9,6 @@ class Certificate(m.Model):
     id = m.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     user_eth_address = m.CharField(max_length=42, default='None')
     academy_title = m.CharField(max_length=70)
-    academy_address = m.CharField(max_length=42, blank=True, null=True)
     provider = m.ForeignKey(
         Provider, blank=True, null=True, on_delete=m.SET_NULL)
     academy_link = m.URLField()
