@@ -18,7 +18,7 @@ class ProfileType(IntEnum):
 class Profile(m.Model):
     active_profile_type = m.PositiveSmallIntegerField(
         default=ProfileType.LEARNER,
-        choices=[(_, _.value) for _ in ProfileType])
+        choices=[(_.value, _) for _ in ProfileType])
     user = m.OneToOneField(settings.AUTH_USER_MODEL, on_delete=m.CASCADE)
     first_name = m.CharField(max_length=70, blank=True, null=True)
     last_name = m.CharField(max_length=70, blank=True, null=True)
