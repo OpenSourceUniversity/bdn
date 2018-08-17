@@ -20,24 +20,29 @@ class VerificationViewSet(viewsets.ModelViewSet):
     queryset = Verification.objects.none()
 
     def create(self, request):
+        data = request.data.copy()
         eth_address = get_auth_eth_address(request.META)
         try:
-            user = User.objects.get(username=eth_address)
+            granted_to = User.objects.get(username__iexact=eth_address)
+            verifier = User.objects.get(username__iexact=data['verifier'])
         except User.DoesNotExist:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
-        data = request.data.copy()
+            return Response({
+                'error': 'User not found',
+            }, status=status.HTTP_400_BAD_REQUEST)
+
         data['state'] = 'requested'
-        data['granted_to'] = user.id
-        try:
-            data['verifier'] = User.objects.get(
-                username=str(request.data.get('verifier').lower())).id
-        except User.DoesNotExist:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
-        try:
-            data['certificate'] = Certificate.objects.get(
-                id=request.data.get('id')).id
-        except Certificate.DoesNotExist:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
+        data['granted_to'] = granted_to.id
+        data['verifier'] = verifier.id
+
+        duplicate_verification = Verification.objects.filter(
+            granted_to=granted_to,
+            verifier=verifier, certificate__id=data['certificate']).first()
+        if duplicate_verification:
+            return Response({
+                'error': 'Duplicate verification request found',
+                'id': duplicate_verification.id,
+            }, status=status.HTTP_400_BAD_REQUEST)
+
         serializer = VerificationSerializer(data=data)
         if serializer.is_valid():
             serializer.save()

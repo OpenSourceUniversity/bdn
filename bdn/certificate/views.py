@@ -111,8 +111,6 @@ class CertificateViewSet(viewsets.ModelViewSet):
         industries = Industry.objects.filter(
             name__in=request.data.get('industries'))
         data = request.data.copy()
-        industries = Industry.objects.filter(
-            name__in=request.data.get('industries'))
         data['learner_eth_address'] = certificate.learner_eth_address
         data['ipfs_hash'] = certificate.ipfs_hash
         data['user_eth_address'] = certificate.user_eth_address
