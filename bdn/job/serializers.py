@@ -28,7 +28,6 @@ class JobSerializer(serializers.ModelSerializer):
             'closes',
             'experience',
             'hours',
-            'job_type',
             'languages',
             'is_featured',
         )
