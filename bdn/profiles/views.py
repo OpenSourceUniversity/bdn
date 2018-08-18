@@ -139,6 +139,32 @@ class ProfileViewSet(viewsets.ModelViewSet):
             newdata.append(data)
         return Response(newdata)
 
+    @list_route(methods=['post'])
+    def set_active_profile(self, request):
+        eth_address = get_auth_eth_address(request.META)
+        try:
+            user = User.objects.get(username=eth_address)
+        except User.DoesNotExist:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+        profile = Profile.objects.get(user=user)
+        profile_type = int(request.META.get('HTTP_PROFILE_TYPE'))
+        profile.active_profile_type = profile_type
+        profile.save()
+        print(profile_type)
+        return Response({'status': 'ok'})
+
+    @list_route(methods=['get'])
+    def get_active_profile(self, request):
+        eth_address = get_auth_eth_address(request.META)
+        try:
+            user = User.objects.get(username=eth_address)
+        except User.DoesNotExist:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+        profile = Profile.objects.get(user=user)
+        print(profile.active_profile_type)
+        return Response(
+            {'active_profile_type': profile.active_profile_type})
+
     def create(self, request, pk=None):
         eth_address = get_auth_eth_address(request.META)
         profile_type = int(request.META.get('HTTP_PROFILE_TYPE'))
