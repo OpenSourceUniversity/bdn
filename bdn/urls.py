@@ -33,7 +33,7 @@ router.register(r'profile', ProfileViewSet)
 router.register(r'industries', IndustryViewSet, base_name='Industry')
 router.register(r'skills', SkillViewSet, base_name='Skill')
 router.register(r'jobs', JobViewSet)
-router.register(r'verification', VerificationViewSet)
+router.register(r'verifications', VerificationViewSet)
 
 
 urlpatterns = [

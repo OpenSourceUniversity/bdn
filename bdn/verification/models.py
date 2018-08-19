@@ -44,3 +44,7 @@ class Verification(m.Model):
     @transition(field=state, source='pending', target='revoked')
     def move_to_revoked(self):
         pass
+
+    @transition(field=state, source=['requested', 'open'], target='rejected')
+    def move_to_rejected(self):
+        pass

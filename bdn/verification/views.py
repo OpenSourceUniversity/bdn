@@ -6,7 +6,6 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.decorators import detail_route, list_route
 from bdn.auth.models import User
-from bdn.certificate.models import Certificate
 from bdn.auth.signature_authentication import SignatureAuthentication
 from bdn.auth.utils import get_auth_eth_address
 from .models import Verification
@@ -18,6 +17,83 @@ class VerificationViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated,)
     serializer_class = VerificationSerializer
     queryset = Verification.objects.none()
+
+    def update(self, request):
+        return self.deny()
+
+    def partial_update(self, request):
+        return self.deny()
+
+    def destroy(self, request):
+        return self.deny()
+
+    @staticmethod
+    def deny():
+        return Response({
+                    'status': 'denied'}, status=status.HTTP_401_UNAUTHORIZED)
+
+    def retrieve(self, request, pk=None):
+        eth_address = get_auth_eth_address(request.META)
+        try:
+            verification = Verification.objects.get(id=pk)
+        except Verification.DoesNotExist:
+            return Response({
+                'error': 'User not found',
+            }, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            user = User.objects.get(username=eth_address)
+        except User.DoesNotExist:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+        if (verification.granted_to == user or verification.verifier == user):
+            serializer = VerificationSerializer(verification)
+            return Response(serializer.data)
+        return self.deny()
+
+    def list(self, request):
+        eth_address = get_auth_eth_address(request.META)
+        try:
+            user = User.objects.get(username=eth_address)
+        except User.DoesNotExist:
+            return Response({
+                'error': 'User not found',
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        verifications = Verification.objects.filter(
+            verifier=user).order_by('state')
+        serializer = VerificationSerializer(verifications, many=True)
+        return Response(serializer.data)
+
+    @list_route(methods=['post'])
+    def reject_by_id(self, request):
+        eth_address = get_auth_eth_address(request.META)
+        try:
+            user = User.objects.get(username=eth_address)
+        except User.DoesNotExist:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+        try:
+            verification = Verification.objects.get(
+                verifier=user, id=str(request.data.get('id')))
+        except Verification.DoesNotExist:
+            return self.deny()
+        verification.state = 'rejected'
+        verification.save()
+        return Response({'status': 'ok'})
+
+    @list_route(methods=['post'])
+    def set_pending_by_id(self, request):
+        eth_address = get_auth_eth_address(request.META)
+        try:
+            user = User.objects.get(username=eth_address)
+        except User.DoesNotExist:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+        try:
+            verification = Verification.objects.get(
+                verifier=user, id=str(request.data.get('id')))
+        except Verification.DoesNotExist:
+            return self.deny()
+        verification.state = 'pending'
+        verification.save()
+        return Response({'status': 'ok'})
 
     def create(self, request):
         data = request.data.copy()
