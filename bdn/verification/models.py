@@ -21,7 +21,7 @@ class Verification(m.Model):
         related_name='granted_verifications')
     verifier_type = m.PositiveSmallIntegerField(
         default=ProfileType.LEARNER,
-        choices=[(_, _.value) for _ in ProfileType])
+        choices=[(_.value, _.name) for _ in ProfileType])
     meta_ipfs_hash = m.CharField(max_length=50, null=True, blank=True)
     date_created = m.DateTimeField(auto_now_add=True)
     date_last_modified = m.DateTimeField(auto_now=True)
