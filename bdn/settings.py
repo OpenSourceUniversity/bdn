@@ -58,6 +58,7 @@ INSTALLED_APPS = [
     'bdn.profiles',
     'bdn.job',
     'bdn.verification',
+    'bdn.notification',
 ]
 
 MIDDLEWARE = [
