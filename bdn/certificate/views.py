@@ -94,10 +94,10 @@ class CertificateViewSet(viewsets.ModelViewSet):
     #             return self.deny()
     #     return Response({'status': 'ok'})
 
-    @list_route(methods=['post'])
-    def delete_by_id(self, request):
+    @detail_route(methods=['post'])
+    def delete_by_id(self, request, pk=None):
         eth_address = get_auth_eth_address(request.META)
-        certificate = Certificate.objects.get(id=str(request.data.get('id')))
+        certificate = Certificate.objects.get(id=str(pk))
         if certificate.learner_eth_address == eth_address:
             certificate.delete()
             return Response({'status': 'ok'})
