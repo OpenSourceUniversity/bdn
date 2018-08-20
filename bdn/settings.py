@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django_celery_results',
     'django_celery_beat',
+    'channels',
     'ajax_select',
     'haystack',
     'rest_framework',
@@ -100,7 +101,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'bdn.wsgi.application'
+ASGI_APPLICATION = "bdn.routing.application"
 
 
 # Database
