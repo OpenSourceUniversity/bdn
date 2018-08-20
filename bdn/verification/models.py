@@ -16,6 +16,9 @@ class Verification(m.Model):
     granted_to = m.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=m.SET_NULL, null=True,
         related_name='received_verifications')
+    granted_to_type = m.PositiveSmallIntegerField(
+        default=ProfileType.LEARNER,
+        choices=[(_.value, _.name) for _ in ProfileType])
     verifier = m.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=m.SET_NULL, null=True,
         related_name='granted_verifications')

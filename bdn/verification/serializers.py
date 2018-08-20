@@ -13,5 +13,20 @@ class VerificationSerializer(serializers.ModelSerializer):
             'certificate',
             'state',
             'granted_to',
+            'verifier'
+        )
+
+
+class VerificationCreateSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Verification
+        fields = (
+            'id',
+            'certificate',
+            'state',
+            'granted_to',
+            'granted_to_type',
             'verifier',
+            'verifier_type',
         )
