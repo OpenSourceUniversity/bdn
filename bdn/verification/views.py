@@ -5,6 +5,7 @@ from rest_framework import viewsets, status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.decorators import detail_route
+from notifications.signals import notify
 from bdn.auth.models import User
 from bdn.auth.signature_authentication import SignatureAuthentication
 from bdn.auth.utils import get_auth_eth_address
@@ -132,7 +133,17 @@ class VerificationViewSet(viewsets.ModelViewSet):
 
         serializer = VerificationCreateSerializer(data=data)
         if serializer.is_valid():
-            serializer.save()
+            verification = serializer.save()
+            notify.send(
+                granted_to,
+                recipient=verifier,
+                verb='requested',
+                action_object=verification,
+                **{
+                    'granted_to_type': data['granted_to_type'],
+                    'verifier_type': data['verifier_type'],
+                }
+            )
             response = Response(serializer.data)
         else:
             response = Response(
