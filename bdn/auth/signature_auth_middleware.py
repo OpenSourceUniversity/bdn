@@ -1,5 +1,6 @@
 from channels.auth import AuthMiddlewareStack
 from django.contrib.auth.models import AnonymousUser
+from django.db import close_old_connections
 from bdn.auth.models import User
 from bdn.auth.utils import recover_to_addr
 
@@ -23,6 +24,7 @@ class SignatureAuthMiddleware:
             except ValueError:
                 pass
         scope['user'] = user
+        close_old_connections()
         return self.inner(scope)
 
 
