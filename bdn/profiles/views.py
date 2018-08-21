@@ -45,7 +45,12 @@ class ProfileViewSet(viewsets.ModelViewSet):
 
     def list(self, request):
         eth_address = get_auth_eth_address(request.META)
-        user = User.objects.get(username=eth_address)
+        try:
+            user = User.objects.get(username=eth_address)
+        except User.DoesNotExist:
+            return Response({
+                'error': 'User not found',
+            }, status=status.HTTP_400_BAD_REQUEST)
         profile = Profile.objects.get(user=user)
         serializer = ProfileSerializer(profile)
         return Response(serializer.data)
@@ -168,7 +173,12 @@ class ProfileViewSet(viewsets.ModelViewSet):
     def create(self, request, pk=None):
         eth_address = get_auth_eth_address(request.META)
         profile_type = int(request.META.get('HTTP_PROFILE_TYPE'))
-        user = User.objects.get(username=eth_address)
+        try:
+            user = User.objects.get(username=eth_address)
+        except User.DoesNotExist:
+            return Response({
+                'error': 'User not found',
+            }, status=status.HTTP_400_BAD_REQUEST)
         profile = Profile.objects.get(user=user)
         data = request.data.copy()
         if profile_type == ProfileType.LEARNER:

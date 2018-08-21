@@ -8,7 +8,7 @@ from rest_framework.decorators import detail_route
 from bdn.auth.models import User
 from bdn.auth.signature_authentication import SignatureAuthentication
 from bdn.auth.utils import get_auth_eth_address
-from bdn.profiles.models import ProfileType
+from bdn.profiles.models import Profile
 from .models import Verification
 from .serializers import VerificationSerializer, VerificationCreateSerializer
 
@@ -39,7 +39,7 @@ class VerificationViewSet(viewsets.ModelViewSet):
             verification = Verification.objects.get(id=pk)
         except Verification.DoesNotExist:
             return Response({
-                'error': 'User not found',
+                'error': 'Verification not found',
             }, status=status.HTTP_400_BAD_REQUEST)
         try:
             user = User.objects.get(username=eth_address)
@@ -58,9 +58,15 @@ class VerificationViewSet(viewsets.ModelViewSet):
             return Response({
                 'error': 'User not found',
             }, status=status.HTTP_400_BAD_REQUEST)
-
+        try:
+            profile = Profile.objects.get(user=user)
+        except User.DoesNotExist:
+            return Response({
+                'error': 'Profile not found',
+            }, status=status.HTTP_400_BAD_REQUEST)
         verifications = Verification.objects.filter(
-            verifier=user, certificate__isnull=False).order_by('state')
+            verifier=user, certificate__isnull=False,
+            verifier_type=profile.active_profile_type).order_by('state')
         serializer = VerificationSerializer(verifications, many=True)
         return Response(serializer.data)
 

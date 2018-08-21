@@ -39,8 +39,18 @@ class JobViewSet(viewsets.ModelViewSet):
                     'status': 'denied'}, status=status.HTTP_401_UNAUTHORIZED)
 
     def retrieve(self, request, pk=None):
-        job = Job.objects.get(id=pk)
-        user = User.objects.get(username=job.company.eth_address)
+        try:
+            job = Job.objects.get(id=pk)
+        except Job.DoesNotExist:
+            return Response({
+                'error': 'Job not found',
+            }, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            user = User.objects.get(username=job.company.eth_address)
+        except User.DoesNotExist:
+            return Response({
+                'error': 'User not found',
+            }, status=status.HTTP_400_BAD_REQUEST)
         profile = Profile.objects.get(user=user)
         serializerProfile = CompanyProfileSerializer(profile)
         serializerJob = JobSerializer(job)
@@ -100,7 +110,12 @@ class JobViewSet(viewsets.ModelViewSet):
     def get_by_id(self, request, pk=None):
         eth_address = get_auth_eth_address(request.META)
         job_id = pk
-        job_position = Job.objects.get(id=job_id)
+        try:
+            job_position = Job.objects.get(id=job_id)
+        except Job.DoesNotExist:
+            return Response({
+                'error': 'Job not found',
+            }, status=status.HTTP_400_BAD_REQUEST)
         if job_position.company.eth_address == eth_address:
             serializer = self.get_serializer(job_position)
             return Response(serializer.data, status=status.HTTP_200_OK)
@@ -112,7 +127,12 @@ class JobViewSet(viewsets.ModelViewSet):
     def edit_by_id(self, request, pk=None):
         eth_address = get_auth_eth_address(request.META)
         job_id = pk
-        job_position = Job.objects.get(id=job_id)
+        try:
+            job_position = Job.objects.get(id=job_id)
+        except Job.DoesNotExist:
+            return Response({
+                'error': 'Job not found',
+            }, status=status.HTTP_400_BAD_REQUEST)
         if job_position.company.eth_address == eth_address:
             serializer = self.get_serializer(
                 data=request.data, instance=job_position, partial=True)
@@ -130,7 +150,12 @@ class JobViewSet(viewsets.ModelViewSet):
     def delete_by_id(self, request, pk=None):
         eth_address = get_auth_eth_address(request.META)
         job_id = pk
-        job_position = Job.objects.get(id=job_id)
+        try:
+            job_position = Job.objects.get(id=job_id)
+        except Job.DoesNotExist:
+            return Response({
+                'error': 'Job not found',
+            }, status=status.HTTP_400_BAD_REQUEST)
         if job_position.company.eth_address == eth_address:
             job_position.delete()
             return Response({'status': 'ok'})
@@ -140,7 +165,12 @@ class JobViewSet(viewsets.ModelViewSet):
 
     def create(self, request, pk=None):
         eth_address = get_auth_eth_address(request.META)
-        company = Company.objects.get(eth_address=eth_address)
+        try:
+            company = Company.objects.get(eth_address=eth_address)
+        except Company.DoesNotExist:
+            return Response({
+                'error': 'Company not found',
+            }, status=status.HTTP_400_BAD_REQUEST)
         skills_post = request.data.get('skills')
         skills_lower = []
         for skill in skills_post:
