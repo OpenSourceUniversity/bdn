@@ -7,14 +7,10 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('job', '0001_initial'),
+        ('job', '0002_auto_20180820_0901'),
     ]
 
     operations = [
-        migrations.RemoveField(
-            model_name='job',
-            name='job_type',
-        ),
         migrations.AlterField(
             model_name='job',
             name='experience',

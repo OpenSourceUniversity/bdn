@@ -7,13 +7,8 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('verification', '0001_initial'),
+        ('verification', '0002_auto_20180820_0904'),
     ]
 
     operations = [
-        migrations.AlterField(
-            model_name='verification',
-            name='verifier_type',
-            field=models.PositiveSmallIntegerField(choices=[(bdn.profiles.models.ProfileType(1), 1), (bdn.profiles.models.ProfileType(2), 2), (bdn.profiles.models.ProfileType(3), 3)], default=bdn.profiles.models.ProfileType(2)),
-        ),
     ]
