@@ -1,8 +1,13 @@
+import logging
+from urllib.parse import parse_qsl
 from channels.auth import AuthMiddlewareStack
 from django.contrib.auth.models import AnonymousUser
 from django.db import close_old_connections
 from bdn.auth.models import User
 from bdn.auth.utils import recover_to_addr
+
+
+logger = logging.getLogger(__name__)
 
 
 class SignatureAuthMiddleware:
@@ -11,20 +16,28 @@ class SignatureAuthMiddleware:
         self.inner = inner
 
     def __call__(self, scope):
-        headers = dict(scope['headers'])
+        querystring = scope['query_string'].decode()
+        query_params = dict(parse_qsl(querystring))
+        eth_address = query_params.get('auth_eth_address')
+        auth_signature = query_params.get('auth_signature')
         user = AnonymousUser()
-        if b'auth_signature' in headers and b'auth_eth_address' in headers:
-            signature = headers['auth_signature'].decode()
-            eth_address = headers['auth_eth_address'].decode()
+
+        if auth_signature and eth_address:
             try:
-                recovered_eth_address = recover_to_addr(eth_address, signature)
+                recovered_eth_address = recover_to_addr(
+                    eth_address, auth_signature)
                 if eth_address.lower() == recovered_eth_address[2:].lower():
                     user, _ = User.objects.get_or_create(
                         username=recovered_eth_address.lower())
+                    logger.info('Authenticating {}'.format(user.username))
             except ValueError:
-                pass
+                logger.warning('Could not authenticate {}'.format(eth_address))
+            finally:
+                close_old_connections()
+        else:
+            logger.warning('No auth parameters provided to WebSocket')
+
         scope['user'] = user
-        close_old_connections()
         return self.inner(scope)
 
 

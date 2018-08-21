@@ -11,23 +11,4 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RemoveField(
-            model_name='job',
-            name='job_type',
-        ),
-        migrations.AlterField(
-            model_name='job',
-            name='experience',
-            field=models.CharField(blank=True, max_length=130, null=True),
-        ),
-        migrations.AlterField(
-            model_name='job',
-            name='industries',
-            field=models.ManyToManyField(blank=True, to='industry.Industry'),
-        ),
-        migrations.AlterField(
-            model_name='job',
-            name='languages',
-            field=django.contrib.postgres.fields.ArrayField(base_field=models.CharField(blank=True, max_length=70, null=True), default=[], size=None),
-        ),
     ]
