@@ -43,6 +43,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django_celery_results',
     'django_celery_beat',
+    'notifications',
+    'bdn.notifications_extensions',
     'channels',
     'ajax_select',
     'haystack',
@@ -58,7 +60,6 @@ INSTALLED_APPS = [
     'bdn.profiles',
     'bdn.job',
     'bdn.verification',
-    'bdn.notification',
 ]
 
 MIDDLEWARE = [
