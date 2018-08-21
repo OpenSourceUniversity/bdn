@@ -13,7 +13,7 @@ class VerificationSerializer(serializers.ModelSerializer):
             'certificate',
             'state',
             'granted_to',
-            'verifier'
+            'verifier',
         )
 
 
