@@ -7,7 +7,7 @@ from .serializers import NotificationSerializer
 
 
 def notification_saved(sender, instance, created, **kwargs):
-    if created or True:
+    if created:
         channel_layer = get_channel_layer()
         serializer = NotificationSerializer(instance)
         recipient = instance.recipient
