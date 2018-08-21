@@ -38,8 +38,18 @@ class CourseViewSet(viewsets.ModelViewSet):
                     'status': 'denied'}, status=status.HTTP_401_UNAUTHORIZED)
 
     def retrieve(self, request, pk=None):
-        course = Course.objects.get(id=pk)
-        user = User.objects.get(username=course.provider.eth_address)
+        try:
+            course = Course.objects.get(id=pk)
+        except Course.DoesNotExist:
+            return Response({
+                'error': 'Course not found',
+            }, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            user = User.objects.get(username=course.provider.eth_address)
+        except User.DoesNotExist:
+            return Response({
+                'error': 'User not found',
+            }, status=status.HTTP_400_BAD_REQUEST)
         profile = Profile.objects.get(user=user)
         serializerProfile = AcademyProfileSerializer(profile)
         serializerCourse = CourseSerializer(course)
@@ -113,7 +123,12 @@ class CourseViewSet(viewsets.ModelViewSet):
     def get_by_id(self, request, pk=None):
         eth_address = get_auth_eth_address(request.META)
         course_id = pk
-        course = Course.objects.get(id=course_id)
+        try:
+            course = Course.objects.get(id=course_id)
+        except Course.DoesNotExist:
+            return Response({
+                'error': 'Course not found',
+            }, status=status.HTTP_400_BAD_REQUEST)
         if course.provider.eth_address == eth_address:
             serializer = self.get_serializer(course)
             return Response(serializer.data, status=status.HTTP_200_OK)
@@ -125,7 +140,12 @@ class CourseViewSet(viewsets.ModelViewSet):
     def edit_by_id(self, request, pk=None):
         eth_address = get_auth_eth_address(request.META)
         course_id = pk
-        course = Course.objects.get(id=course_id)
+        try:
+            course = Course.objects.get(id=course_id)
+        except Course.DoesNotExist:
+            return Response({
+                'error': 'Course not found',
+            }, status=status.HTTP_400_BAD_REQUEST)
         if course.provider.eth_address == eth_address:
             serializer = self.get_serializer(
                 data=request.data, instance=course, partial=True)
@@ -139,7 +159,12 @@ class CourseViewSet(viewsets.ModelViewSet):
 
     def create(self, request, pk=None):
         eth_address = get_auth_eth_address(request.META)
-        provider = Provider.objects.get(eth_address=eth_address)
+        try:
+            provider = Provider.objects.get(eth_address=eth_address)
+        except Provider.DoesNotExist:
+            return Response({
+                'error': 'Provider not found',
+            }, status=status.HTTP_400_BAD_REQUEST)
         skills_post = request.data.get('skills')
         skills_lower = [_.lower() for _ in skills_post]
         skills = Skill.objects.filter(name__in=skills_lower)
@@ -158,7 +183,12 @@ class CourseViewSet(viewsets.ModelViewSet):
     def delete_by_id(self, request, pk=None):
         eth_address = get_auth_eth_address(request.META)
         course_id = pk
-        course = Course.objects.get(id=course_id)
+        try:
+            course = Course.objects.get(id=course_id)
+        except Course.DoesNotExist:
+            return Response({
+                'error': 'Course not found',
+            }, status=status.HTTP_400_BAD_REQUEST)
         if course.provider.eth_address == eth_address:
             course.delete()
             return Response({'status': 'ok'})
