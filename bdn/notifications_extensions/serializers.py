@@ -10,6 +10,8 @@ class NotificationSerializer(serializers.ModelSerializer):
     actor_name = serializers.\
         SerializerMethodField('_actor_name')
 
+    actor_username = serializers.SerializerMethodField('_actor_username')
+
     recipient_active_profile_type = serializers.\
         SerializerMethodField('_recipient_active_profile_type')
 
@@ -30,6 +32,9 @@ class NotificationSerializer(serializers.ModelSerializer):
     def _actor_active_profile_type(self, obj):
         if obj.data:
             return obj.data.get('actor_active_profile_type')
+
+    def _actor_username(self, obj):
+        return obj.actor.username
 
     def _recipient_active_profile_type(self, obj):
         if obj.data:
@@ -60,6 +65,7 @@ class NotificationSerializer(serializers.ModelSerializer):
             'actor_object_id',
             'actor_active_profile_type',
             'actor_name',
+            'actor_username',
             'verb',
             'description',
             'target_content_type',
