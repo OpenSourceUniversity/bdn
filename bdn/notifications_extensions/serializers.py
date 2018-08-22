@@ -1,8 +1,18 @@
+import json
 from rest_framework import serializers
 from notifications.models import Notification
 
 
 class NotificationSerializer(serializers.ModelSerializer):
+    actor_active_profile_type = serializers.\
+        SerializerMethodField('_actor_active_profile_type')
+
+    actor_name = serializers.\
+        SerializerMethodField('_actor_name')
+
+    recipient_active_profile_type = serializers.\
+        SerializerMethodField('_recipient_active_profile_type')
+
     actor_content_type_name = serializers.\
         SerializerMethodField('_actor_content_type_name')
 
@@ -11,6 +21,19 @@ class NotificationSerializer(serializers.ModelSerializer):
 
     target_content_type_name = serializers.\
         SerializerMethodField('_target_content_type_name')
+
+    def _actor_name(self, obj):
+        profile_type = self._actor_active_profile_type(obj)
+        if profile_type:
+            return obj.actor.profile.name_by_profile_type(profile_type)
+
+    def _actor_active_profile_type(self, obj):
+        if obj.data:
+            return obj.data.get('actor_active_profile_type')
+
+    def _recipient_active_profile_type(self, obj):
+        if obj.data:
+            return obj.data.get('recipient_active_profile_type')
 
     def _action_object_content_type_name(self, obj):
         if not obj.action_object_content_type:
@@ -35,6 +58,8 @@ class NotificationSerializer(serializers.ModelSerializer):
             'actor_content_type',
             'actor_content_type_name',
             'actor_object_id',
+            'actor_active_profile_type',
+            'actor_name',
             'verb',
             'description',
             'target_content_type',
@@ -48,4 +73,6 @@ class NotificationSerializer(serializers.ModelSerializer):
             'deleted',
             'data',
             'unread',
+            'timesince',
+            'recipient_active_profile_type',
         )

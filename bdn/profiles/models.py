@@ -48,6 +48,19 @@ class Profile(m.Model):
     def __str__(self):
         return self.user.username
 
+    @property
+    def full_name(self):
+        return '{} {}'.format(self.first_name, self.last_name)
+
+    def name_by_profile_type(self, profile_type):
+        NAME_FIELDS = {
+            ProfileType.LEARNER: 'full_name',
+            ProfileType.ACADEMY: 'academy_name',
+            ProfileType.BUSINESS: 'company_name'
+        }
+        name_field = NAME_FIELDS.get(profile_type)
+        return getattr(self, name_field)
+
 
 @receiver(post_save, sender=settings.AUTH_USER_MODEL)
 def create_user_profile(sender, instance, created, **kwargs):

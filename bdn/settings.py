@@ -134,6 +134,13 @@ HAYSTACK_CONNECTIONS = {
 }
 
 
+# Django notifications
+
+DJANGO_NOTIFICATIONS_CONFIG = {
+    'USE_JSONFIELD': True
+}
+
+
 # Redis
 
 REDIS_HOST = 'redis'

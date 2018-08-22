@@ -134,14 +134,17 @@ class VerificationViewSet(viewsets.ModelViewSet):
         serializer = VerificationCreateSerializer(data=data)
         if serializer.is_valid():
             verification = serializer.save()
+            granted_to_type = int(data['granted_to_type'])
+            verifier_type = int(data['verifier_type'])
+
             notify.send(
                 granted_to,
                 recipient=verifier,
                 verb='requested',
                 action_object=verification,
                 **{
-                    'granted_to_type': data['granted_to_type'],
-                    'verifier_type': data['verifier_type'],
+                    'actor_active_profile_type': granted_to_type,
+                    'recipient_active_profile_type': verifier_type,
                 }
             )
             response = Response(serializer.data)
