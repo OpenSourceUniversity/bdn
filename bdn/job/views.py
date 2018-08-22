@@ -59,9 +59,18 @@ class JobViewSet(viewsets.ModelViewSet):
             'company': serializerProfile.data})
 
     def get_queryset(self):
+        search_query = self.request.GET.get('q', '')
+        if search_query:
+            sqs = SearchQuerySet().filter(title=search_query).models(Job)
+            qs = [
+                _.object
+                for _ in sqs
+            ]
+            return qs
         qs = Job.objects.all()
         qs = qs.filter(self.industry_filter())
-        return qs.filter(self.featured_filter())
+        qs = qs.filter(self.featured_filter())
+        return qs
 
     def industry_filter(self):
         filtered_industries_ids = self.request.query_params.get(
@@ -85,7 +94,7 @@ class JobViewSet(viewsets.ModelViewSet):
     @list_route(methods=['get'])
     def search(self, request):
         query = self.request.GET.get('q', '')
-        sqs = SearchQuerySet().filter(title=query)
+        sqs = SearchQuerySet().filter(title=query).model(Job)
         serializer = self.get_serializer([s.object for s in sqs], many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
