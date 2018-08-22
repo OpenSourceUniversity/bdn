@@ -51,6 +51,9 @@ class NotificationViewSet(viewsets.ModelViewSet):
             .order_by('-timestamp')
         return notifications
 
+    def create(self, request):
+        return self.deny()
+
     def update(self, request):
         return self.deny()
 
