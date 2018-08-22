@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+from collections import OrderedDict
 from rest_framework import viewsets, status
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.permissions import IsAuthenticated
@@ -14,6 +15,19 @@ from .serializers import NotificationSerializer
 class NotificationPagination(LimitOffsetPagination):
     default_limit = 20
     max_limit = 20
+
+    def paginate_queryset(self, queryset, *args, **kwargs):
+        self.unread_count = queryset.filter(unread=True).count()
+        return super().paginate_queryset(queryset, *args, **kwargs)
+
+    def get_paginated_response(self, data):
+        return Response(OrderedDict([
+            ('count', self.count),
+            ('unread_count', self.unread_count),
+            ('next', self.get_next_link()),
+            ('previous', self.get_previous_link()),
+            ('results', data)
+        ]))
 
 
 class NotificationViewSet(viewsets.ModelViewSet):
