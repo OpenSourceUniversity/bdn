@@ -38,12 +38,14 @@ class Profile(m.Model):
     academy_country = m.CharField(max_length=70, blank=True, null=True)
     academy_about = m.TextField(max_length=500, blank=True, null=True)
     academy_logo = m.CharField(max_length=100, blank=True, null=True)
+    academy_verified = m.BooleanField(default=False)
     company_name = m.CharField(max_length=70, blank=True, null=True)
     company_website = m.CharField(max_length=70, blank=True, null=True)
     company_email = m.EmailField(max_length=70, blank=True, null=True)
     company_country = m.CharField(max_length=70, blank=True, null=True)
     company_about = m.TextField(max_length=500, blank=True, null=True)
     company_logo = m.CharField(max_length=100, blank=True, null=True)
+    company_verified = m.BooleanField(default=False)
 
     def __str__(self):
         return self.user.username

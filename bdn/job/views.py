@@ -95,7 +95,6 @@ class JobViewSet(viewsets.ModelViewSet):
     @list_route(methods=['get'])
     def search(self, request):
         query = self.request.GET.get('q', '')
-        print(query)
         sqs = SearchQuerySet().filter(title=query).models(Job)
         serializer = self.get_serializer([s.object for s in sqs], many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
