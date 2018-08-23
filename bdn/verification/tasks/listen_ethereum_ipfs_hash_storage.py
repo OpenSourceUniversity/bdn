@@ -30,6 +30,9 @@ def listen_ethereum_ipfs_hash_storage():
         meta_ipfs_hash = entry_args.get('meta_ipfs_hash', b'').decode()
         granted_to_eth = entry_args.get('granted_to', '')
         if not meta_ipfs_hash or not granted_to_eth:
+            logger.error(
+                "Event triggered without providing IPFS meta hash and "
+                "granted to ETH address")
             continue
 
         try:
