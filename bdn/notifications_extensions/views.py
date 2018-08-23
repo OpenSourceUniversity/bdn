@@ -6,6 +6,7 @@ from rest_framework import viewsets, status
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.decorators import detail_route
 from bdn.auth.signature_authentication import SignatureAuthentication
 from bdn.auth.utils import get_auth_eth_address
 from notifications.models import Notification
@@ -50,6 +51,25 @@ class NotificationViewSet(viewsets.ModelViewSet):
             .filter(recipient__username__iexact=eth_address.lower())\
             .order_by('-timestamp')
         return notifications
+
+    @detail_route(methods=['post'])
+    def toggle_unread(self, request, pk=None):
+        eth_address = get_auth_eth_address(request.META)
+        try:
+            notification = Notification.objects.get(
+                pk=pk, recipient__username__iexact=eth_address)
+            old_unread = notification.unread
+            notification.unread = not notification.unread
+            notification.save()
+            response = Response({
+                'old_unread': old_unread,
+                'new_unread': notification.unread,
+            })
+        except Notification.DoesNotExist:
+            response = Response({
+                'error': 'Notification not found'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        return response
 
     def create(self, request):
         return self.deny()
