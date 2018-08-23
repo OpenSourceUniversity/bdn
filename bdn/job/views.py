@@ -67,6 +67,7 @@ class JobViewSet(viewsets.ModelViewSet):
                 for _ in sqs
             ]
             return qs
+
         qs = Job.objects.all()
         qs = qs.filter(self.industry_filter())
         qs = qs.filter(self.featured_filter())
@@ -94,7 +95,8 @@ class JobViewSet(viewsets.ModelViewSet):
     @list_route(methods=['get'])
     def search(self, request):
         query = self.request.GET.get('q', '')
-        sqs = SearchQuerySet().filter(title=query).model(Job)
+        print(query)
+        sqs = SearchQuerySet().filter(title=query).models(Job)
         serializer = self.get_serializer([s.object for s in sqs], many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
