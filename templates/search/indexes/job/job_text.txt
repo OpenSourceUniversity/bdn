@@ -1,0 +1,5 @@
+{{ object.title }}
+{{ object.description }}
+
+{% for industry in object.industries.all %}{{ industry.name }} {% endfor %}
+{% for skill in object.skills.all %}{{ skill.name }} {% endfor %}

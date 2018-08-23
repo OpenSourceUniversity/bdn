@@ -23,8 +23,8 @@ class JobViewSet(viewsets.ModelViewSet):
     queryset = Job.objects.all()
     serializer_class = JobSerializer
     pagination_class = LimitOffsetPagination
-    authentication_classes = (SignatureAuthentication,)
-    permission_classes = (IsAuthenticated,)
+    # authentication_classes = (SignatureAuthentication,)
+    # permission_classes = (IsAuthenticated,)
 
     def update(self, request):
         return Response({
@@ -94,7 +94,7 @@ class JobViewSet(viewsets.ModelViewSet):
     @list_route(methods=['get'])
     def search(self, request):
         query = self.request.GET.get('q', '')
-        sqs = SearchQuerySet().filter(title=query).model(Job)
+        sqs = SearchQuerySet().filter(title=query).models(Job)
         serializer = self.get_serializer([s.object for s in sqs], many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
