@@ -23,8 +23,8 @@ class JobViewSet(viewsets.ModelViewSet):
     queryset = Job.objects.all()
     serializer_class = JobSerializer
     pagination_class = LimitOffsetPagination
-    # authentication_classes = (SignatureAuthentication,)
-    # permission_classes = (IsAuthenticated,)
+    authentication_classes = (SignatureAuthentication,)
+    permission_classes = (IsAuthenticated,)
 
     def update(self, request):
         return Response({

@@ -30,12 +30,14 @@ class ProfileSerializer(serializers.ModelSerializer):
             'academy_country',
             'academy_about',
             'academy_logo',
+            'academy_verified',
             'company_name',
             'company_website',
             'company_email',
             'company_country',
             'company_about',
             'company_logo',
+            'company_verified',
         )
 
 
@@ -73,6 +75,7 @@ class AcademyProfileSerializer(serializers.ModelSerializer):
             'academy_country',
             'academy_about',
             'academy_logo',
+            'academy_verified',
         )
 
 
@@ -89,4 +92,5 @@ class CompanyProfileSerializer(serializers.ModelSerializer):
             'company_country',
             'company_about',
             'company_logo',
+            'company_verified',
         )
