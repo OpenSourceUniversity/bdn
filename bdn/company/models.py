@@ -1,5 +1,6 @@
 import uuid
 from django.db import models as m
+from django.conf import settings
 
 
 class Company(m.Model):
@@ -9,7 +10,8 @@ class Company(m.Model):
 
     id = m.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = m.CharField(max_length=70)
-    eth_address = m.CharField(max_length=42, blank=True, null=True)
+    user = m.OneToOneField(
+        settings.AUTH_USER_MODEL, on_delete=m.SET_NULL, null=True)
     verified = m.BooleanField(default=False)
 
     def __str__(self):
