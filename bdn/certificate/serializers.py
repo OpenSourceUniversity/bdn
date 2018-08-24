@@ -14,6 +14,7 @@ class CertificateSerializer(serializers.ModelSerializer):
         model = Certificate
         fields = (
             'id',
+            'holder',
             'user_eth_address',
             'academy_title',
             'provider',

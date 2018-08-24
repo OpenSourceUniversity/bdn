@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from rest_framework.serializers import SerializerMethodField
 from bdn.auth.models import User
 from .models import Profile
 
@@ -43,6 +44,10 @@ class ProfileSerializer(serializers.ModelSerializer):
 
 class LearnerProfileSerializer(serializers.ModelSerializer):
     user = UserSerializer(many=False, read_only=True)
+    certificates_count = SerializerMethodField('_certificates_count')
+
+    def _certificates_count(self, obj):
+        return obj.user.certificate_set.all().count()
 
     class Meta:
         model = Profile
@@ -59,11 +64,16 @@ class LearnerProfileSerializer(serializers.ModelSerializer):
             'phone_number',
             'learner_country',
             'learner_avatar',
+            'certificates_count',
         )
 
 
 class AcademyProfileSerializer(serializers.ModelSerializer):
     user = UserSerializer(many=False, read_only=True)
+    courses_count = SerializerMethodField('_courses_count')
+
+    def _courses_count(self, obj):
+        return obj.user.provider.course_set.all().count()
 
     class Meta:
         model = Profile
@@ -76,11 +86,16 @@ class AcademyProfileSerializer(serializers.ModelSerializer):
             'academy_about',
             'academy_logo',
             'academy_verified',
+            'courses_count',
         )
 
 
 class CompanyProfileSerializer(serializers.ModelSerializer):
     user = UserSerializer(many=False, read_only=True)
+    jobs_count = SerializerMethodField('_jobs_count')
+
+    def _jobs_count(self, obj):
+        return obj.user.company.job_set.all().count()
 
     class Meta:
         model = Profile
@@ -93,4 +108,5 @@ class CompanyProfileSerializer(serializers.ModelSerializer):
             'company_about',
             'company_logo',
             'company_verified',
+            'jobs_count',
         )

@@ -1,5 +1,6 @@
 import uuid
 from django.db import models as m
+from django.conf import settings
 from bdn.provider.models import Provider
 from bdn.skill.models import Skill
 from bdn.industry.models import Industry
@@ -7,6 +8,8 @@ from bdn.industry.models import Industry
 
 class Certificate(m.Model):
     id = m.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    holder = m.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=m.SET_NULL, null=True)
     user_eth_address = m.CharField(max_length=42, default='None')
     academy_title = m.CharField(max_length=70)
     provider = m.ForeignKey(

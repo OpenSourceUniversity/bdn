@@ -8,5 +8,4 @@ class CompanySerializer(serializers.ModelSerializer):
         fields = (
             'id',
             'name',
-            'eth_address',
         )

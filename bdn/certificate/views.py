@@ -79,21 +79,6 @@ class CertificateViewSet(viewsets.ModelViewSet):
         serializer = CertificateViewProfileSerializer(certificates, many=True)
         return Response(serializer.data)
 
-    # Depricated
-
-    # @list_route(methods=['post'])
-    # def mass_verification(self, request):
-    #     eth_address = get_auth_eth_address(request.META)
-    #     ids = filter(lambda i: bool(i), request.data.get('ids').split('|'))
-    #     certificates = Certificate.objects.filter(id__in=ids)
-    #     for certificate in certificates:
-    #         if certificate.academy_address == eth_address:
-    #             certificate.verified = True
-    #             certificate.save()
-    #         else:
-    #             return self.deny()
-    #     return Response({'status': 'ok'})
-
     @detail_route(methods=['post'])
     def delete_by_id(self, request, pk=None):
         eth_address = get_auth_eth_address(request.META)
@@ -118,7 +103,7 @@ class CertificateViewSet(viewsets.ModelViewSet):
         data['learner_eth_address'] = learner_eth_address
         data['academy_address'] = academy_address
         data['user_eth_address'] = eth_address
-        serializer = CertificateSerializer(data=data)
+        serializer = CertificateSerializer(data=data, holder=request.user)
         if serializer.is_valid():
             serializer.save(
                 provider=provider, skills=skills, industries=industries)

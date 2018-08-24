@@ -9,10 +9,7 @@ from bdn.auth.signature_authentication import SignatureAuthentication
 from rest_framework.response import Response
 from bdn.auth.utils import get_auth_eth_address
 from .models import Profile, ProfileType
-from bdn.course.models import Course
 from bdn.provider.models import Provider
-from bdn.certificate.models import Certificate
-from bdn.job.models import Job
 from bdn.company.models import Company
 from bdn.provider.serializers import ProviderSerializer
 from bdn.company.serializers import CompanySerializer
@@ -59,90 +56,64 @@ class ProfileViewSet(viewsets.ModelViewSet):
     def get_academy(self, request, pk=None):
         eth_address = pk.lower()
         try:
-            user = User.objects.get(username=eth_address)
+            profile = Profile.objects.get(user__username__iexact=eth_address)
+            serializer = AcademyProfileSerializer(profile)
+            response = Response(serializer.data)
         except User.DoesNotExist:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
-        profile = Profile.objects.get(user=user)
-        serializer = AcademyProfileSerializer(profile)
-        return Response(serializer.data)
+            response = Response(status=status.HTTP_400_BAD_REQUEST)
+        return response
 
     @detail_route(methods=['get'])
     def get_learner(self, request, pk=None):
         eth_address = pk.lower()
         try:
-            user = User.objects.get(username=eth_address)
-        except User.DoesNotExist:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
-        profile = Profile.objects.get(user=user)
-        if profile.public_profile:
-            serializer = LearnerProfileSerializer(profile)
-            return Response(serializer.data)
-        else:
-            return Response({'is_public': False})
+            profile = Profile.objects.get(user__username__iexact=eth_address)
+            if profile.public_profile:
+                serializer = LearnerProfileSerializer(profile)
+                response = Response(serializer.data)
+            else:
+                response = Response({
+                    'is_public': False
+                }, status=status.HTTP_403_FORBIDDEN)
+        except Profile.DoesNotExist:
+            response = Response(status=status.HTTP_400_BAD_REQUEST)
+        return response
 
     @detail_route(methods=['get'])
     def get_business(self, request, pk=None):
         eth_address = pk.lower()
         try:
-            user = User.objects.get(username=eth_address)
-        except User.DoesNotExist:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
-        profile = Profile.objects.get(user=user)
-        serializer = CompanyProfileSerializer(profile)
-        return Response(serializer.data)
+            profile = Profile.objects.get(user__username=eth_address)
+            serializer = CompanyProfileSerializer(profile)
+            response = Response(serializer.data)
+        except Profile.DoesNotExist:
+            response = Response(status=status.HTTP_400_BAD_REQUEST)
+        return response
 
     @list_route(methods=['get'])
     def get_academies(self, request):
-        providers_obj = Provider.objects.all()
-        eth_addresses = set()
-        for obj in providers_obj:
-            eth_addresses.add(obj.eth_address)
-        users = User.objects.filter(username__in=eth_addresses)
         profiles = Profile.objects\
-            .filter(user__in=users).order_by('academy_name')
+            .exclude(academy_name__isnull=True)\
+            .exclude(academy_name='')\
+            .order_by('academy_name')
         serializer = AcademyProfileSerializer(profiles, many=True)
-        newdata = []
-        for data in serializer.data:
-            provider = Provider.objects.get(
-                eth_address=data.get('user').get('username'))
-            courses_count = Course.objects.all().filter(
-                provider=provider).count()
-            data['courses_count'] = courses_count
-            newdata.append(data)
-        return Response(newdata)
+        return Response(serializer.data)
 
     @list_route(methods=['get'])
     def get_businesses(self, request):
-        companies_obj = Company.objects.all()
-        eth_addresses = set()
-        for obj in companies_obj:
-            eth_addresses.add(obj.eth_address)
-        users = User.objects.filter(username__in=eth_addresses)
         profiles = Profile.objects\
-            .filter(user__in=users)\
+            .exclude(company_name__isnull=True)\
+            .exclude(company_email__isnull=True)\
             .order_by('company_name')
         serializer = CompanyProfileSerializer(profiles, many=True)
-        newdata = []
-        for data in serializer.data:
-            company = Company.objects.get(
-                eth_address=data.get('user').get('username'))
-            jobs_count = Job.objects.all().filter(company=company).count()
-            data['jobs_count'] = jobs_count
-            newdata.append(data)
-        return Response(newdata)
+        return Response(serializer.data)
 
     @list_route(methods=['get'])
     def get_learners(self, request):
         profiles = Profile.objects.filter(
             public_profile=True).order_by('first_name')
         serializer = LearnerProfileSerializer(profiles, many=True)
-        newdata = []
-        for data in serializer.data:
-            certificates_count = Certificate.objects.all().filter(
-                learner_eth_address=data.get('user').get('username')).count()
-            data['certificates_count'] = certificates_count
-            newdata.append(data)
-        return Response(newdata)
+        return Response(serializer.data)
 
     @list_route(methods=['post'])
     def set_active_profile(self, request):
@@ -155,26 +126,25 @@ class ProfileViewSet(viewsets.ModelViewSet):
         profile_type = int(request.META.get('HTTP_PROFILE_TYPE'))
         profile.active_profile_type = profile_type
         profile.save()
-        print(profile_type)
         return Response({'status': 'ok'})
 
     @list_route(methods=['get'])
     def get_active_profile(self, request):
         eth_address = get_auth_eth_address(request.META)
         try:
-            user = User.objects.get(username=eth_address)
-        except User.DoesNotExist:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
-        profile = Profile.objects.get(user=user)
-        print(profile.active_profile_type)
-        return Response(
-            {'active_profile_type': profile.active_profile_type})
+            profile = Profile.objects.get(user__username__iexact=eth_address)
+            response = Response({
+                'active_profile_type': profile.active_profile_type
+            })
+        except Profile.DoesNotExist:
+            response = Response(status=status.HTTP_400_BAD_REQUEST)
+        return response
 
     def create(self, request, pk=None):
         eth_address = get_auth_eth_address(request.META)
         profile_type = int(request.META.get('HTTP_PROFILE_TYPE'))
         try:
-            user = User.objects.get(username=eth_address)
+            user = User.objects.get(username__iexact=eth_address)
         except User.DoesNotExist:
             return Response({
                 'error': 'User not found',
