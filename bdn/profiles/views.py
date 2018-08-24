@@ -52,43 +52,40 @@ class ProfileViewSet(viewsets.ModelViewSet):
         serializer = ProfileSerializer(profile)
         return Response(serializer.data)
 
-    @detail_route(methods=['get'])
-    def get_academy(self, request, pk=None):
+    @staticmethod
+    def _get_profile_by_type(pk, profile_type):
+        SERIALIZERS = {
+            ProfileType.ACADEMY: AcademyProfileSerializer,
+            ProfileType.BUSINESS: CompanyProfileSerializer,
+            ProfileType.LEARNER: LearnerProfileSerializer,
+        }
+        serializer_cls = SERIALIZERS[profile_type]
         eth_address = pk.lower()
         try:
             profile = Profile.objects.get(user__username__iexact=eth_address)
-            serializer = AcademyProfileSerializer(profile)
+            serializer = serializer_cls(profile)
             response = Response(serializer.data)
         except User.DoesNotExist:
             response = Response(status=status.HTTP_400_BAD_REQUEST)
         return response
 
     @detail_route(methods=['get'])
+    def get_academy(self, request, pk=None):
+        return self._get_profile_by_type(pk, ProfileType.ACADEMY)
+
+    @detail_route(methods=['get'])
     def get_learner(self, request, pk=None):
         eth_address = pk.lower()
-        try:
-            profile = Profile.objects.get(user__username__iexact=eth_address)
-            if profile.public_profile:
-                serializer = LearnerProfileSerializer(profile)
-                response = Response(serializer.data)
-            else:
-                response = Response({
-                    'is_public': False
-                }, status=status.HTTP_403_FORBIDDEN)
-        except Profile.DoesNotExist:
-            response = Response(status=status.HTTP_400_BAD_REQUEST)
-        return response
+        profile = Profile.objects.get(user__username__iexact=eth_address)
+        if not profile.public_profile:
+            return Response({
+                'is_public': False
+            }, status=status.HTTP_403_FORBIDDEN)
+        return self._get_profile_by_type(pk, ProfileType.LEARNER)
 
     @detail_route(methods=['get'])
     def get_business(self, request, pk=None):
-        eth_address = pk.lower()
-        try:
-            profile = Profile.objects.get(user__username=eth_address)
-            serializer = CompanyProfileSerializer(profile)
-            response = Response(serializer.data)
-        except Profile.DoesNotExist:
-            response = Response(status=status.HTTP_400_BAD_REQUEST)
-        return response
+        return self._get_profile_by_type(pk, ProfileType.BUSINESS)
 
     @list_route(methods=['get'])
     def get_academies(self, request):
@@ -144,12 +141,11 @@ class ProfileViewSet(viewsets.ModelViewSet):
         eth_address = get_auth_eth_address(request.META)
         profile_type = int(request.META.get('HTTP_PROFILE_TYPE'))
         try:
-            user = User.objects.get(username__iexact=eth_address)
+            profile = Profile.objects.get(user__username__iexact=eth_address)
         except User.DoesNotExist:
             return Response({
                 'error': 'User not found',
             }, status=status.HTTP_400_BAD_REQUEST)
-        profile = Profile.objects.get(user=user)
         data = request.data.copy()
         if profile_type == ProfileType.LEARNER:
             if data['learner_avatar'] is None:
