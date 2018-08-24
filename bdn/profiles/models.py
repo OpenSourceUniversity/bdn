@@ -27,7 +27,7 @@ class Profile(m.Model):
     learner_specialisation = m.CharField(
         max_length=70, blank=True, null=True)
     learner_about = m.TextField(max_length=500, blank=True, null=True)
-    public_profile = m.BooleanField(default=False)
+    public_profile = m.BooleanField(default=True)
     learner_site = m.CharField(max_length=70, blank=True, null=True)
     phone_number = m.CharField(max_length=70, blank=True, null=True)
     learner_country = m.CharField(max_length=70, blank=True, null=True)
