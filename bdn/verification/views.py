@@ -85,6 +85,16 @@ class VerificationViewSet(viewsets.ModelViewSet):
             return self.deny()
         verification.move_to_rejected()
         verification.save()
+        notify.send(
+            sender=verification.verifier,
+            recipient=verification.granted_to,
+            verb='rejected',
+            target=verification,
+            **{
+                'actor_active_profile_type': verification.verifier_type,
+                'recipient_active_profile_type': verification.granted_to_type,
+            }
+        )
         return Response({'status': 'ok'})
 
     @detail_route(methods=['post'])

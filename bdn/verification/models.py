@@ -36,7 +36,7 @@ class Verification(m.Model):
     def move_to_open(self):
         pass
 
-    @transition(field=state, source='open', target='pending')
+    @transition(field=state, source=['requested', 'open'], target='pending')
     def move_to_pending(self):
         pass
 
