@@ -46,7 +46,7 @@ class JobViewSet(viewsets.ModelViewSet):
                 'error': 'Job not found',
             }, status=status.HTTP_400_BAD_REQUEST)
         try:
-            user = User.objects.get(username=job.company.eth_address)
+            user = User.objects.get(username=job.company.user)
         except User.DoesNotExist:
             return Response({
                 'error': 'User not found',
@@ -130,7 +130,7 @@ class JobViewSet(viewsets.ModelViewSet):
             return Response({
                 'error': 'Job not found',
             }, status=status.HTTP_400_BAD_REQUEST)
-        if job_position.company.eth_address == eth_address:
+        if job_position.company.user.username == eth_address:
             serializer = self.get_serializer(job_position)
             return Response(serializer.data, status=status.HTTP_200_OK)
         else:
@@ -147,7 +147,7 @@ class JobViewSet(viewsets.ModelViewSet):
             return Response({
                 'error': 'Job not found',
             }, status=status.HTTP_400_BAD_REQUEST)
-        if job_position.company.eth_address == eth_address:
+        if job_position.company.user.username == eth_address:
             serializer = self.get_serializer(
                 data=request.data, instance=job_position, partial=True)
             if serializer.is_valid():
@@ -170,7 +170,7 @@ class JobViewSet(viewsets.ModelViewSet):
             return Response({
                 'error': 'Job not found',
             }, status=status.HTTP_400_BAD_REQUEST)
-        if job_position.company.eth_address == eth_address:
+        if job_position.company.user.username == eth_address:
             job_position.delete()
             return Response({'status': 'ok'})
         else:
@@ -180,7 +180,11 @@ class JobViewSet(viewsets.ModelViewSet):
     def create(self, request, pk=None):
         eth_address = get_auth_eth_address(request.META)
         try:
-            company = Company.objects.get(eth_address=eth_address)
+            business = User.objects.get(username=eth_address)
+        except User.DoesNotExist:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+        try:
+            company = Company.objects.get(user=business)
         except Company.DoesNotExist:
             return Response({
                 'error': 'Company not found',

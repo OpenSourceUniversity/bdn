@@ -45,7 +45,7 @@ class CourseViewSet(viewsets.ModelViewSet):
                 'error': 'Course not found',
             }, status=status.HTTP_400_BAD_REQUEST)
         try:
-            user = User.objects.get(username=course.provider.eth_address)
+            user = User.objects.get(username=course.provider.user)
         except User.DoesNotExist:
             return Response({
                 'error': 'User not found',
@@ -133,7 +133,7 @@ class CourseViewSet(viewsets.ModelViewSet):
             return Response({
                 'error': 'Course not found',
             }, status=status.HTTP_400_BAD_REQUEST)
-        if course.provider.eth_address == eth_address:
+        if course.provider.user.username == eth_address:
             serializer = self.get_serializer(course)
             return Response(serializer.data, status=status.HTTP_200_OK)
         else:
@@ -150,7 +150,7 @@ class CourseViewSet(viewsets.ModelViewSet):
             return Response({
                 'error': 'Course not found',
             }, status=status.HTTP_400_BAD_REQUEST)
-        if course.provider.eth_address == eth_address:
+        if course.provider.user.username == eth_address:
             serializer = self.get_serializer(
                 data=request.data, instance=course, partial=True)
             if serializer.is_valid():
@@ -164,7 +164,11 @@ class CourseViewSet(viewsets.ModelViewSet):
     def create(self, request, pk=None):
         eth_address = get_auth_eth_address(request.META)
         try:
-            provider = Provider.objects.get(eth_address=eth_address)
+            academy = User.objects.get(username=eth_address)
+        except User.DoesNotExist:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+        try:
+            provider = Provider.objects.get(user=academy)
         except Provider.DoesNotExist:
             return Response({
                 'error': 'Provider not found',
@@ -193,7 +197,7 @@ class CourseViewSet(viewsets.ModelViewSet):
             return Response({
                 'error': 'Course not found',
             }, status=status.HTTP_400_BAD_REQUEST)
-        if course.provider.eth_address == eth_address:
+        if course.provider.user.username == eth_address:
             course.delete()
             return Response({'status': 'ok'})
         else:
