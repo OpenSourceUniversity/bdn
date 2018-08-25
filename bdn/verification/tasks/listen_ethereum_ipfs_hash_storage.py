@@ -12,6 +12,7 @@ from .perform_ipfs_meta_verification import perform_ipfs_meta_verification
 
 
 logger = logging.getLogger(__name__)
+IPFS_HOST = 'https://ipfs.io/ipfs/'
 
 
 @shared_task
@@ -38,7 +39,7 @@ def listen_ethereum_ipfs_hash_storage():
                 "Event triggered without providing IPFS meta hash or "
                 "granted to ETH address")
             continue
-        ipfs_link = 'https://ipfs.io/ipfs/' + meta_ipfs_hash
+        ipfs_link = IPFS_HOST + meta_ipfs_hash
         verification_ipfs_data = requests.get(ipfs_link).json()
         try:
             verifier_id = verification_ipfs_data.get('verifier')
