@@ -112,7 +112,11 @@ class CourseViewSet(viewsets.ModelViewSet):
     def get_by_provider(self, request):
         eth_address = str(request.GET.get('eth_address')).lower()
         try:
-            provider = Provider.objects.get(eth_address=eth_address)
+            academy = User.objects.get(username=eth_address)
+        except User.DoesNotExist:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+        try:
+            provider = Provider.objects.get(user=academy)
         except Provider.DoesNotExist:
             return Response(status=status.HTTP_400_BAD_REQUEST)
         qs = Course.objects.all().filter(provider=provider)

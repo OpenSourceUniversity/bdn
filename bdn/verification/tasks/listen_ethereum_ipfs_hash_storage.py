@@ -77,8 +77,8 @@ def listen_ethereum_ipfs_hash_storage():
             verb='verified',
             target=certificate,
             **{
-                'actor_active_profile_type': verification.granted_to_type,
-                'recipient_active_profile_type': verification.verifier_type,
+                'actor_active_profile_type': verification.verifier_type,
+                'recipient_active_profile_type': verification.granted_to_type
             }
         )
 

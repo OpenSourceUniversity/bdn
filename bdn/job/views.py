@@ -109,7 +109,11 @@ class JobViewSet(viewsets.ModelViewSet):
     def get_by_company(self, request):
         eth_address = str(request.GET.get('eth_address')).lower()
         try:
-            company = Company.objects.get(eth_address=eth_address)
+            business = User.objects.get(username=eth_address)
+        except User.DoesNotExist:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+        try:
+            company = Company.objects.get(user=business)
         except Company.DoesNotExist:
             return Response(status=status.HTTP_400_BAD_REQUEST)
         sqs = Job.objects.all().filter(company=company)
