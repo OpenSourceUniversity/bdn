@@ -28,7 +28,7 @@ class CertificateViewSet(viewsets.ModelViewSet):
         eth_address = get_auth_eth_address(request.META)
         certificate = Certificate.objects.get(id=pk)
         if (certificate.learner_eth_address == eth_address):
-            serializer = CertificateSerializer(certificate)
+            serializer = CertificateViewProfileSerializer(certificate)
             return Response(serializer.data)
         try:
             user = User.objects.get(username=eth_address)
@@ -59,8 +59,8 @@ class CertificateViewSet(viewsets.ModelViewSet):
         eth_address = get_auth_eth_address(request.META)
         certificates = Certificate.objects\
             .filter(learner_eth_address=eth_address)\
-            .order_by('-verified', 'course_title')
-        serializer = CertificateSerializer(certificates, many=True)
+            .order_by('course_title')
+        serializer = CertificateViewProfileSerializer(certificates, many=True)
         return Response(serializer.data)
 
     @detail_route(methods=['get'])

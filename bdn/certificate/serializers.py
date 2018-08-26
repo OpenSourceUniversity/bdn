@@ -1,3 +1,5 @@
+import datetime
+from django.db.models import Q
 from rest_framework import serializers
 from bdn.provider.serializers import ProviderSerializer
 from bdn.industry.serializers import IndustrySerializer
@@ -46,6 +48,31 @@ class CertificateViewProfileSerializer(serializers.ModelSerializer):
     skills = SkillSerializer(many=True, read_only=True)
     industries = IndustrySerializer(many=True, read_only=True)
 
+    verifications = serializers.\
+        SerializerMethodField('_verifications')
+
+    is_expired = serializers.\
+        SerializerMethodField('_is_expired')
+
+    def _verifications(self, obj):
+        from bdn.verification.serializers import VerificationCertificateSerializer  # noqa
+        verifiers = obj.verification_set.all().filter(
+            Q(state='verified') | Q(state='revoked'))
+        verifier_list = verifiers.values_list(
+            'verifier', flat=True).distinct()
+        group_by_verifier = []
+        for verifier in verifier_list:
+            group_by_verifier.append(VerificationCertificateSerializer(
+                        verifiers.filter(
+                            verifier=verifier).order_by('date_last_modified'),
+                        many=True, read_only=True).data)
+        return group_by_verifier
+
+    def _is_expired(self, obj):
+        if obj.expiration_date:
+            return obj.expiration_date.replace(tzinfo=None) < datetime.\
+                datetime.now().replace(tzinfo=None)
+
     class Meta:
         model = Certificate
         fields = (
@@ -60,8 +87,9 @@ class CertificateViewProfileSerializer(serializers.ModelSerializer):
             'industries',
             'skills',
             'learner_eth_address',
-            'verified',
             'score',
             'duration',
             'expiration_date',
+            'verifications',
+            'is_expired',
         )

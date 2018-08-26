@@ -51,6 +51,8 @@ def listen_ethereum_ipfs_hash_storage():
             verifier = User.objects.get(pk=verifier_id)
         except User.DoesNotExist:
             continue
+        except ValidationError:
+            continue
         try:
             verification = Verification.objects.get(
                 pk=verification_id, verifier=verifier)

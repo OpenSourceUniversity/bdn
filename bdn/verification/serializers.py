@@ -29,6 +29,37 @@ class VerificationSerializer(serializers.ModelSerializer):
         )
 
 
+class VerificationCertificateSerializer(serializers.ModelSerializer):
+    verifier_eth_address = serializers.\
+        SerializerMethodField('_verifier_eth_address')
+
+    verifier_name = serializers.\
+        SerializerMethodField('_verifier_name')
+
+    def _granted_to_eth_address(self, obj):
+        return obj.granted_to.username
+
+    def _verifier_eth_address(self, obj):
+        return obj.verifier.username
+
+    def _verifier_name(self, obj):
+        profile_type = obj.verifier_type
+        if profile_type:
+            return obj.verifier.profile.name_by_profile_type(profile_type)
+
+    class Meta:
+        model = Verification
+        fields = (
+            'id',
+            'state',
+            'verifier_type',
+            'verifier_name',
+            'verifier_eth_address',
+            'date_last_modified',
+            'tx_hash',
+        )
+
+
 class VerificationCreateSerializer(serializers.ModelSerializer):
 
     class Meta:

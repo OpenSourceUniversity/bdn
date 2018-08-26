@@ -67,7 +67,8 @@ class VerificationViewSet(viewsets.ModelViewSet):
             }, status=status.HTTP_400_BAD_REQUEST)
         verifications = Verification.objects.filter(
             verifier=user, certificate__isnull=False,
-            verifier_type=profile.active_profile_type).order_by('state')
+            verifier_type=profile.active_profile_type).\
+            order_by('state', 'date_last_modified')
         serializer = VerificationSerializer(verifications, many=True)
         return Response(serializer.data)
 
