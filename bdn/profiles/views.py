@@ -158,7 +158,7 @@ class ProfileViewSet(viewsets.ModelViewSet):
             serializer = AcademyProfileSerializer(
                 data=data, instance=profile, partial=True)
             provider, created = Provider.objects.get_or_create(
-                    user=request.User)
+                    user=request.user)
             if created:
                 provider_serializer = ProviderSerializer(
                     data={'name': request.data.get('academy_name')},
@@ -183,7 +183,7 @@ class ProfileViewSet(viewsets.ModelViewSet):
             serializer = CompanyProfileSerializer(
                 data=data, instance=profile, partial=True)
             company, created = Company.objects.get_or_create(
-                    user=request.User)
+                    user=request.user)
             if created:
                 company_serializer = CompanySerializer(
                     data={'name': request.data.get('company_name')},
