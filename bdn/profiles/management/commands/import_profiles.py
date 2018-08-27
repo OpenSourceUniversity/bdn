@@ -4,6 +4,7 @@ from bdn.course.models import Course
 from bdn.provider.models import Provider
 from bdn.skill.models import Skill
 from bdn.industry.models import Industry
+from bdn.company.models import Company
 from bdn.auth.models import User
 from faker import Faker
 from bdn.profiles.models import Profile
@@ -25,14 +26,20 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         countLearners = 1
-        countBusinesses = 6
-        countAcademies = 7
+        countBusinesses = 1
+        countAcademies = 1
         if options['learners']:
             countLearners = int(options['learners'])
         if options['businesses']:
             countBusinesses = int(options['businesses'])
         if options['academies']:
             countAcademies = int(options['academies'])
+        if options['max_certificates']:
+            max_certificates = int(options['max_certificates'])
+        if options['max_courses']:
+            max_courses = int(options['max_courses'])
+        if options['max_jobs']:
+            max_jobs = int(options['max_jobs'])
         fake_users = int(countLearners) + int(countBusinesses) + \
             int(countAcademies)
         faker = Faker()
@@ -60,6 +67,7 @@ class Command(BaseCommand):
                     print('User eth: ' + str(eth_wallet) + ' was created!')
                 elif int(profile) < (fake_users-int(countAcademies)):
                     business_obj = Profile.objects.get(user=user)
+                    company, _ = Company.objects.get_or_create(user=user)
                     business_obj.active_profile_type = 3
                     business_obj.company_name = faker.company()
                     business_obj.company_website = 'https://www.business.com'
@@ -73,6 +81,7 @@ class Command(BaseCommand):
                     print('Business eth: ' + str(eth_wallet) + ' was created!')
                 elif int(profile) < fake_users:
                     academy_obj = Profile.objects.get(user=user)
+                    provider, _ = Provider.objects.get_or_create(user=user)
                     academy_obj.active_profile_type = 2
                     academy_obj.academy_name = faker.company()
                     academy_obj.academy_website = 'https://www.academy.com'
