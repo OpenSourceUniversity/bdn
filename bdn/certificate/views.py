@@ -9,10 +9,8 @@ from rest_framework.decorators import detail_route, list_route
 from bdn.auth.signature_authentication import SignatureAuthentication
 from bdn.auth.utils import get_auth_eth_address
 from bdn.auth.models import User
-from bdn.provider.models import Provider
 from bdn.skill.models import Skill
 from bdn.industry.models import Industry
-from bdn.verification.models import Verification
 from .models import Certificate
 from .serializers import (CertificateSerializer,
                           CertificateViewProfileSerializer)
@@ -25,20 +23,8 @@ class CertificateViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated,)
 
     def retrieve(self, request, pk=None):
-        eth_address = get_auth_eth_address(request.META)
         certificate = Certificate.objects.get(id=pk)
-        if (certificate.holder == request.user):
-            serializer = CertificateViewProfileSerializer(certificate)
-            return Response(serializer.data)
-        try:
-            user = User.objects.get(username=eth_address)
-        except User.DoesNotExist:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
-        try:
-            Verification.objects.get(verifier=user, certificate=certificate)
-        except Verification.DoesNotExist:
-            return self.deny()
-        serializer = CertificateSerializer(certificate)
+        serializer = CertificateViewProfileSerializer(certificate)
         return Response(serializer.data)
 
     def update(self, request):

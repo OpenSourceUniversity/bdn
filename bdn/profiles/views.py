@@ -90,8 +90,7 @@ class ProfileViewSet(viewsets.ModelViewSet):
     @list_route(methods=['get'])
     def get_academies(self, request):
         profiles = Profile.objects\
-            .exclude(academy_name__isnull=True)\
-            .exclude(academy_name='')\
+            .filter(user__provider__isnull=False)\
             .order_by('academy_name')
         serializer = AcademyProfileSerializer(profiles, many=True)
         return Response(serializer.data)
@@ -99,8 +98,7 @@ class ProfileViewSet(viewsets.ModelViewSet):
     @list_route(methods=['get'])
     def get_businesses(self, request):
         profiles = Profile.objects\
-            .exclude(company_name__isnull=True)\
-            .exclude(company_email__isnull=True)\
+            .filter(user__company__isnull=False)\
             .order_by('company_name')
         serializer = CompanyProfileSerializer(profiles, many=True)
         return Response(serializer.data)

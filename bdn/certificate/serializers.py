@@ -86,5 +86,6 @@ class CertificateViewProfileSerializer(serializers.ModelSerializer):
             'duration',
             'expiration_date',
             'verifications',
+            'ipfs_hash',
             'is_expired',
         )
