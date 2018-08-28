@@ -1,14 +1,12 @@
 import datetime
 from django.db.models import Q
 from rest_framework import serializers
-from bdn.provider.serializers import ProviderSerializer
 from bdn.industry.serializers import IndustrySerializer
 from bdn.skill.serializers import SkillSerializer
 from .models import Certificate
 
 
 class CertificateSerializer(serializers.ModelSerializer):
-    provider = ProviderSerializer(many=False, read_only=True)
     skills = SkillSerializer(many=True, read_only=True)
     industries = IndustrySerializer(many=True, read_only=True)
 
@@ -19,7 +17,6 @@ class CertificateSerializer(serializers.ModelSerializer):
             'holder',
             'user_eth_address',
             'academy_title',
-            'provider',
             'academy_link',
             'program_title',
             'course_title',
@@ -44,7 +41,6 @@ class CertificateSerializer(serializers.ModelSerializer):
 
 
 class CertificateViewProfileSerializer(serializers.ModelSerializer):
-    provider = ProviderSerializer(many=False, read_only=True)
     skills = SkillSerializer(many=True, read_only=True)
     industries = IndustrySerializer(many=True, read_only=True)
 
@@ -79,7 +75,6 @@ class CertificateViewProfileSerializer(serializers.ModelSerializer):
             'id',
             'user_eth_address',
             'academy_title',
-            'provider',
             'academy_link',
             'program_title',
             'course_title',
