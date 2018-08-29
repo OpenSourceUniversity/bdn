@@ -22,3 +22,6 @@ class SignUp(m.Model):
     step = m.PositiveSmallIntegerField(
         default=SignUpStep.EMAIL,
         choices=[(_.value, _.name) for _ in SignUpStep])
+
+    def __str__(self):
+        return self.email
