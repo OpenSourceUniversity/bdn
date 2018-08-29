@@ -90,7 +90,7 @@ class VerificationViewSet(viewsets.ModelViewSet):
             sender=verification.verifier,
             recipient=verification.granted_to,
             verb='rejected',
-            target=verification,
+            target=verification.certificate,
             **{
                 'actor_active_profile_type': verification.verifier_type,
                 'recipient_active_profile_type': verification.granted_to_type,

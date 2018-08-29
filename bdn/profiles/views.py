@@ -155,51 +155,31 @@ class ProfileViewSet(viewsets.ModelViewSet):
                 data['academy_logo'] = profile.academy_logo
             serializer = AcademyProfileSerializer(
                 data=data, instance=profile, partial=True)
-            provider, created = Provider.objects.get_or_create(
+            provider, _ = Provider.objects.get_or_create(
                     user=request.user)
-            if created:
-                provider_serializer = ProviderSerializer(
-                    data={'name': request.data.get('academy_name')},
-                    instance=provider, partial=True)
-                if provider_serializer.is_valid():
-                    provider_serializer.save()
-                else:
-                    return Response(provider_serializer.errors,
-                                    status=status.HTTP_400_BAD_REQUEST)
+            provider_serializer = ProviderSerializer(
+                data={'name': request.data.get('academy_name')},
+                instance=provider, partial=True)
+            if provider_serializer.is_valid():
+                provider_serializer.save()
             else:
-                provider_serializer = ProviderSerializer(
-                    data={'name': request.data.get('academy_name')},
-                    instance=provider, partial=True)
-                if provider_serializer.is_valid():
-                    provider_serializer.save()
-                else:
-                    return Response(provider_serializer.errors,
-                                    status=status.HTTP_400_BAD_REQUEST)
+                return Response(provider_serializer.errors,
+                                status=status.HTTP_400_BAD_REQUEST)
         elif profile_type == ProfileType.BUSINESS:
             if data['company_logo'] is None:
                     data['company_logo'] = profile.company_logo
             serializer = CompanyProfileSerializer(
                 data=data, instance=profile, partial=True)
-            company, created = Company.objects.get_or_create(
+            company, _ = Company.objects.get_or_create(
                     user=request.user)
-            if created:
-                company_serializer = CompanySerializer(
-                    data={'name': request.data.get('company_name')},
-                    instance=company, partial=True)
-                if company_serializer.is_valid():
-                    company_serializer.save()
-                else:
-                    return Response(company_serializer.errors,
-                                    status=status.HTTP_400_BAD_REQUEST)
+            company_serializer = CompanySerializer(
+                data={'name': request.data.get('company_name')},
+                instance=company, partial=True)
+            if company_serializer.is_valid():
+                company_serializer.save()
             else:
-                company_serializer = CompanySerializer(
-                    data={'name': request.data.get('company_name')},
-                    instance=company, partial=True)
-                if company_serializer.is_valid():
-                    company_serializer.save()
-                else:
-                    return Response(company_serializer.errors,
-                                    status=status.HTTP_400_BAD_REQUEST)
+                return Response(company_serializer.errors,
+                                status=status.HTTP_400_BAD_REQUEST)
         if serializer.is_valid():
             serializer.save()
             return Response({'status': 'ok'})
