@@ -2,4 +2,7 @@ from django.apps import AppConfig
 
 
 class MessagingConfig(AppConfig):
-    name = 'messaging'
+    name = 'bdn.messaging'
+
+    def ready(self):
+        from . import signals # noqa

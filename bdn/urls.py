@@ -24,7 +24,7 @@ from bdn.skill.views import SkillViewSet
 from bdn.job.views import JobViewSet
 from bdn.verification.views import VerificationViewSet
 from bdn.auth.views import SignUpViewSet
-from bdn.messaging.views import ThreadViewSet
+from bdn.messaging.views import ThreadViewSet, MessageViewSet
 from bdn.notifications_extensions.views import NotificationViewSet
 from rest_framework import routers
 
@@ -41,6 +41,7 @@ router.register(r'messaging/threads', ThreadViewSet)
 router.register(
     r'notifications', NotificationViewSet, base_name='Notification')
 router.register(r'signup', SignUpViewSet)
+router.register(r'messages', MessageViewSet)
 
 
 urlpatterns = [
