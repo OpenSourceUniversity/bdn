@@ -7,7 +7,8 @@ class ProviderSerializer(serializers.ModelSerializer):
         SerializerMethodField('_eth_address')
 
     def _eth_address(self, obj):
-        return obj.user.username
+        if obj.user:
+            return obj.user.username
 
     class Meta:
         model = Provider
