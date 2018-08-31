@@ -16,6 +16,7 @@ class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
         fields = (
+            'active_profile_type',
             'user',
             'first_name',
             'last_name',

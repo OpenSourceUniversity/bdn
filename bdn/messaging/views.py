@@ -1,3 +1,6 @@
+from __future__ import unicode_literals
+
+from collections import OrderedDict
 from django.db.models import Q
 from django.utils import timezone
 from rest_framework import status, viewsets, mixins
@@ -17,7 +20,6 @@ class ThreadViewSet(mixins.CreateModelMixin,
                     mixins.ListModelMixin,
                     mixins.DestroyModelMixin,
                     viewsets.GenericViewSet):
-    queryset = Thread.objects.all()
     serializer_class = ThreadGetSerializer
     pagination_class = LimitOffsetPagination
     authentication_classes = (SignatureAuthentication,)
@@ -67,31 +69,52 @@ class ThreadViewSet(mixins.CreateModelMixin,
                                     status=status.HTTP_400_BAD_REQUEST)
         return response
 
+    @list_route(methods=['get'])
+    def get_unread_count(self, request):
+        issuer = request.user
+        unread_messages_count = Message.objects.all().filter(
+            (Q(thread__owner=issuer) | Q(thread__opponent=issuer)) & Q(
+                read=False)).exclude(sender=issuer).count()
+        return Response({'unread_messages_count': unread_messages_count})
+
+
+class MessagePagination(LimitOffsetPagination):
+    default_limit = 30
+    max_limit = 30
+
+    def get_paginated_response(self, data):
+        return Response(OrderedDict([
+            ('count', self.count),
+            ('next', self.get_next_link()),
+            ('previous', self.get_previous_link()),
+            ('results', data)
+        ]))
+
 
 class MessageViewSet(mixins.CreateModelMixin,
                      mixins.RetrieveModelMixin,
                      mixins.ListModelMixin,
                      viewsets.GenericViewSet):
-    queryset = Message.objects.all()
     serializer_class = MessageGetSerializer
-    pagination_class = LimitOffsetPagination
+    pagination_class = MessagePagination
     authentication_classes = (SignatureAuthentication,)
     permission_classes = (IsAuthenticated,)
 
-    def list(self, request):
+    def get_queryset(self):
+        request = self.request
         thread_id = request.GET.get('thread_id')
+        issuer = request.user
         try:
-            thread = Thread.objects.get(
-                Q(
-                    pk=thread_id, owner=self.request.user) | Q(
-                    pk=thread_id, opponent=self.request.user))
+            thread = Thread.objects.get(Q(
+                    pk=thread_id, owner=issuer) | Q(
+                    pk=thread_id, opponent=issuer))
         except Thread.DoesNotExist:
             return Response({
                 'error': 'Thread not found',
             }, status=status.HTTP_400_BAD_REQUEST)
         messages = Message.objects.filter(thread=thread)
-        serializer = MessageGetSerializer(messages, many=True)
-        return Response(serializer.data)
+        messages.exclude(sender=issuer).update(read=True)
+        return messages
 
     def create(self, request):
         thread_id = request.data.get('threadID')

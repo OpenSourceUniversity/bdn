@@ -26,7 +26,7 @@ class Thread(m.Model):
 
 class Message(m.Model):
     class Meta:
-        ordering = ['created']
+        ordering = ['-created']
 
     id = m.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     thread = m.ForeignKey(Thread, related_name="messages", on_delete=m.CASCADE)

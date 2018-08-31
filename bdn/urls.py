@@ -41,11 +41,11 @@ router.register(r'skills', SkillViewSet, base_name='Skill')
 router.register(r'jobs', JobViewSet)
 router.register(r'connections', ConnectionsViewSet)
 router.register(r'verifications', VerificationViewSet)
-router.register(r'messaging/threads', ThreadViewSet)
+router.register(r'messaging/threads', ThreadViewSet, base_name='Thread')
 router.register(
     r'notifications', NotificationViewSet, base_name='Notification')
 router.register(r'signup', SignUpViewSet)
-router.register(r'messages', MessageViewSet)
+router.register(r'messages', MessageViewSet, base_name='Message')
 
 
 urlpatterns = [
