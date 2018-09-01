@@ -24,3 +24,4 @@ test:
   script:
   - cp bdn/ci_settings.py bdn/local_settings.py
   - python manage.py test
+  - flake8
