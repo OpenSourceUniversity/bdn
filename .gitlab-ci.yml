@@ -29,4 +29,5 @@ coverage:
   stage: build
   script:
   - coverage run --source='.' manage.py test
+  - coverage report --skip-covered
   coverage: '/TOTAL.+ ([0-9]{1,3}%)/'
