@@ -15,6 +15,8 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import include, path
+from django.conf import settings
+from django.conf.urls.static import static
 from ajax_select import urls as ajax_select_urls
 from bdn.certificate.views import CertificateViewSet
 from bdn.profiles.views import ProfileViewSet
@@ -22,6 +24,7 @@ from bdn.industry.views import IndustryViewSet
 from bdn.course.views import CourseViewSet
 from bdn.skill.views import SkillViewSet
 from bdn.job.views import JobViewSet
+from bdn.connections.views import ConnectionsViewSet
 from bdn.verification.views import VerificationViewSet
 from bdn.auth.views import SignUpViewSet
 from bdn.messaging.views import ThreadViewSet, MessageViewSet
@@ -36,6 +39,7 @@ router.register(r'profile', ProfileViewSet)
 router.register(r'industries', IndustryViewSet, base_name='Industry')
 router.register(r'skills', SkillViewSet, base_name='Skill')
 router.register(r'jobs', JobViewSet)
+router.register(r'connections', ConnectionsViewSet)
 router.register(r'verifications', VerificationViewSet)
 router.register(r'messaging/threads', ThreadViewSet)
 router.register(
@@ -49,3 +53,7 @@ urlpatterns = [
     path('ajax_select/', include(ajax_select_urls)),
     path('admin/', admin.site.urls),
 ]
+
+if settings.DEBUG:
+    urlpatterns += static(
+        settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -118,3 +118,5 @@ data/
 celerybeat.pid
 
 .ethereum_data/
+
+media/
