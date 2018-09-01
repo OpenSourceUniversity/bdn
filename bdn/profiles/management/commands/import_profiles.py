@@ -75,7 +75,7 @@ class Command(BaseCommand):
                             int(random_generator.randint(0,
                                 int(max_certificates)))
                         for course in range(0, nr_certificates):
-                            certificate_obj = Certificate.objects.create(
+                            Certificate.objects.create(
                                 holder=user,
                                 user_eth_address=eth_wallet,
                                 academy_title='Academy ' + faker.company(),
