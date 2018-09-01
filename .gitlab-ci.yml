@@ -1,0 +1,26 @@
+image: python:3.6
+
+services:
+  - postgres:latest
+  - trufflesuite/ganache-cli:latest
+
+variables:
+  POSTGRES_DB: ci
+  ETHEREUM_NODE: http://ganache:8545
+  DJANGO_SETTINGS_MODULE: bdn.settings
+
+cache:
+  paths:
+  - ~/.cache/pip/
+
+before_script:
+  - python -V
+  - apt-get update -q && apt-get install -y libgmp-dev gettext
+  - pip install -r requirements.txt
+
+test:
+  variables:
+    DATABASE_URL: "postgresql://postgres:postgres@postgres:5432/$POSTGRES_DB"
+  script:
+  - cp bdn/ci_settings.py bdn/local_settings.py
+  - python manage.py test
