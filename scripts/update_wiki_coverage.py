@@ -11,7 +11,9 @@ def main():
     coverage = os.environ['COVERAGE']
     time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
     commit_sha = os.environ['CI_COMMIT_SHA']
-    new_line = '| {} | {} | {} |\n'.format(time, commit_sha, coverage)
+    ref_name = os.environ['CI_COMMIT_REF_NAME']
+    new_line = '| {} | {} | {} | {} |\n'.format(
+        time, commit_sha, ref_name, coverage)
     headers = {'Private-Token': PRIVATE_TOKEN}
     response = requests.get(
         URL,
