@@ -30,4 +30,5 @@ coverage:
   script:
   - coverage run --source='.' manage.py test
   - coverage report --skip-covered
+  - COVERAGE=$(`coverage report` | python -c "import sys; print(sys.stdin.read().split()[-1])") python scripts/update_wiki_coverage.sh
   coverage: '/TOTAL.+ ([0-9]{1,3}%)/'
