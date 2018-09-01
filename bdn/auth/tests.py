@@ -1,6 +1,13 @@
 import unittest
 from django.test import TestCase
+from .signature_auth_middleware import SignatureAuthMiddleware
 from .utils import recover_to_addr, get_auth_eth_address
+
+
+class SignatureAuthMiddlewareTests(TestCase):
+    def test_signature_authentication_middleware(self):
+        middleware = SignatureAuthMiddleware(inner=lambda scope: scope)
+        self.assertIsNotNone(middleware.inner)
 
 
 class AuthTests(TestCase):
