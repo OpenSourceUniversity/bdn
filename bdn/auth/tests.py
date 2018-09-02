@@ -2,6 +2,7 @@ import unittest
 from django.test import TestCase
 from .signature_auth_middleware import SignatureAuthMiddleware
 from .utils import recover_to_addr, get_auth_eth_address
+from .models import SignUp, SignUpStep
 
 
 class SignatureAuthMiddlewareTests(TestCase):
@@ -25,6 +26,10 @@ class SignatureAuthMiddlewareTests(TestCase):
 
 
 class AuthTests(TestCase):
+
+    def test_signup(self):
+        s = SignUp(email='test@example.com', step=SignUpStep.EMAIL)
+        self.assertEqual(str(s), 'test@example.com')
 
     def test_recover_to_addr_string(self):
         sig = (
