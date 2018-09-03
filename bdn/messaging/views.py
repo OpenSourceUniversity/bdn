@@ -4,6 +4,7 @@ from collections import OrderedDict
 from django.db.models import Q
 from django.utils import timezone
 from rest_framework import status, viewsets, mixins
+from rest_framework.decorators import list_route
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response

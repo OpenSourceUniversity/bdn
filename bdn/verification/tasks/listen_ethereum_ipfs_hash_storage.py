@@ -45,20 +45,25 @@ def listen_ethereum_ipfs_hash_storage():
             verifier_id = verification_ipfs_data.get('verifier')
             verification_id = verification_ipfs_data.get('id')
         except AttributeError:
+            logger.error('verification_ipfs_data AttributeError')
             continue
         try:
             granted_to = User.objects.get(username=granted_to_eth.lower())
             verifier = User.objects.get(pk=verifier_id)
         except User.DoesNotExist:
+            logger.error('User.DoesNotExist')
             continue
         except ValidationError:
+            logger.error('User ValidationError')
             continue
         try:
             verification = Verification.objects.get(
                 pk=verification_id, verifier=verifier)
         except Verification.DoesNotExist:
+            logger.error('Verification.DoesNotExist')
             continue
         except ValidationError:
+            logger.error('Verification ValidationError')
             continue
         if verification.state == 'verified':
             continue
