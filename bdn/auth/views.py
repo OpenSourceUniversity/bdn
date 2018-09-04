@@ -1,32 +1,13 @@
-from rest_framework import status, viewsets
+from rest_framework import status, viewsets, mixins
 from rest_framework.response import Response
 from .serializers import SignUpSerializer
 from .models import SignUp
 
 
-class SignUpViewSet(viewsets.ModelViewSet):
+class SignUpViewSet(mixins.CreateModelMixin,
+                    viewsets.GenericViewSet):
     queryset = SignUp.objects.all()
     serializer_class = SignUpSerializer
-
-    def update(self, request):
-        return Response({
-                    'status': 'denied'}, status=status.HTTP_401_UNAUTHORIZED)
-
-    def partial_update(self, request):
-        return Response({
-                    'status': 'denied'}, status=status.HTTP_401_UNAUTHORIZED)
-
-    def destroy(self, request):
-        return Response({
-                    'status': 'denied'}, status=status.HTTP_401_UNAUTHORIZED)
-
-    def retrieve(self, request, pk=None):
-        return Response({
-                    'status': 'denied'}, status=status.HTTP_401_UNAUTHORIZED)
-
-    def list(self, request, pk=None):
-        return Response({
-                    'status': 'denied'}, status=status.HTTP_401_UNAUTHORIZED)
 
     def create(self, request):
         data = request.data.copy()

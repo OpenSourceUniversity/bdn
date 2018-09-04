@@ -1,10 +1,11 @@
 import unittest
-from django.test import TestCase
+from django.test import TestCase, RequestFactory
 from django.contrib.auth.models import AnonymousUser
 from .signature_auth_middleware import SignatureAuthMiddleware
 from .signature_authentication import SignatureAuthentication
 from .utils import recover_to_addr, get_auth_eth_address
 from .models import SignUp, SignUpStep
+from .views import SignUpViewSet
 
 
 class SignatureAuthMiddlewareTests(TestCase):
@@ -130,6 +131,27 @@ class AuthTests(TestCase):
             'HTTP_AUTH_ETH_ADDRESS': '0' * 40
         })
         self.assertEqual(eth_address, '0x{0}'.format('0' * 40))
+
+
+class SignUpViewSetTests(TestCase):
+    def setUp(self):
+        self.factory = RequestFactory()
+
+    def test_create_of_signup_object(self):
+        request = self.factory.post('/api/v1/signup/', data={
+            'email': 'test@example.com'
+        })
+        response = SignUpViewSet.as_view({'post': 'create'})(request)
+        self.assertEqual(response.status_code, 200)
+        count = SignUp.objects.filter(email='test@example.com').count()
+        self.assertEqual(count, 1)
+
+    def test_create_of_signup_invalid_email(self):
+        request = self.factory.post('/api/v1/signup/', data={
+            'email': 'something_definitely_not_an_email'
+        })
+        response = SignUpViewSet.as_view({'post': 'create'})(request)
+        self.assertEqual(response.status_code, 400)
 
 
 if __name__ == '__main__':
