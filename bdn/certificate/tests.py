@@ -3,11 +3,15 @@
 from django.test import RequestFactory, TestCase
 
 from .views import CertificateViewSet
+from .apps import CertificateConfig
 
 
 class CertificateTests(TestCase):
     def setUp(self):
         self.factory = RequestFactory()
+
+    def test_app_name(self):
+        self.assertEqual(CertificateConfig.name, 'certificate')
 
     def test_auth_failure(self):
         request = self.factory.get('/api/v1/certificates/')
