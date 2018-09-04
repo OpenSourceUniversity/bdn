@@ -2,7 +2,6 @@ import logging
 from urllib.parse import parse_qsl
 from channels.auth import AuthMiddlewareStack
 from django.contrib.auth.models import AnonymousUser
-from django.db import close_old_connections
 from bdn.auth.models import User
 from bdn.auth.utils import recover_to_addr
 
