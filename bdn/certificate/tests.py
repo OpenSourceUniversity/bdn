@@ -36,6 +36,109 @@ class CertificateTests(TestCase):
         response = CertificateViewSet.as_view({'get': 'list'})(request)
         self.assertEqual(response.status_code, 200)
 
+    def test_certificate_create_and_then_delete_it(self):
+        # Create certificate
+        user, _ = User.objects.get_or_create(username='0x0')
+        request = self.factory.post(
+            '/api/v1/certificates/',
+            data={
+                'academy_title': 'test',
+                'academy_link': 'http://example.com',
+                'course_title': 'test',
+                'learner_eth_address': '0xD2BE64317Eb1832309DF8c8C18B09871809f3735',
+                'score': '',
+                'duration': '',
+                'skills': ['Python'],
+            },
+            HTTP_AUTH_SIGNATURE='0xe646de646dde9cee6875e3845428ce6fc13d41086e8a7f6531d1d526598cc4104122e01c38255d1e1d595710986d193f52e3dbc47cb01cb554d8e4572d6920361c',
+            HTTP_AUTH_ETH_ADDRESS='D2BE64317Eb1832309DF8c8C18B09871809f3735'
+        )
+        response = CertificateViewSet.as_view({'post': 'create'})(request)
+        self.assertEqual(response.status_code, 200)
+        certificate_pk = str(response.data['certificate_pk'])
+
+        # Retrieve the certificate
+        request = self.factory.get(
+            '/api/v1/certificates/{}/'.format(certificate_pk),
+            HTTP_AUTH_SIGNATURE='0xe646de646dde9cee6875e3845428ce6fc13d41086e8a7f6531d1d526598cc4104122e01c38255d1e1d595710986d193f52e3dbc47cb01cb554d8e4572d6920361c',
+            HTTP_AUTH_ETH_ADDRESS='D2BE64317Eb1832309DF8c8C18B09871809f3735')
+        response = CertificateViewSet.as_view({'get': 'retrieve'})(request, pk=certificate_pk)
+        self.assertEqual(response.status_code, 200)
+
+        # Get certificates by learner
+        request = self.factory.get(
+            '/api/v1/certificates/get_certificates_by_learner/'\
+            '?eth_address=0xD2BE64317Eb1832309DF8c8C18B09871809f3735',
+            HTTP_AUTH_SIGNATURE='0xe646de646dde9cee6875e3845428ce6fc13d41086e8a7f6531d1d526598cc4104122e01c38255d1e1d595710986d193f52e3dbc47cb01cb554d8e4572d6920361c',
+            HTTP_AUTH_ETH_ADDRESS='D2BE64317Eb1832309DF8c8C18B09871809f3735')
+        view = CertificateViewSet.as_view({'get': 'get_certificates_by_learner'})
+        response = view(request)
+        self.assertEqual(len(response.data), 1)
+        self.assertEqual(response.status_code, 200)
+
+        # Delete it
+        url = '/api/v1/certificates/{}/delete_by_id/'.format(certificate_pk)
+        request = self.factory.post(
+            url,
+            HTTP_AUTH_SIGNATURE='0xe646de646dde9cee6875e3845428ce6fc13d41086e8a7f6531d1d526598cc4104122e01c38255d1e1d595710986d193f52e3dbc47cb01cb554d8e4572d6920361c',
+            HTTP_AUTH_ETH_ADDRESS='D2BE64317Eb1832309DF8c8C18B09871809f3735')
+        view = CertificateViewSet.as_view({'post': 'delete_by_id'})
+        response = view(request, pk=certificate_pk)
+        self.assertEqual(response.status_code, 200)
+
+    def test_delete_certificate_not_holded_by_user(self):
+        User.objects.get_or_create(username='0x0')
+        certificate = Certificate(**{
+            'academy_title': 'test',
+            'academy_link': 'http://example.com',
+            'course_title': 'test',
+            'learner_eth_address': '0x0',
+        })
+        certificate.save()
+        url = '/api/v1/certificates/{}/delete_by_id/'.format(certificate.pk)
+        request = self.factory.post(
+            url,
+            HTTP_AUTH_SIGNATURE='0xe646de646dde9cee6875e3845428ce6fc13d41086e8a7f6531d1d526598cc4104122e01c38255d1e1d595710986d193f52e3dbc47cb01cb554d8e4572d6920361c',
+            HTTP_AUTH_ETH_ADDRESS='D2BE64317Eb1832309DF8c8C18B09871809f3735')
+        view = CertificateViewSet.as_view({'post': 'delete_by_id'})
+        response = view(request, pk=certificate.pk)
+        self.assertEqual(response.status_code, 401)
+
+    def test_certificate_create_not_valid_data(self):
+        user, _ = User.objects.get_or_create(username='0x0')
+        request = self.factory.post(
+            '/api/v1/certificates/',
+            data={
+                'academy_title': 'test',
+                'academy_link': 'httttp://example.com',
+                'course_title': 'test',
+                'learner_eth_address': '0x0',
+                'score': '',
+                'duration': '',
+            },
+            HTTP_AUTH_SIGNATURE='0xe646de646dde9cee6875e3845428ce6fc13d41086e8a7f6531d1d526598cc4104122e01c38255d1e1d595710986d193f52e3dbc47cb01cb554d8e4572d6920361c',
+            HTTP_AUTH_ETH_ADDRESS='D2BE64317Eb1832309DF8c8C18B09871809f3735'
+        )
+        response = CertificateViewSet.as_view({'post': 'create'})(request)
+        self.assertEqual(response.status_code, 400)
+
+    def test_certificate_create_no_such_holder(self):
+        request = self.factory.post(
+            '/api/v1/certificates/',
+            data={
+                'academy_title': 'test',
+                'academy_link': 'http://example.com',
+                'course_title': 'test',
+                'learner_eth_address': '0x1',
+                'score': '',
+                'duration': '',
+            },
+            HTTP_AUTH_SIGNATURE='0xe646de646dde9cee6875e3845428ce6fc13d41086e8a7f6531d1d526598cc4104122e01c38255d1e1d595710986d193f52e3dbc47cb01cb554d8e4572d6920361c',
+            HTTP_AUTH_ETH_ADDRESS='D2BE64317Eb1832309DF8c8C18B09871809f3735'
+        )
+        response = CertificateViewSet.as_view({'post': 'create'})(request)
+        self.assertEqual(response.status_code, 400)
+
     def test_certificate_serializer_to_internal_value(self):
         serializer = CertificateSerializer(data={
             'academy_title': 'test',

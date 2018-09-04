@@ -2,7 +2,7 @@
 from __future__ import unicode_literals
 
 import datetime
-from rest_framework import viewsets, status
+from rest_framework import viewsets, status, mixins
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.decorators import detail_route, list_route
@@ -16,7 +16,10 @@ from .serializers import (CertificateSerializer,
                           CertificateViewProfileSerializer)
 
 
-class CertificateViewSet(viewsets.ModelViewSet):
+class CertificateViewSet(mixins.RetrieveModelMixin,
+                         mixins.CreateModelMixin,
+                         mixins.ListModelMixin,
+                         viewsets.GenericViewSet):
     queryset = Certificate.objects.all()
     serializer_class = CertificateSerializer
     authentication_classes = (SignatureAuthentication,)
@@ -26,15 +29,6 @@ class CertificateViewSet(viewsets.ModelViewSet):
         certificate = Certificate.objects.get(id=pk)
         serializer = CertificateViewProfileSerializer(certificate)
         return Response(serializer.data)
-
-    def update(self, request):
-        return self.deny()
-
-    def partial_update(self, request):
-        return self.deny()
-
-    def destroy(self, request):
-        return self.deny()
 
     @staticmethod
     def deny():
@@ -47,12 +41,6 @@ class CertificateViewSet(viewsets.ModelViewSet):
             .order_by('course_title')
         serializer = CertificateViewProfileSerializer(certificates, many=True)
         return Response(serializer.data)
-
-    @detail_route(methods=['get'])
-    def get_certificates_count(self, request, pk=None):
-        certificates_count = Certificate.objects.filter(
-            holder=request.user).count()
-        return Response({'certificates_count': certificates_count})
 
     @list_route(methods=['get'])
     def get_certificates_by_learner(self, request):
@@ -75,9 +63,9 @@ class CertificateViewSet(viewsets.ModelViewSet):
         eth_address = get_auth_eth_address(request.META)
         academy_address = str(request.data.get('academy_address')).lower()
         industries = Industry.objects.filter(
-            name__in=request.data.get('industries'))
+            name__in=request.data.get('industries', []))
         data = request.data.copy()
-        expiration_date = self._normalized_date(data['expiration_date'])
+        expiration_date = self._normalized_date(data.get('expiration_date'))
         data['expiration_date'] = expiration_date
         learner_eth_address = request.data.get('learner_eth_address').lower()
         try:
@@ -86,15 +74,19 @@ class CertificateViewSet(viewsets.ModelViewSet):
             return Response({
                 'error': 'User not found',
             }, status=status.HTTP_400_BAD_REQUEST)
-        skills = self._normalized_skills(request.data.get('skills'))
+        skills = self._normalized_skills(request.data.get('skills', []))
         data['holder'] = holder.id
         data['learner_eth_address'] = learner_eth_address
         data['academy_address'] = academy_address
         data['user_eth_address'] = eth_address
         serializer = CertificateSerializer(data=data)
         if serializer.is_valid():
-            serializer.save(skills=skills, industries=industries)
-            return Response({'status': 'ok'})
+            certificate = serializer.save(
+                skills=skills, industries=industries)
+            return Response({
+                'status': 'ok',
+                'certificate_pk': certificate.pk,
+            })
         else:
             return Response(serializer.errors,
                             status=status.HTTP_400_BAD_REQUEST)
