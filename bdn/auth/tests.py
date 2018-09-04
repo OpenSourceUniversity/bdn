@@ -1,5 +1,6 @@
 import unittest
 from django.test import TestCase
+from django.contrib.auth.models import AnonymousUser
 from .signature_auth_middleware import SignatureAuthMiddleware
 from .utils import recover_to_addr, get_auth_eth_address
 from .models import SignUp, SignUpStep
@@ -19,6 +20,49 @@ class SignatureAuthMiddlewareTests(TestCase):
             '43921b'
         eth = '6feb0cb327a812202f41ba50856ff985E4a781B5'
         qs = 'auth_eth_address={}&auth_signature={}'.format(eth, sig)
+        result = middleware({
+            'query_string': bytes(qs, 'utf-8')
+        })
+        self.assertTrue(result)
+
+    def test_mismatch_between_recovered(self):
+        def inner(scope):
+            self.assertIsInstance(scope['user'], AnonymousUser)
+            return True
+        middleware = SignatureAuthMiddleware(inner=inner)
+        self.assertIsNotNone(middleware.inner)
+        sig = ''\
+            '0x0b19d1d187c1145f08f4712241e2e24b011b5eef6f1fe94f880fc1a8bf2e2' \
+            '6513d16c7126dcce2fd4fa0f739ad566102657366cf2e1cde0164aed9b0e6b1'\
+            '43921b'
+        eth = '6feb0cb327a812202f41ba50856ff985E4a781B4'
+        qs = 'auth_eth_address={}&auth_signature={}'.format(eth, sig)
+        result = middleware({
+            'query_string': bytes(qs, 'utf-8')
+        })
+        self.assertTrue(result)
+
+    def test_signature_authentication_middleware_value_error(self):
+        def inner(scope):
+            self.assertIsInstance(scope['user'], AnonymousUser)
+            return True
+        middleware = SignatureAuthMiddleware(inner=inner)
+        self.assertIsNotNone(middleware.inner)
+        sig = 'some_wrong_signature_so_that_we_raise_value_error'
+        eth = '6feb0cb327a812202f41ba50856ff985E4a781B5'
+        qs = 'auth_eth_address={}&auth_signature={}'.format(eth, sig)
+        result = middleware({
+            'query_string': bytes(qs, 'utf-8')
+        })
+        self.assertTrue(result)
+
+    def test_no_auth_parameters_provided(self):
+        def inner(scope):
+            self.assertIsInstance(scope['user'], AnonymousUser)
+            return True
+        middleware = SignatureAuthMiddleware(inner=inner)
+        self.assertIsNotNone(middleware.inner)
+        qs = ''
         result = middleware({
             'query_string': bytes(qs, 'utf-8')
         })

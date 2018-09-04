@@ -32,8 +32,6 @@ class SignatureAuthMiddleware:
                     logger.info('Authenticating {}'.format(user.username))
             except ValueError:
                 logger.warning('Could not authenticate {}'.format(eth_address))
-            finally:
-                close_old_connections()
         else:
             logger.warning('No auth parameters provided to WebSocket')
 
