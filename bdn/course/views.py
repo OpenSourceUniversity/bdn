@@ -95,14 +95,8 @@ class CourseViewSet(mixins.RetrieveModelMixin,
     @list_route(methods=['get'])
     def get_by_provider(self, request):
         eth_address = str(request.GET.get('eth_address')).lower()
-        try:
-            academy = User.objects.get(username=eth_address)
-        except User.DoesNotExist:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
-        try:
-            provider = Provider.objects.get(user=academy)
-        except Provider.DoesNotExist:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
+        academy = get_object_or_404(User, username=eth_address)
+        provider = get_object_or_404(Provider, user=academy)
         qs = Course.objects.all().filter(provider=provider)
         serializer = self.get_serializer(qs, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
