@@ -1,6 +1,5 @@
 from bdn.auth.models import User
 from rest_framework import authentication
-from rest_framework import exceptions
 from bdn.auth.utils import recover_to_addr
 
 
@@ -19,10 +18,7 @@ class SignatureAuthentication(authentication.BaseAuthentication):
         if eth_address.lower() != recovered_eth_address[2:].lower():
             return None
 
-        try:
-            user, _ = User.objects.get_or_create(
-                username=recovered_eth_address.lower())
-        except User.DoesNotExist:
-            raise exceptions.AuthenticationFailed('No such user')
+        user, _ = User.objects.get_or_create(
+            username=recovered_eth_address.lower())
 
         return (user, None)

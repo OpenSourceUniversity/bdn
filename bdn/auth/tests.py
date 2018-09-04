@@ -2,6 +2,7 @@ import unittest
 from django.test import TestCase
 from django.contrib.auth.models import AnonymousUser
 from .signature_auth_middleware import SignatureAuthMiddleware
+from .signature_authentication import SignatureAuthentication
 from .utils import recover_to_addr, get_auth_eth_address
 from .models import SignUp, SignUpStep
 
@@ -98,6 +99,31 @@ class AuthTests(TestCase):
             '131c')
         addr = recover_to_addr('a0x12345', sig)
         self.assertEqual(addr, '0xc2d7cf95645d33006175b78989035c7c9061d3f9')
+
+    def test_recover_to_addr_value_error(self):
+        class FakeRequest():
+            META = {
+                'HTTP_AUTH_SIGNATURE': 'some_sig_to_cause_value_error',
+                'HTTP_AUTH_ETH_ADDRESS': '0xsomedefinitelywrongethaddress',
+            }
+        auth = SignatureAuthentication()
+        result = auth.authenticate(FakeRequest)
+        self.assertIsNone(result)
+
+    def test_recover_to_addr_mismatch(self):
+        sig = '' \
+              '0x0b19d1d187c1145f08f4712241e2e24b011b5eef6f1fe94f880fc1a8bf' \
+              '2e26513d16c7126dcce2fd4fa0f739ad566102657366cf2e1cde0164aed9' \
+              'b0e6b143921b'
+
+        class FakeRequest():
+            META = {
+                'HTTP_AUTH_SIGNATURE': sig,
+                'HTTP_AUTH_ETH_ADDRESS': 'cb327a812202f41ba50856ff985E4a781B5',
+            }
+        auth = SignatureAuthentication()
+        result = auth.authenticate(FakeRequest)
+        self.assertIsNone(result)
 
     def test_get_auth_eth_address(self):
         eth_address = get_auth_eth_address({
