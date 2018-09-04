@@ -1,5 +1,5 @@
-import datetime
 from django.db.models import Q
+from django.utils import timezone
 from rest_framework import serializers
 from bdn.industry.serializers import IndustrySerializer
 from bdn.skill.serializers import SkillSerializer
@@ -66,8 +66,7 @@ class CertificateViewProfileSerializer(serializers.ModelSerializer):
 
     def _is_expired(self, obj):
         if obj.expiration_date:
-            return obj.expiration_date.replace(tzinfo=None) < datetime.\
-                datetime.now().replace(tzinfo=None)
+            return obj.expiration_date < timezone.now()
 
     class Meta:
         model = Certificate

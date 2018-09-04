@@ -1,9 +1,15 @@
 # flake8: noqa
 
 from django.test import RequestFactory, TestCase
-
+from django.utils import timezone
+from datetime import timedelta
+from bdn.verification.models import Verification
+from bdn.auth.models import User
 from .views import CertificateViewSet
 from .apps import CertificateConfig
+from .serializers import (
+    CertificateSerializer, CertificateViewProfileSerializer)
+from .models import Certificate
 
 
 class CertificateTests(TestCase):
@@ -29,3 +35,56 @@ class CertificateTests(TestCase):
         )
         response = CertificateViewSet.as_view({'get': 'list'})(request)
         self.assertEqual(response.status_code, 200)
+
+    def test_certificate_serializer_to_internal_value(self):
+        serializer = CertificateSerializer(data={
+            'academy_title': 'test',
+            'academy_link': 'http://example.com',
+            'course_title': 'test',
+            'learner_eth_address': '0x0',
+            'score': '',
+            'duration': '',
+        })
+        self.assertTrue(serializer.is_valid())
+        serializer = CertificateSerializer(data={
+            'academy_title': 'test',
+            'academy_link': 'http://example.com',
+            'course_title': 'test',
+            'learner_eth_address': '0x0',
+            'score': 100,
+            'duration': 100,
+        })
+        self.assertTrue(serializer.is_valid())
+
+
+class CertificateViewProfileSerializerTests(TestCase):
+    def test_verifications(self):
+        certificate = Certificate(**{
+            'academy_title': 'test',
+            'academy_link': 'http://example.com',
+            'course_title': 'test',
+            'learner_eth_address': '0x0',
+        })
+        certificate.save()
+        verifier, _ = User.objects.get_or_create(email='verifier@example.com')
+        verification = Verification(
+            certificate=certificate,
+            state='verified',
+            verifier=verifier
+        )
+        verification.save()
+        serializer = CertificateViewProfileSerializer(certificate)
+        self.assertEqual(len(serializer._verifications(certificate)), 1)
+        self.assertIsNone(serializer._is_expired(certificate))
+
+    def test_certificate_expired(self):
+        certificate = Certificate(**{
+            'academy_title': 'test',
+            'academy_link': 'http://example.com',
+            'course_title': 'test',
+            'learner_eth_address': '0x0',
+            'expiration_date': timezone.now() - timedelta(hours=24)
+        })
+        certificate.save()
+        serializer = CertificateViewProfileSerializer(certificate)
+        self.assertTrue(serializer._is_expired(certificate))
