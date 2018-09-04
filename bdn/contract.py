@@ -23,4 +23,4 @@ def contract(contract_name):
         _contracts[contract_name] = w3.eth.contract(
             address=web3.Web3.toChecksumAddress(network['address']),
             abi=contract_interface['abi'])
-        return _contracts[contract_name]
+    return _contracts[contract_name]
