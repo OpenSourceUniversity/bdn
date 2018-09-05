@@ -4,7 +4,7 @@ from collections import OrderedDict
 from django.db.models import Q
 from django.utils import timezone
 from rest_framework import status, viewsets, mixins
-from rest_framework.decorators import list_route
+from rest_framework.decorators import list_route, detail_route
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -117,6 +117,21 @@ class MessageViewSet(mixins.CreateModelMixin,
         messages = Message.objects.filter(thread=thread)
         messages.exclude(sender=issuer).update(read=True)
         return messages
+
+    @detail_route(methods=['post'])
+    def mark_as_read_by_id(self, request, pk=None):
+        message_id = str(pk)
+        issuer = request.user
+        try:
+            message = Message.objects.get(pk=message_id)
+        except Message.DoesNotExist:
+            return Response({
+                'error': 'Message not found',
+            }, status=status.HTTP_400_BAD_REQUEST)
+        if message.thread.owner == issuer or message.thread.opponent == issuer:
+            message.read = True
+            message.save()
+        return Response({'message': message.pk})
 
     def create(self, request):
         thread_id = request.data.get('threadID')

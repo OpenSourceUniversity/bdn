@@ -57,6 +57,7 @@ class MessageGetSerializer(serializers.ModelSerializer):
     class Meta:
         model = Message
         fields = (
+            'id',
             'thread',
             'sender',
             'text',
