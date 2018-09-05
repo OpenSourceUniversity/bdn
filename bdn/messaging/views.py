@@ -57,7 +57,8 @@ class ThreadViewSet(mixins.CreateModelMixin,
             Q(owner=owner, opponent=opponent) | Q(
                 owner=opponent, opponent=owner)).first()
         if created_thread:
-            serializer = ThreadGetSerializer(instance=created_thread)
+            serializer = ThreadGetSerializer(
+                created_thread, context={'request': request})
             response = Response(serializer.data)
         else:
             serializer = ThreadSerializer(
