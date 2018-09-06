@@ -1,10 +1,78 @@
 import logging
+import requests
+from bdn.verification.models import Verification
+from bdn.certificate.models import Certificate
+from bdn.auth.models import User
+from django.core.exceptions import ValidationError
+from notifications.signals import notify
 from celery import shared_task
 
+
+IPFS_HOST = 'https://ipfs.io/ipfs/'
 
 logger = logging.getLogger(__name__)
 
 
 @shared_task
-def perform_ipfs_meta_verification():
-    pass
+def perform_ipfs_meta_verification(entry):
+    tx_hash = entry['transactionHash'].hex()
+    block_hash = entry['blockHash'].hex()
+    block_number = int(entry['blockNumber'])
+    entry_args = entry['args']
+    meta_ipfs_hash = entry_args.get('ipfsHash', b'').decode()
+    granted_to_eth = entry_args.get('grantedTo', '')
+    if not meta_ipfs_hash or not granted_to_eth:
+        logger.error(
+            "Event triggered without providing IPFS meta hash or "
+            "granted to ETH address")
+        return
+    ipfs_link = IPFS_HOST + meta_ipfs_hash
+    verification_ipfs_data = requests.get(ipfs_link).json()
+    try:
+        verifier_id = verification_ipfs_data.get('verifier')
+        verification_id = verification_ipfs_data.get('id')
+    except AttributeError:
+        logger.error('verification_ipfs_data AttributeError')
+        return
+    try:
+        granted_to = User.objects.get(username=granted_to_eth.lower())
+        verifier = User.objects.get(pk=verifier_id)
+    except User.DoesNotExist:
+        logger.error('User.DoesNotExist')
+        return
+    except ValidationError:
+        logger.error('User ValidationError')
+        return
+    try:
+        verification = Verification.objects.get(
+            pk=verification_id, verifier=verifier)
+    except Verification.DoesNotExist:
+        logger.error('Verification.DoesNotExist')
+        return
+    except ValidationError:
+        logger.error('Verification ValidationError')
+        return
+    if verification.state == 'verified':
+        return
+    verification.tx_hash = tx_hash
+    verification.block_hash = block_hash
+    verification.block_number = block_number
+    verification.granted_to = granted_to
+    verification.meta_ipfs_hash = meta_ipfs_hash
+    verification.move_to_verified()
+    verification.save()
+    try:
+        certificate = Certificate.objects.get(
+            id=verification_ipfs_data.get('certificate').get('id'))
+    except Certificate.DoesNotExist:
+        return
+    notify.send(
+        verifier,
+        recipient=granted_to,
+        verb='verified',
+        target=certificate,
+        **{
+            'actor_active_profile_type': verification.verifier_type,
+            'recipient_active_profile_type': verification.granted_to_type
+        }
+    )
