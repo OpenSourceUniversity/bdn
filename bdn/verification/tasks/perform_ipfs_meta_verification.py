@@ -15,11 +15,11 @@ logger = logging.getLogger(__name__)
 
 @shared_task
 def perform_ipfs_meta_verification(entry):
-    tx_hash = entry['transactionHash'].hex()
-    block_hash = entry['blockHash'].hex()
+    tx_hash = entry['transactionHash']
+    block_hash = entry['blockHash']
     block_number = int(entry['blockNumber'])
     entry_args = entry['args']
-    meta_ipfs_hash = entry_args.get('ipfsHash', b'').decode()
+    meta_ipfs_hash = entry_args.get('ipfsHash', '')
     granted_to_eth = entry_args.get('grantedTo', '')
     if not meta_ipfs_hash or not granted_to_eth:
         logger.error(

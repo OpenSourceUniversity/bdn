@@ -1,8 +1,9 @@
 import logging
+import json
 from celery import shared_task
 from bdn import contract
 from bdn import redis
-from . import perform_ipfs_meta_verification
+from .perform_ipfs_meta_verification import perform_ipfs_meta_verification
 
 
 logger = logging.getLogger(__name__)
@@ -22,6 +23,16 @@ def listen_ethereum_ipfs_hash_storage():
 
     for entry in hash_filter.get_all_entries():
         block_number = int(entry['blockNumber'])
-        perform_ipfs_meta_verification.delay(entry)
+        entry_args = dict(entry['args'])
+        entry_data = {
+            'transactionHash': entry['transactionHash'].hex(),
+            'blockHash': entry['blockHash'].hex(),
+            'blockNumber': entry['blockNumber'],
+            'args': {
+                'ipfsHash': entry_args.get('ipfsHash', b'').decode(),
+                'grantedTo': entry_args.get('grantedTo', ''),
+            },
+        }
+        perform_ipfs_meta_verification.delay(entry_data)
         if block_number > last_block:
             redis_db.set('_verification_filter_block', block_number)
