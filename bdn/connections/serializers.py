@@ -21,7 +21,7 @@ class FileUploadSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = FileUpload
-        read_only_fields = (
+        fields = (
             'created',
             'owner',
             'datafile',

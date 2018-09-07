@@ -40,7 +40,7 @@ router.register(r'industries', IndustryViewSet, base_name='Industry')
 router.register(r'skills', SkillViewSet, base_name='Skill')
 router.register(r'jobs', JobViewSet)
 router.register(r'connections', ConnectionsViewSet)
-router.register(r'connections/archive', FileViewSet)
+router.register(r'archive', FileViewSet, base_name='archive')
 router.register(r'verifications', VerificationViewSet)
 router.register(r'messaging/threads', ThreadViewSet, base_name='Thread')
 router.register(

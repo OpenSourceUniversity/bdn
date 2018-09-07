@@ -2,4 +2,4 @@ from django.apps import AppConfig
 
 
 class ConnectionsConfig(AppConfig):
-    name = 'connections'
+    name = 'bdn.connections'

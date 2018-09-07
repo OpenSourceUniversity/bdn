@@ -23,3 +23,6 @@ class FileUpload(m.Model):
     owner = m.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=m.SET_NULL, null=True)
     datafile = m.FileField()
+
+    def __str__(self):
+        return self.owner.username

@@ -13,8 +13,8 @@ from bdn.auth.models import User
 class ConnectionsViewSet(viewsets.ModelViewSet):
     queryset = Connections.objects.all()
     serializer_class = ConnectionsSerializer
-    # authentication_classes = (SignatureAuthentication,)
-    # permission_classes = (IsAuthenticated,)
+    authentication_classes = (SignatureAuthentication,)
+    permission_classes = (IsAuthenticated,)
 
     def retrieve(self, request, pk=None):
         return self.deny()
@@ -34,31 +34,16 @@ class ConnectionsViewSet(viewsets.ModelViewSet):
                     'status': 'denied'}, status=status.HTTP_401_UNAUTHORIZED)
 
     def create(self, request):
-        eth_address = get_auth_eth_address(request.META)
-        try:
-            user = User.objects.get(username=eth_address)
-        except User.DoesNotExist:
-            return Response({
-                'error': 'User not found',
-            }, status=status.HTTP_400_BAD_REQUEST)
-        serializer = FileUploadSerializer(FileUpload)
-        if serializer.is_valid():
-            serializer(
-                owner=user,
-                datafile=self.request.FILES['file']
-            )
-            return Response({
-                'status': 'ok',
-            })
-        else:
-            return Response(serializer.errors,
-                            status=status.HTTP_400HTTP_400_BAD_REQUEST)
+        return Response({
+                    'status': 'denied'}, status=status.HTTP_401_UNAUTHORIZED)
 
 
 class FileViewSet(viewsets.ModelViewSet):
     serializer_class = FileUploadSerializer
+    authentication_classes = (SignatureAuthentication,)
+    permission_classes = (IsAuthenticated,)
 
-    def create(self, request):
+    def create(self, request, format=None):
         eth_address = get_auth_eth_address(request.META)
         try:
             user = User.objects.get(username=eth_address)
@@ -66,30 +51,16 @@ class FileViewSet(viewsets.ModelViewSet):
             return Response({
                 'error': 'User not found',
             }, status=status.HTTP_400_BAD_REQUEST)
-        serializer = FileUploadSerializer(FileUpload)
+        serializer = FileUploadSerializer(data=request.data)
         if serializer.is_valid():
-            serializer(
+            archive = serializer.save(
                 owner=user,
                 datafile=self.request.FILES['file']
             )
             return Response({
                 'status': 'ok',
+                'archive': archive.pk,
             })
         else:
             return Response(serializer.errors,
-                            status=status.HTTP_400HTTP_400_BAD_REQUEST)
-
-    def store_archive(self, request):
-        eth_address = get_auth_eth_address(request.META)
-        try:
-            user = User.objects.get(username=eth_address)
-        except User.DoesNotExist:
-            return Response({
-                'error': 'User not found',
-            }, status=status.HTTP_400_BAD_REQUEST)
-        serializer = FileUploadSerializer(FileUpload)
-        if serializer.is_valid():
-            serializer(
-                owner=user,
-                datafile=self.request.FILES['file']
-            )
+                            status=status.HTTP_400_BAD_REQUEST)
