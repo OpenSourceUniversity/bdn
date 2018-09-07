@@ -32,7 +32,7 @@ class Migration(migrations.Migration):
                 ('closes', models.DateField(blank=True, null=True)),
                 ('experience', models.CharField(max_length=130)),
                 ('hours', models.CharField(max_length=130)),
-                ('job_type', models.CharField(max_length=130)),
+                ('job_type', models.CharField(max_length=130, null=True)),
                 ('languages', django.contrib.postgres.fields.ArrayField(base_field=models.CharField(max_length=70), default=[], size=None)),
                 ('is_featured', models.BooleanField(default=False)),
                 ('company', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='company.Company')),

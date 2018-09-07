@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from rest_framework import status, viewsets
+from rest_framework import status, viewsets, mixins
 from rest_framework.decorators import detail_route, list_route
 from bdn.auth.models import User
 from rest_framework.permissions import IsAuthenticated
@@ -18,36 +18,16 @@ from .serializers import (
     CompanyProfileSerializer)
 
 
-class ProfileViewSet(viewsets.ModelViewSet):
+class ProfileViewSet(mixins.CreateModelMixin,
+                     mixins.ListModelMixin,
+                     viewsets.GenericViewSet):
     serializer_class = ProfileSerializer
     authentication_classes = (SignatureAuthentication,)
     permission_classes = (IsAuthenticated,)
     queryset = Profile.objects.all()
 
-    def retrieve(self, request):
-        return Response({
-                    'status': 'denied'}, status=status.HTTP_401_UNAUTHORIZED)
-
-    def update(self, request):
-        return Response({
-                    'status': 'denied'}, status=status.HTTP_401_UNAUTHORIZED)
-
-    def partial_update(self, request):
-        return Response({
-                    'status': 'denied'}, status=status.HTTP_401_UNAUTHORIZED)
-
-    def destroy(self, request):
-        return Response({
-                    'status': 'denied'}, status=status.HTTP_401_UNAUTHORIZED)
-
     def list(self, request):
-        eth_address = get_auth_eth_address(request.META)
-        try:
-            user = User.objects.get(username=eth_address)
-        except User.DoesNotExist:
-            return Response({
-                'error': 'User not found',
-            }, status=status.HTTP_400_BAD_REQUEST)
+        user = request.user
         profile = Profile.objects.get(user=user)
         serializer = ProfileSerializer(profile)
         return Response(serializer.data)
@@ -112,12 +92,7 @@ class ProfileViewSet(viewsets.ModelViewSet):
 
     @list_route(methods=['post'])
     def set_active_profile(self, request):
-        eth_address = get_auth_eth_address(request.META)
-        try:
-            user = User.objects.get(username=eth_address)
-        except User.DoesNotExist:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
-        profile = Profile.objects.get(user=user)
+        profile = request.user.profile
         profile_type = int(request.META.get('HTTP_PROFILE_TYPE'))
         profile.active_profile_type = profile_type
         profile.save()
@@ -125,33 +100,24 @@ class ProfileViewSet(viewsets.ModelViewSet):
 
     @list_route(methods=['get'])
     def get_active_profile(self, request):
-        eth_address = get_auth_eth_address(request.META)
-        try:
-            profile = Profile.objects.get(user__username__iexact=eth_address)
-            response = Response({
+        profile = request.user.profile
+        return Response({
                 'active_profile_type': profile.active_profile_type
             })
-        except Profile.DoesNotExist:
-            response = Response(status=status.HTTP_400_BAD_REQUEST)
-        return response
 
     def create(self, request, pk=None):
-        eth_address = get_auth_eth_address(request.META)
         profile_type = int(request.META.get('HTTP_PROFILE_TYPE'))
-        try:
-            profile = Profile.objects.get(user__username__iexact=eth_address)
-        except User.DoesNotExist:
-            return Response({
-                'error': 'User not found',
-            }, status=status.HTTP_400_BAD_REQUEST)
+        profile = request.user.profile
         data = request.data.copy()
         if profile_type == ProfileType.LEARNER:
-            if data['learner_avatar'] is None:
+            learner_avatar = data.get('learner_avatar')
+            if learner_avatar is None:
                 data['learner_avatar'] = profile.learner_avatar
             serializer = LearnerProfileSerializer(
                 data=data, instance=profile, partial=True)
         elif profile_type == ProfileType.ACADEMY:
-            if data['academy_logo'] is None:
+            academy_logo = data.get('academy_logo')
+            if academy_logo is None:
                 data['academy_logo'] = profile.academy_logo
             serializer = AcademyProfileSerializer(
                 data=data, instance=profile, partial=True)
@@ -166,7 +132,8 @@ class ProfileViewSet(viewsets.ModelViewSet):
                 return Response(provider_serializer.errors,
                                 status=status.HTTP_400_BAD_REQUEST)
         elif profile_type == ProfileType.BUSINESS:
-            if data['company_logo'] is None:
+            company_logo = data.get('company_logo')
+            if company_logo is None:
                     data['company_logo'] = profile.company_logo
             serializer = CompanyProfileSerializer(
                 data=data, instance=profile, partial=True)

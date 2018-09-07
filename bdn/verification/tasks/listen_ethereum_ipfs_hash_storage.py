@@ -1,5 +1,4 @@
 import logging
-import json
 from celery import shared_task
 from bdn import contract
 from bdn import redis
