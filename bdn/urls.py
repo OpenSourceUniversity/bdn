@@ -24,7 +24,7 @@ from bdn.industry.views import IndustryViewSet
 from bdn.course.views import CourseViewSet
 from bdn.skill.views import SkillViewSet
 from bdn.job.views import JobViewSet
-from bdn.connections.views import ConnectionsViewSet, FileViewSet
+from bdn.connections.views import FileViewSet
 from bdn.verification.views import VerificationViewSet
 from bdn.auth.views import SignUpViewSet
 from bdn.messaging.views import ThreadViewSet, MessageViewSet
@@ -39,7 +39,6 @@ router.register(r'profile', ProfileViewSet)
 router.register(r'industries', IndustryViewSet, base_name='Industry')
 router.register(r'skills', SkillViewSet, base_name='Skill')
 router.register(r'jobs', JobViewSet)
-router.register(r'connections', ConnectionsViewSet)
 router.register(r'archive', FileViewSet, base_name='archive')
 router.register(r'verifications', VerificationViewSet)
 router.register(r'messaging/threads', ThreadViewSet, base_name='Thread')
