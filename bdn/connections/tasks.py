@@ -17,19 +17,24 @@ def import_connections(connections_file_id):
             connections_file = codecs.iterdecode(connections_file, 'utf-8')
             reader = csv.reader(connections_file, delimiter=',', quotechar='"')
             for row in reader:
-                first_name = row[0]
-                last_name = row[1]
-                email = row[2]
-                company = row[3]
-                position = row[4]
-                # connected_on = row[5]
-                connection = Connection(
-                    owner=file_upload.owner,
-                    first_name=first_name,
-                    last_name=last_name,
-                    email=email,
-                    company_name=company,
-                    position_title=position,
-                    user=None  # TODO: user might already be on the platform
-                )
-                connection.save()
+                handle_connection_row.delay(str(file_upload.owner.id), row)
+
+
+@shared_task
+def handle_connection_row(owner, row):
+    first_name = row[0]
+    last_name = row[1]
+    email = row[2]
+    company = row[3]
+    position = row[4]
+    # connected_on = row[5]
+    connection = Connection(
+        owner_id=owner,
+        first_name=first_name,
+        last_name=last_name,
+        email=email,
+        company_name=company,
+        position_title=position,
+        user=None  # TODO: user might already be on the platform
+    )
+    connection.save()
