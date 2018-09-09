@@ -11,7 +11,7 @@ class Connection(m.Model):
     user = m.ForeignKey(s.AUTH_USER_MODEL, on_delete=m.SET_NULL, null=True)
     first_name = m.CharField(max_length=70)
     last_name = m.CharField(max_length=70)
-    email_address = m.CharField(max_length=130, blank=True, null=True)
+    email = m.CharField(max_length=130, blank=True, null=True)
     company_name = m.CharField(max_length=130, blank=True, null=True)
     position_title = m.CharField(max_length=130, blank=True, null=True)
     connected_on = m.DateTimeField(blank=True, null=True)
@@ -27,4 +27,4 @@ class FileUpload(m.Model):
     datafile = m.FileField()
 
     def __str__(self):
-        return self.owner.username
+        return self.datafile.path
