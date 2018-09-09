@@ -1,12 +1,14 @@
 import uuid
 from django.db import models as m
-from django.conf import settings
+from django.conf import settings as s
 
 
-class Connections(m.Model):
+class Connection(m.Model):
     id = m.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    contacts_holder = m.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=m.SET_NULL, null=True)
+    owner = m.ForeignKey(
+        s.AUTH_USER_MODEL, on_delete=m.SET_NULL, null=True,
+        related_name='self_connections')
+    user = m.ForeignKey(s.AUTH_USER_MODEL, on_delete=m.SET_NULL, null=True)
     first_name = m.CharField(max_length=70)
     last_name = m.CharField(max_length=70)
     email_address = m.CharField(max_length=130, blank=True, null=True)
@@ -21,7 +23,7 @@ class Connections(m.Model):
 class FileUpload(m.Model):
     created = m.DateTimeField(auto_now_add=True)
     owner = m.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=m.SET_NULL, null=True)
+        s.AUTH_USER_MODEL, on_delete=m.SET_NULL, null=True)
     datafile = m.FileField()
 
     def __str__(self):
