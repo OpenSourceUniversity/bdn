@@ -2,6 +2,7 @@ import csv
 import logging
 import zipfile
 import codecs
+import time
 from celery import shared_task
 from .models import Connection, FileUpload
 
@@ -27,7 +28,7 @@ def handle_connection_row(owner, row):
     email = row[2]
     company = row[3]
     position = row[4]
-    # connected_on = row[5]
+    connected_on = time.strptime(row[5].strip(), "%m/%d/%y, %I:%M %p")
     connection = Connection(
         owner_id=owner,
         first_name=first_name,
@@ -35,6 +36,7 @@ def handle_connection_row(owner, row):
         email=email,
         company_name=company,
         position_title=position,
+        connected_on=time.strftime("%Y-%m-%d %H:%M", connected_on),
         user=None  # TODO: user might already be on the platform
     )
     connection.save()
