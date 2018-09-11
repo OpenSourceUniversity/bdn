@@ -103,7 +103,7 @@ class PerformIpfsMetaTests(TestCase):
         self.certificate.save()
         self.verification = Verification(pk='9ffd6ed3-fa64-4beb-903e-b1c4fd6d0c99',
             certificate=self.certificate, verifier=self.verifier, state='pending',
-            verifier_type=2)
+            verifier_type=2, granted_to_type=1)
         self.verification.save()
 
     @patch('requests.get', fake_ipfs_request_get([
