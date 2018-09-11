@@ -1,3 +1,4 @@
+# flake8: noqa
 import unittest
 from unittest.mock import mock_open, patch
 from bdn import contract

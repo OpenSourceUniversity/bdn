@@ -7,7 +7,6 @@ from bdn.auth.models import User
 from rest_framework.permissions import IsAuthenticated
 from bdn.auth.signature_authentication import SignatureAuthentication
 from rest_framework.response import Response
-from bdn.auth.utils import get_auth_eth_address
 from .models import Profile, ProfileType
 from bdn.provider.models import Provider
 from bdn.company.models import Company
