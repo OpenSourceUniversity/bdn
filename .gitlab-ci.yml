@@ -3,6 +3,7 @@ image: python:3.6
 services:
   - postgres:latest
   - trufflesuite/ganache-cli:latest
+  - redis:latest
 
 variables:
   POSTGRES_DB: ci
