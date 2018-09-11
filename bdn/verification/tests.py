@@ -45,13 +45,17 @@ class fake_ipfs_request_get:
         self.exec_count = 0
 
     def __call__(self, *args):
-        instance = type('', (), {})
         instance = MagicMock()
         instance.json.return_value = self.ipfs_verification_results[
             self.exec_count
         ]
         self.exec_count += 1
         return instance
+
+def fake_get_transaction(data):
+    mock = MagicMock()
+    mock.getTransaction.return_value = data
+    return mock
 
 
 class ListenIpfsMetaTests(TestCase):
@@ -91,7 +95,7 @@ class ListenIpfsMetaTests(TestCase):
 
 class PerformIpfsMetaTests(TestCase):
     def setUp(self):
-        self.verifier, _ = User.objects.get_or_create(pk='3482b1bb-cb39-4fcd-91c2-690c48223a51')
+        self.verifier, _ = User.objects.get_or_create(pk='3482b1bb-cb39-4fcd-91c2-690c48223a51', username='0x05')
         self.granted_to, _ = User.objects.get_or_create(username='0x04')
         self.certificate = Certificate(
             id='0cb19a83-d3c9-491b-99a3-374ebb01c43f',
@@ -114,6 +118,12 @@ class PerformIpfsMetaTests(TestCase):
             },
         }
     ]))
+
+    @patch('bdn.contract.w3.eth', fake_get_transaction(
+        {
+            'from': '0x05',
+        }
+    ))
     def test_verification_task(self):
         perform_ipfs_meta_verification({
             'transactionHash': '0x03',
@@ -140,6 +150,11 @@ class PerformIpfsMetaTests(TestCase):
             None,
         }
     ]))
+    @patch('bdn.contract.w3.eth', fake_get_transaction(
+        {
+            'from': '0x05',
+        }
+    ))
     def test_no_ipfs_data(self):
         with self.assertRaises(IpfsDataAttributeError):
             perform_ipfs_meta_verification({
@@ -161,6 +176,11 @@ class PerformIpfsMetaTests(TestCase):
             },
         }
     ]))
+    @patch('bdn.contract.w3.eth', fake_get_transaction(
+        {
+            'from': '0x05',
+        }
+    ))
     def test_granted_to_does_not_exist(self):
         with self.assertRaises(GrantedToUserDoesNotExist):
             perform_ipfs_meta_verification({
@@ -182,6 +202,11 @@ class PerformIpfsMetaTests(TestCase):
             },
         }
     ]))
+    @patch('bdn.contract.w3.eth', fake_get_transaction(
+        {
+            'from': '0x05',
+        }
+    ))
     def test_verifier_does_not_exist(self):
         with self.assertRaises(VerifierUserDoesNotExist):
             perform_ipfs_meta_verification({
@@ -203,6 +228,11 @@ class PerformIpfsMetaTests(TestCase):
             },
         }
     ]))
+    @patch('bdn.contract.w3.eth', fake_get_transaction(
+        {
+            'from': '0x05',
+        }
+    ))
     def test_verifier_not_valid_id(self):
         with self.assertRaises(VerifierUserValidationError):
             perform_ipfs_meta_verification({
@@ -224,6 +254,11 @@ class PerformIpfsMetaTests(TestCase):
             },
         }
     ]))
+    @patch('bdn.contract.w3.eth', fake_get_transaction(
+        {
+            'from': '0x05',
+        }
+    ))
     def test_verification_does_not_exist(self):
         with self.assertRaises(VerificationDoesNotExist):
             perform_ipfs_meta_verification({
@@ -245,6 +280,11 @@ class PerformIpfsMetaTests(TestCase):
             },
         }
     ]))
+    @patch('bdn.contract.w3.eth', fake_get_transaction(
+        {
+            'from': '0x05',
+        }
+    ))
     def test_verification_not_valid_id(self):
         with self.assertRaises(VerificationValidationError):
             perform_ipfs_meta_verification({
@@ -266,6 +306,11 @@ class PerformIpfsMetaTests(TestCase):
             },
         }
     ]))
+    @patch('bdn.contract.w3.eth', fake_get_transaction(
+        {
+            'from': '0x05',
+        }
+    ))
     def test_verification_allready_verified(self):
         self.verification.state = 'verified'
         self.verification.save()
@@ -288,6 +333,11 @@ class PerformIpfsMetaTests(TestCase):
             },
         }
     ]))
+    @patch('bdn.contract.w3.eth', fake_get_transaction(
+        {
+            'from': '0x05',
+        }
+    ))
     def test_certificate_does_not_exist(self):
         with self.assertRaises(CertificateDoesNotExist):
             perform_ipfs_meta_verification({
@@ -309,6 +359,11 @@ class PerformIpfsMetaTests(TestCase):
             },
         }
     ]))
+    @patch('bdn.contract.w3.eth', fake_get_transaction(
+        {
+            'from': '0x05',
+        }
+    ))
     def test_certificate_not_valid_id(self):
         with self.assertRaises(CertificateValidationError):
             perform_ipfs_meta_verification({

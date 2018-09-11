@@ -1,7 +1,7 @@
 import logging
 import requests
 import json
-from bdn.contract import w3
+import bdn.contract
 from bdn.verification.models import Verification
 from bdn.certificate.models import Certificate
 from bdn.auth.models import User
@@ -54,7 +54,7 @@ def perform_ipfs_meta_verification(entry):
         raise VerifierUserDoesNotExist('Verifier DoesNotExist')
     except ValidationError:
         raise VerifierUserValidationError('Verifier ValidationError')
-    transaction = w3.eth.getTransaction(tx_hash)
+    transaction = bdn.contract.w3.eth.getTransaction(tx_hash)
     from_eth_address = transaction.get('from', '').lower()
     if from_eth_address != verifier.username.lower():
         raise BlockchainVerificationError(
