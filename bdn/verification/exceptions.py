@@ -36,3 +36,11 @@ class CertificateDoesNotExist(VerificationException):
 
 class CertificateValidationError(VerificationException):
     pass
+
+
+class BlockchainVerificationError(VerificationException):
+    pass
+
+
+class JsonDecodeError(VerificationException):
+    pass

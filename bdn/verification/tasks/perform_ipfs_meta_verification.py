@@ -1,5 +1,7 @@
 import logging
 import requests
+import json
+from bdn.contract import w3
 from bdn.verification.models import Verification
 from bdn.certificate.models import Certificate
 from bdn.auth.models import User
@@ -11,7 +13,8 @@ from bdn.verification.exceptions import (
     GrantedToUserDoesNotExist, VerifierUserDoesNotExist,
     VerifierUserValidationError, VerificationDoesNotExist,
     VerificationValidationError, CertificateDoesNotExist,
-    CertificateValidationError)
+    CertificateValidationError, BlockchainVerificationError,
+    JsonDecodeError)
 
 
 IPFS_HOST = 'https://ipfs.io/ipfs/'
@@ -26,20 +29,23 @@ def perform_ipfs_meta_verification(entry):
     block_number = int(entry['blockNumber'])
     entry_args = entry['args']
     meta_ipfs_hash = entry_args.get('ipfsHash', '')
-    granted_to_eth = entry_args.get('grantedTo', '')
+    granted_to_eth = entry_args.get('grantedTo', '').lower()
     if not meta_ipfs_hash or not granted_to_eth:
         raise NoArgumentsError(
             "Event triggered without providing IPFS meta hash or "
             "granted to ETH address")
     ipfs_link = IPFS_HOST + meta_ipfs_hash
-    verification_ipfs_data = requests.get(ipfs_link).json()
+    try:
+        verification_ipfs_data = requests.get(ipfs_link).json()
+    except json.decoder.JSONDecodeError:
+        raise JsonDecodeError('Can not decode IPFS data')
     try:
         verifier_id = verification_ipfs_data.get('verifier')
         verification_id = verification_ipfs_data.get('id')
     except AttributeError:
         raise IpfsDataAttributeError('verification_ipfs_data AttributeError')
     try:
-        granted_to = User.objects.get(username=granted_to_eth.lower())
+        granted_to = User.objects.get(username=granted_to_eth)
     except User.DoesNotExist:
         raise GrantedToUserDoesNotExist('GrantedTo DoesNotExist')
     try:
@@ -48,6 +54,12 @@ def perform_ipfs_meta_verification(entry):
         raise VerifierUserDoesNotExist('Verifier DoesNotExist')
     except ValidationError:
         raise VerifierUserValidationError('Verifier ValidationError')
+    transaction = w3.eth.getTransaction(tx_hash)
+    from_eth_address = transaction.get('from', '').lower()
+    if from_eth_address != verifier.username.lower():
+        raise BlockchainVerificationError(
+            'Addresses {0} and {1} not equal'.format(
+                from_eth_address, verifier.username.lower()))
     try:
         verification = Verification.objects.get(
             pk=verification_id, verifier=verifier)
