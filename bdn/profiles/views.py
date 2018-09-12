@@ -3,7 +3,6 @@ from __future__ import unicode_literals
 
 from rest_framework import status, viewsets, mixins
 from rest_framework.decorators import detail_route, list_route
-from bdn.auth.models import User
 from rest_framework.permissions import IsAuthenticated
 from bdn.auth.signature_authentication import SignatureAuthentication
 from rest_framework.response import Response
@@ -12,6 +11,7 @@ from bdn.provider.models import Provider
 from bdn.company.models import Company
 from bdn.provider.serializers import ProviderSerializer
 from bdn.company.serializers import CompanySerializer
+from .utils import get_profile_by_type
 from .serializers import (
     ProfileSerializer, LearnerProfileSerializer, AcademyProfileSerializer,
     CompanyProfileSerializer)
@@ -31,26 +31,9 @@ class ProfileViewSet(mixins.CreateModelMixin,
         serializer = ProfileSerializer(profile)
         return Response(serializer.data)
 
-    @staticmethod
-    def _get_profile_by_type(pk, profile_type):
-        SERIALIZERS = {
-            ProfileType.ACADEMY: AcademyProfileSerializer,
-            ProfileType.BUSINESS: CompanyProfileSerializer,
-            ProfileType.LEARNER: LearnerProfileSerializer,
-        }
-        serializer_cls = SERIALIZERS[profile_type]
-        eth_address = pk.lower()
-        try:
-            profile = Profile.objects.get(user__username__iexact=eth_address)
-            serializer = serializer_cls(profile)
-            response = Response(serializer.data)
-        except User.DoesNotExist:
-            response = Response(status=status.HTTP_400_BAD_REQUEST)
-        return response
-
     @detail_route(methods=['get'])
     def get_academy(self, request, pk=None):
-        return self._get_profile_by_type(pk, ProfileType.ACADEMY)
+        return get_profile_by_type(pk, ProfileType.ACADEMY)
 
     @detail_route(methods=['get'])
     def get_learner(self, request, pk=None):
@@ -60,11 +43,11 @@ class ProfileViewSet(mixins.CreateModelMixin,
             return Response({
                 'is_public': False
             }, status=status.HTTP_403_FORBIDDEN)
-        return self._get_profile_by_type(pk, ProfileType.LEARNER)
+        return get_profile_by_type(pk, ProfileType.LEARNER)
 
     @detail_route(methods=['get'])
     def get_business(self, request, pk=None):
-        return self._get_profile_by_type(pk, ProfileType.BUSINESS)
+        return get_profile_by_type(pk, ProfileType.BUSINESS)
 
     @list_route(methods=['get'])
     def get_academies(self, request):

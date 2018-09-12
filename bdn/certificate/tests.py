@@ -45,7 +45,7 @@ class CertificateTests(TestCase):
                 'academy_title': 'test',
                 'academy_link': 'http://example.com',
                 'course_title': 'test',
-                'learner_eth_address': '0xD2BE64317Eb1832309DF8c8C18B09871809f3735',
+                'holder_eth_address': '0xD2BE64317Eb1832309DF8c8C18B09871809f3735',
                 'score': '',
                 'duration': '',
                 'skills': ['Python'],
@@ -92,7 +92,6 @@ class CertificateTests(TestCase):
             'academy_title': 'test',
             'academy_link': 'http://example.com',
             'course_title': 'test',
-            'learner_eth_address': '0x0',
         })
         certificate.save()
         url = '/api/v1/certificates/{}/delete_by_id/'.format(certificate.pk)
@@ -112,7 +111,7 @@ class CertificateTests(TestCase):
                 'academy_title': 'test',
                 'academy_link': 'httttp://example.com',
                 'course_title': 'test',
-                'learner_eth_address': '0x0',
+                'holder_eth_address': '0x0',
                 'score': '',
                 'duration': '',
             },
@@ -129,7 +128,7 @@ class CertificateTests(TestCase):
                 'academy_title': 'test',
                 'academy_link': 'http://example.com',
                 'course_title': 'test',
-                'learner_eth_address': '0x1',
+                'holder_eth_address': '0x1',
                 'score': '',
                 'duration': '',
             },
@@ -144,7 +143,6 @@ class CertificateTests(TestCase):
             'academy_title': 'test',
             'academy_link': 'http://example.com',
             'course_title': 'test',
-            'learner_eth_address': '0x0',
             'score': '',
             'duration': '',
         })
@@ -153,7 +151,6 @@ class CertificateTests(TestCase):
             'academy_title': 'test',
             'academy_link': 'http://example.com',
             'course_title': 'test',
-            'learner_eth_address': '0x0',
             'score': 100,
             'duration': 100,
         })
@@ -166,7 +163,6 @@ class CertificateViewProfileSerializerTests(TestCase):
             'academy_title': 'test',
             'academy_link': 'http://example.com',
             'course_title': 'test',
-            'learner_eth_address': '0x0',
         })
         certificate.save()
         verifier, _ = User.objects.get_or_create(email='verifier@example.com')
@@ -185,7 +181,6 @@ class CertificateViewProfileSerializerTests(TestCase):
             'academy_title': 'test',
             'academy_link': 'http://example.com',
             'course_title': 'test',
-            'learner_eth_address': '0x0',
             'expiration_date': timezone.now() - timedelta(hours=24)
         })
         certificate.save()

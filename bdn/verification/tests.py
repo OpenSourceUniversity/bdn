@@ -103,7 +103,6 @@ class PerformIpfsMetaTests(TestCase):
             academy_title='test',
             academy_link='http://test.com/',
             course_title='test',
-            learner_eth_address='0x0',
         )
         self.certificate.save()
         self.verification = Verification(pk='9ffd6ed3-fa64-4beb-903e-b1c4fd6d0c99',
@@ -391,13 +390,16 @@ class VerificationTests(TestCase):
             username='0xd2be64317eb1832309df8c8c18b09871809f3735')
         self.second_verifier, _ = User.objects.get_or_create(
             username='0x05')
+        self.second_verifier.profile.academy_name = 'test'
+        self.second_verifier.profile.academy_website = 'http://test.com'
+        self.second_verifier.profile.academy_email = 'test@test.com'
+        self.second_verifier.profile.save()
         self.granted_to, _ = User.objects.get_or_create(username='0x04')
         self.certificate = Certificate(
             id='0cb19a83-d3c9-491b-99a3-374ebb01c43f',
             academy_title='test',
             academy_link='http://test.com/',
             course_title='test',
-            learner_eth_address='0x0',
         )
         self.certificate.save()
         self.verification, _ = Verification.objects.get_or_create(pk='9ffd6ed3-fa64-4beb-903e-b1c4fd6d0c99',

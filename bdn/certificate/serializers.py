@@ -23,9 +23,6 @@ class CertificateSerializer(serializers.ModelSerializer):
             'course_link',
             'industries',
             'skills',
-            'learner_eth_address',
-            'verified',
-            'verification_tx',
             'ipfs_hash',
             'score',
             'duration',
@@ -72,6 +69,7 @@ class CertificateViewProfileSerializer(serializers.ModelSerializer):
         model = Certificate
         fields = (
             'id',
+            'holder',
             'user_eth_address',
             'academy_title',
             'academy_link',
@@ -80,7 +78,6 @@ class CertificateViewProfileSerializer(serializers.ModelSerializer):
             'course_link',
             'industries',
             'skills',
-            'learner_eth_address',
             'score',
             'duration',
             'expiration_date',

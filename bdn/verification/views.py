@@ -96,23 +96,44 @@ class VerificationViewSet(mixins.CreateModelMixin,
         data['state'] = 'requested'
         data['granted_to'] = granted_to.id
         data['verifier'] = verifier.id
+        verifier_type = int(data['verifier_type'])
 
         duplicate_verification = Verification.objects.filter(
             granted_to=granted_to,
             verifier=verifier, certificate__id=data['certificate'],
             granted_to_type=data['granted_to_type'],
-            verifier_type=data['verifier_type']).first()
+            verifier_type=verifier_type).first()
         if duplicate_verification:
             return Response({
                 'error': 'Duplicate verification request found',
                 'id': duplicate_verification.id,
             }, status=status.HTTP_400_BAD_REQUEST)
 
+        verifier_profile = verifier.profile
+
+        if verifier_type == 1:
+            return Response({
+                'error': 'Wrong verifier profile type',
+            }, status=status.HTTP_400_BAD_REQUEST)
+        elif verifier_type == 2:
+            if not (verifier_profile.academy_name and
+                    verifier_profile.academy_website and
+                    verifier_profile.academy_email):
+                return Response({
+                    'error': 'This Academy Profile is not created yet',
+                }, status=status.HTTP_400_BAD_REQUEST)
+        elif verifier_type == 3:
+            if not (verifier_profile.company_name and
+                    verifier_profile.company_website and
+                    verifier_profile.company_email):
+                return Response({
+                    'error': 'This Business Profile is not created yet',
+                }, status=status.HTTP_400_BAD_REQUEST)
+
         serializer = VerificationCreateSerializer(data=data)
         if serializer.is_valid():
             verification = serializer.save()
             granted_to_type = int(data['granted_to_type'])
-            verifier_type = int(data['verifier_type'])
 
             notify.send(
                 granted_to,

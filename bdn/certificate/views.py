@@ -46,8 +46,8 @@ class CertificateViewSet(mixins.RetrieveModelMixin,
     def get_certificates_by_learner(self, request):
         eth_address = str(request.GET.get('eth_address')).lower()
         certificates = Certificate.objects\
-            .filter(learner_eth_address=eth_address)\
-            .order_by('-verified', 'course_title')
+            .filter(holder__username__iexact=eth_address)\
+            .order_by('course_title')
         serializer = CertificateViewProfileSerializer(certificates, many=True)
         return Response(serializer.data)
 
@@ -67,16 +67,15 @@ class CertificateViewSet(mixins.RetrieveModelMixin,
         data = request.data.copy()
         expiration_date = self._normalized_date(data.get('expiration_date'))
         data['expiration_date'] = expiration_date
-        learner_eth_address = request.data.get('learner_eth_address').lower()
+        holder_eth_address = request.data.get('holder_eth_address').lower()
         try:
-            holder = User.objects.get(username=learner_eth_address)
+            holder = User.objects.get(username=holder_eth_address)
         except User.DoesNotExist:
             return Response({
                 'error': 'User not found',
             }, status=status.HTTP_400_BAD_REQUEST)
         skills = self._normalized_skills(request.data.get('skills', []))
         data['holder'] = holder.id
-        data['learner_eth_address'] = learner_eth_address
         data['academy_address'] = academy_address
         data['user_eth_address'] = eth_address
         serializer = CertificateSerializer(data=data)

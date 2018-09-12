@@ -17,9 +17,6 @@ class Certificate(m.Model):
     course_link = m.URLField(blank=True, null=True)
     industries = m.ManyToManyField(Industry)
     skills = m.ManyToManyField(Skill)
-    learner_eth_address = m.CharField(max_length=42)  # TODO: deprecate this
-    verified = m.BooleanField(default=False)  # TODO: deprecate
-    verification_tx = m.CharField(max_length=100, blank=True, null=True)  # noqa TODO: deprecate
     ipfs_hash = m.CharField(max_length=100, default='None')
     score = m.FloatField(default=0.0, blank=True, null=True)
     duration = m.PositiveSmallIntegerField(blank=True, null=True)
