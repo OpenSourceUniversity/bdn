@@ -42,9 +42,9 @@ class CertificateTests(TestCase):
         request = self.factory.post(
             '/api/v1/certificates/',
             data={
-                'academy_title': 'test',
-                'academy_link': 'http://example.com',
-                'course_title': 'test',
+                'institution_title': 'test',
+                'institution_link': 'http://example.com',
+                'certificate_title': 'test',
                 'holder_eth_address': '0xD2BE64317Eb1832309DF8c8C18B09871809f3735',
                 'score': '',
                 'duration': '',
@@ -89,9 +89,9 @@ class CertificateTests(TestCase):
     def test_delete_certificate_not_holded_by_user(self):
         User.objects.get_or_create(username='0x0')
         certificate = Certificate(**{
-            'academy_title': 'test',
-            'academy_link': 'http://example.com',
-            'course_title': 'test',
+            'institution_title': 'test',
+            'institution_link': 'http://example.com',
+            'certificate_title': 'test',
         })
         certificate.save()
         url = '/api/v1/certificates/{}/delete_by_id/'.format(certificate.pk)
@@ -108,9 +108,9 @@ class CertificateTests(TestCase):
         request = self.factory.post(
             '/api/v1/certificates/',
             data={
-                'academy_title': 'test',
-                'academy_link': 'httttp://example.com',
-                'course_title': 'test',
+                'institution_title': 'test',
+                'institution_link': 'httttp://example.com',
+                'certificate_title': 'test',
                 'holder_eth_address': '0x0',
                 'score': '',
                 'duration': '',
@@ -125,9 +125,9 @@ class CertificateTests(TestCase):
         request = self.factory.post(
             '/api/v1/certificates/',
             data={
-                'academy_title': 'test',
-                'academy_link': 'http://example.com',
-                'course_title': 'test',
+                'institution_title': 'test',
+                'institution_link': 'http://example.com',
+                'certificate_title': 'test',
                 'holder_eth_address': '0x1',
                 'score': '',
                 'duration': '',
@@ -140,17 +140,17 @@ class CertificateTests(TestCase):
 
     def test_certificate_serializer_to_internal_value(self):
         serializer = CertificateSerializer(data={
-            'academy_title': 'test',
-            'academy_link': 'http://example.com',
-            'course_title': 'test',
+            'institution_title': 'test',
+            'institution_link': 'http://example.com',
+            'certificate_title': 'test',
             'score': '',
             'duration': '',
         })
         self.assertTrue(serializer.is_valid())
         serializer = CertificateSerializer(data={
-            'academy_title': 'test',
-            'academy_link': 'http://example.com',
-            'course_title': 'test',
+            'institution_title': 'test',
+            'institution_link': 'http://example.com',
+            'certificate_title': 'test',
             'score': 100,
             'duration': 100,
         })
@@ -160,9 +160,9 @@ class CertificateTests(TestCase):
 class CertificateViewProfileSerializerTests(TestCase):
     def test_verifications(self):
         certificate = Certificate(**{
-            'academy_title': 'test',
-            'academy_link': 'http://example.com',
-            'course_title': 'test',
+            'institution_title': 'test',
+            'institution_link': 'http://example.com',
+            'certificate_title': 'test',
         })
         certificate.save()
         verifier, _ = User.objects.get_or_create(email='verifier@example.com')
@@ -178,9 +178,9 @@ class CertificateViewProfileSerializerTests(TestCase):
 
     def test_certificate_expired(self):
         certificate = Certificate(**{
-            'academy_title': 'test',
-            'academy_link': 'http://example.com',
-            'course_title': 'test',
+            'institution_title': 'test',
+            'institution_link': 'http://example.com',
+            'certificate_title': 'test',
             'expiration_date': timezone.now() - timedelta(hours=24)
         })
         certificate.save()

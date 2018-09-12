@@ -78,8 +78,8 @@ class Command(BaseCommand):
                             Certificate.objects.create(
                                 holder=user,
                                 user_eth_address=eth_wallet,
-                                academy_title='Academy ' + faker.company(),
-                                course_title='Course title ' + str(course+1),
+                                institution_title='Academy ' + faker.company(),
+                                certificate_title='Course title ' + str(course+1),
                                 learner_eth_address=eth_wallet,
                                 verified=False
                             )

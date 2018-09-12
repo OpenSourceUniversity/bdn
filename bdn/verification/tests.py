@@ -100,9 +100,9 @@ class PerformIpfsMetaTests(TestCase):
         self.granted_to, _ = User.objects.get_or_create(username='0x04')
         self.certificate = Certificate(
             id='0cb19a83-d3c9-491b-99a3-374ebb01c43f',
-            academy_title='test',
-            academy_link='http://test.com/',
-            course_title='test',
+            institution_title='test',
+            institution_link='http://test.com/',
+            certificate_title='test',
         )
         self.certificate.save()
         self.verification = Verification(pk='9ffd6ed3-fa64-4beb-903e-b1c4fd6d0c99',
@@ -397,9 +397,9 @@ class VerificationTests(TestCase):
         self.granted_to, _ = User.objects.get_or_create(username='0x04')
         self.certificate = Certificate(
             id='0cb19a83-d3c9-491b-99a3-374ebb01c43f',
-            academy_title='test',
-            academy_link='http://test.com/',
-            course_title='test',
+            institution_title='test',
+            institution_link='http://test.com/',
+            certificate_title='test',
         )
         self.certificate.save()
         self.verification, _ = Verification.objects.get_or_create(pk='9ffd6ed3-fa64-4beb-903e-b1c4fd6d0c99',

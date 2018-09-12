@@ -11,6 +11,7 @@ from bdn.auth.utils import get_auth_eth_address
 from bdn.auth.models import User
 from bdn.skill.models import Skill
 from bdn.industry.models import Industry
+from bdn.verification.models import Verification
 from .models import Certificate
 from .serializers import (CertificateSerializer,
                           CertificateViewProfileSerializer)
@@ -38,7 +39,7 @@ class CertificateViewSet(mixins.RetrieveModelMixin,
     def list(self, request):
         certificates = Certificate.objects\
             .filter(holder=request.user)\
-            .order_by('course_title')
+            .order_by('certificate_title')
         serializer = CertificateViewProfileSerializer(certificates, many=True)
         return Response(serializer.data)
 
@@ -47,7 +48,7 @@ class CertificateViewSet(mixins.RetrieveModelMixin,
         eth_address = str(request.GET.get('eth_address')).lower()
         certificates = Certificate.objects\
             .filter(holder__username__iexact=eth_address)\
-            .order_by('course_title')
+            .order_by('certificate_title')
         serializer = CertificateViewProfileSerializer(certificates, many=True)
         return Response(serializer.data)
 
@@ -82,6 +83,14 @@ class CertificateViewSet(mixins.RetrieveModelMixin,
         if serializer.is_valid():
             certificate = serializer.save(
                 skills=skills, industries=industries)
+            issuer_type = request.user.profile.active_profile_type
+            if (issuer_type != 1 and
+               holder.username != request.user.username):
+                verification = Verification(
+                    certificate=certificate, granted_to=holder,
+                    verifier=request.user, verifier_type=issuer_type,
+                    granted_to_type=int(data['granted_to_type']))
+                verification.save()
             return Response({
                 'status': 'ok',
                 'certificate_pk': certificate.pk,
