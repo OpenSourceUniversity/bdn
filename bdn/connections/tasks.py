@@ -5,6 +5,9 @@ import codecs
 import time
 from celery import shared_task
 from .models import Connection, FileUpload
+from bdn.profiles.models import Profile
+from django.core.mail import BadHeaderError, send_mail
+from django.http import HttpResponse, HttpResponseRedirect
 
 
 logger = logging.getLogger(__name__)
@@ -37,6 +40,60 @@ def handle_connection_row(owner, row):
         company_name=company,
         position_title=position,
         connected_on=time.strftime("%Y-%m-%d %H:%M", connected_on),
-        user=None  # TODO: user might already be on the platform
+        user_id=handle_onboarding(email)
     )
     connection.save()
+
+
+@shared_task
+def handle_onboarding(email):
+    if len(email) > 0:
+        onboarded_users = Profile.objects.filter(learner_email=email)
+        if onboarded_users:
+            return onboarded_users[0].user.id
+    return None
+
+
+@shared_task
+def inviting_emails(connections_file_id):
+    subject = 'Test Subject {name}'
+    message = 'This is a test message ... {name}'
+    from_email = 'dobromir.mail@gmail.com'
+    all_emails = []
+    chunk_size = 500
+    if subject and message and from_email:
+        file_upload = FileUpload.objects.get(id=connections_file_id)
+        if file_upload:
+            # profile = Profile.objects.get(user=file_upload.owner)
+            connections = Connection.objects.filter(
+                owner_id=file_upload.owner.id, user_id=None)
+            for connection in range(len(connections)):
+                all_emails.append(
+                    (subject.format(name='test name'),
+                     message.format(name='test name'),
+                     from_email, [connections[connection].email]))
+            if all_emails:
+                all_emails = [all_emails[i:i+chunk_size] for i in range(0, len(all_emails), chunk_size)]
+                for item in all_emails:
+                    chunk = tuple(item)
+                    # send_chunk_of_emails.delay(chunk)
+        else:
+            return HttpResponse('Archive not found!')
+
+
+@shared_task
+def send_chunk_of_emails():
+    pass
+
+
+
+
+
+
+
+
+
+
+
+
+# czc
