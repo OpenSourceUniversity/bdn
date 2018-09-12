@@ -8,8 +8,6 @@ from rest_framework.decorators import detail_route
 from notifications.signals import notify
 from bdn.auth.models import User
 from bdn.auth.signature_authentication import SignatureAuthentication
-from bdn.auth.utils import get_auth_eth_address
-from bdn.profiles.models import Profile
 from .models import Verification
 from .serializers import VerificationSerializer, VerificationCreateSerializer
 
