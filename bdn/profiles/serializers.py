@@ -72,6 +72,31 @@ class LearnerProfileSerializer(serializers.ModelSerializer):
         )
 
 
+class LearnerViewProfileSerializer(serializers.ModelSerializer):
+    user = UserSerializer(many=False, read_only=True)
+    certificates_count = SerializerMethodField('_certificates_count')
+
+    def _certificates_count(self, obj):
+        return obj.user.certificate_set.all().count()
+
+    class Meta:
+        model = Profile
+        fields = (
+            'user',
+            'first_name',
+            'last_name',
+            'learner_position',
+            'learner_specialisation',
+            'learner_about',
+            'public_profile',
+            'learner_site',
+            'phone_number',
+            'learner_country',
+            'learner_avatar',
+            'certificates_count',
+        )
+
+
 class AcademyProfileSerializer(serializers.ModelSerializer):
     user = UserSerializer(many=False, read_only=True)
     courses_count = SerializerMethodField('_courses_count')

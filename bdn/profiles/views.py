@@ -14,7 +14,7 @@ from bdn.company.serializers import CompanySerializer
 from .utils import get_profile_by_type
 from .serializers import (
     ProfileSerializer, LearnerProfileSerializer, AcademyProfileSerializer,
-    CompanyProfileSerializer)
+    CompanyProfileSerializer, LearnerViewProfileSerializer)
 
 
 class ProfileViewSet(mixins.CreateModelMixin,
@@ -43,7 +43,8 @@ class ProfileViewSet(mixins.CreateModelMixin,
             return Response({
                 'is_public': False
             }, status=status.HTTP_403_FORBIDDEN)
-        return get_profile_by_type(pk, ProfileType.LEARNER)
+        serializer = LearnerViewProfileSerializer(profile)
+        return Response(serializer.data)
 
     @detail_route(methods=['get'])
     def get_business(self, request, pk=None):
@@ -69,7 +70,7 @@ class ProfileViewSet(mixins.CreateModelMixin,
     def get_learners(self, request):
         profiles = Profile.objects.filter(
             public_profile=True).order_by('first_name')
-        serializer = LearnerProfileSerializer(profiles, many=True)
+        serializer = LearnerViewProfileSerializer(profiles, many=True)
         return Response(serializer.data)
 
     @list_route(methods=['post'])
