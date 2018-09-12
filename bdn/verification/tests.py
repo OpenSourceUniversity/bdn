@@ -1,13 +1,14 @@
 # flake8: noqa
 import uuid
 from unittest.mock import MagicMock, patch
-from django.test import TestCase
+from django.test import TestCase, RequestFactory
 from bdn.certificate.models import Certificate
 from bdn.auth.models import User
 from bdn.celery import app as celeryapp
 from .models import Verification
 from .tasks import (
     listen_ethereum_ipfs_hash_storage, perform_ipfs_meta_verification)
+from .views import VerificationViewSet
 from bdn.verification.exceptions import (
     NoArgumentsError, IpfsDataAttributeError,
     GrantedToUserDoesNotExist, VerifierUserDoesNotExist,
@@ -381,3 +382,122 @@ class PerformIpfsMetaTests(TestCase):
         self.certificate.delete()
         self.verifier.delete()
         self.granted_to.delete()
+
+
+class VerificationTests(TestCase):
+    def setUp(self):
+        self.factory = RequestFactory()
+        self.verifier, _ = User.objects.get_or_create(pk='3482b1bb-cb39-4fcd-91c2-690c48223a51',
+            username='0xd2be64317eb1832309df8c8c18b09871809f3735')
+        self.second_verifier, _ = User.objects.get_or_create(
+            username='0x05')
+        self.granted_to, _ = User.objects.get_or_create(username='0x04')
+        self.certificate = Certificate(
+            id='0cb19a83-d3c9-491b-99a3-374ebb01c43f',
+            academy_title='test',
+            academy_link='http://test.com/',
+            course_title='test',
+            learner_eth_address='0x0',
+        )
+        self.certificate.save()
+        self.verification, _ = Verification.objects.get_or_create(pk='9ffd6ed3-fa64-4beb-903e-b1c4fd6d0c99',
+            certificate=self.certificate, verifier=self.verifier, state='requested', granted_to=self.granted_to)
+
+    def test_verification_create_and_then_get(self):
+        # Create verification
+        request = self.factory.post(
+            '/api/v1/verifications/',
+            data={
+                'verifier': '0x05',
+                'granted_to_type': 1,
+                'verifier_type': 2,
+                'certificate': '0cb19a83-d3c9-491b-99a3-374ebb01c43f',
+            },
+            HTTP_AUTH_SIGNATURE='0xe646de646dde9cee6875e3845428ce6fc13d41086e8a7f6531d1d526598cc4104122e01c38255d1e1d595710986d193f52e3dbc47cb01cb554d8e4572d6920361c',
+            HTTP_AUTH_ETH_ADDRESS='D2BE64317Eb1832309DF8c8C18B09871809f3735',
+        )
+        response = VerificationViewSet.as_view({'post': 'create'})(request)
+        self.assertEqual(response.status_code, 200)
+
+    # List verifications
+        request = self.factory.get(
+            '/api/v1/verifications/',
+            HTTP_AUTH_SIGNATURE='0xe646de646dde9cee6875e3845428ce6fc13d41086e8a7f6531d1d526598cc4104122e01c38255d1e1d595710986d193f52e3dbc47cb01cb554d8e4572d6920361c',
+            HTTP_AUTH_ETH_ADDRESS='D2BE64317Eb1832309DF8c8C18B09871809f3735',
+        )
+        response = VerificationViewSet.as_view({'get': 'list'})(request)
+        self.assertEqual(response.status_code, 200)
+
+    # get verification
+        request = self.factory.get(
+            '/api/v1/verifications/{}/'.format(self.verification.pk),
+            HTTP_AUTH_SIGNATURE='0xe646de646dde9cee6875e3845428ce6fc13d41086e8a7f6531d1d526598cc4104122e01c38255d1e1d595710986d193f52e3dbc47cb01cb554d8e4572d6920361c',
+            HTTP_AUTH_ETH_ADDRESS='D2BE64317Eb1832309DF8c8C18B09871809f3735',
+        )
+        response = VerificationViewSet.as_view({'get': 'retrieve'})(request, pk=self.verification.pk)
+        self.assertEqual(response.status_code, 200)
+
+    # set pending by id verification
+        request = self.factory.post(
+            '/api/v1/verifications/{}/set_pending_by_id'.format(self.verification.pk),
+            HTTP_AUTH_SIGNATURE='0xe646de646dde9cee6875e3845428ce6fc13d41086e8a7f6531d1d526598cc4104122e01c38255d1e1d595710986d193f52e3dbc47cb01cb554d8e4572d6920361c',
+            HTTP_AUTH_ETH_ADDRESS='D2BE64317Eb1832309DF8c8C18B09871809f3735',
+        )
+        response = VerificationViewSet.as_view({'post': 'set_pending_by_id'})(request, pk=self.verification.pk)
+        self.assertEqual(response.status_code, 200)
+
+        self.verification.state = 'requested'
+        self.verification.save()
+
+    # reject by id verification
+        request = self.factory.post(
+            '/api/v1/verifications/{}/reject_by_id'.format(self.verification.pk),
+            HTTP_AUTH_SIGNATURE='0xe646de646dde9cee6875e3845428ce6fc13d41086e8a7f6531d1d526598cc4104122e01c38255d1e1d595710986d193f52e3dbc47cb01cb554d8e4572d6920361c',
+            HTTP_AUTH_ETH_ADDRESS='D2BE64317Eb1832309DF8c8C18B09871809f3735',
+        )
+        response = VerificationViewSet.as_view({'post': 'reject_by_id'})(request, pk=self.verification.pk)
+        self.assertEqual(response.status_code, 200)
+
+    # get verification DoesNotExist
+        request = self.factory.get(
+            '/api/v1/verifications/{}/'.format('9ffd6ed3-fa64-4beb-903e-b1c4fd6d0c98'),
+            HTTP_AUTH_SIGNATURE='0xe646de646dde9cee6875e3845428ce6fc13d41086e8a7f6531d1d526598cc4104122e01c38255d1e1d595710986d193f52e3dbc47cb01cb554d8e4572d6920361c',
+            HTTP_AUTH_ETH_ADDRESS='D2BE64317Eb1832309DF8c8C18B09871809f3735',
+        )
+        response = VerificationViewSet.as_view({'get': 'retrieve'})(request, pk='9ffd6ed3-fa64-4beb-903e-b1c4fd6d0c98')
+        self.assertEqual(response.status_code, 400)
+
+    # Create duplicate verification
+        request = self.factory.post(
+            '/api/v1/verifications/',
+            data={
+                'verifier': '0x05',
+                'granted_to_type': 1,
+                'verifier_type': 2,
+                'certificate': '0cb19a83-d3c9-491b-99a3-374ebb01c43f',
+            },
+            HTTP_AUTH_SIGNATURE='0xe646de646dde9cee6875e3845428ce6fc13d41086e8a7f6531d1d526598cc4104122e01c38255d1e1d595710986d193f52e3dbc47cb01cb554d8e4572d6920361c',
+            HTTP_AUTH_ETH_ADDRESS='D2BE64317Eb1832309DF8c8C18B09871809f3735',
+        )
+        response = VerificationViewSet.as_view({'post': 'create'})(request)
+        self.assertEqual(response.status_code, 400)
+
+        self.verification.verifier = None
+        self.verification.granted_to = None
+        self.verification.save()
+
+    # get verification deny
+        request = self.factory.get(
+            '/api/v1/verifications/{}/'.format(self.verification.pk),
+            HTTP_AUTH_SIGNATURE='0xe646de646dde9cee6875e3845428ce6fc13d41086e8a7f6531d1d526598cc4104122e01c38255d1e1d595710986d193f52e3dbc47cb01cb554d8e4572d6920361c',
+            HTTP_AUTH_ETH_ADDRESS='D2BE64317Eb1832309DF8c8C18B09871809f3735',
+        )
+        response = VerificationViewSet.as_view({'get': 'retrieve'})(request, pk=self.verification.pk)
+        self.assertEqual(response.status_code, 401)
+
+    def tearDown(self):
+        self.verification.delete()
+        self.certificate.delete()
+        self.verifier.delete()
+        self.granted_to.delete()
+        self.second_verifier.delete()

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from rest_framework import viewsets, status
+from rest_framework import viewsets, status, mixins
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.decorators import detail_route
@@ -14,20 +14,14 @@ from .models import Verification
 from .serializers import VerificationSerializer, VerificationCreateSerializer
 
 
-class VerificationViewSet(viewsets.ModelViewSet):
+class VerificationViewSet(mixins.CreateModelMixin,
+                          mixins.ListModelMixin,
+                          mixins.RetrieveModelMixin,
+                          viewsets.GenericViewSet):
     authentication_classes = (SignatureAuthentication,)
     permission_classes = (IsAuthenticated,)
     serializer_class = VerificationSerializer
     queryset = Verification.objects.none()
-
-    def update(self, request):
-        return self.deny()
-
-    def partial_update(self, request):
-        return self.deny()
-
-    def destroy(self, request):
-        return self.deny()
 
     @staticmethod
     def deny():
@@ -35,36 +29,21 @@ class VerificationViewSet(viewsets.ModelViewSet):
                     'status': 'denied'}, status=status.HTTP_401_UNAUTHORIZED)
 
     def retrieve(self, request, pk=None):
-        eth_address = get_auth_eth_address(request.META)
         try:
             verification = Verification.objects.get(id=pk)
         except Verification.DoesNotExist:
             return Response({
                 'error': 'Verification not found',
             }, status=status.HTTP_400_BAD_REQUEST)
-        try:
-            user = User.objects.get(username=eth_address)
-        except User.DoesNotExist:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
+        user = request.user
         if (verification.granted_to == user or verification.verifier == user):
             serializer = VerificationSerializer(verification)
             return Response(serializer.data)
         return self.deny()
 
     def list(self, request):
-        eth_address = get_auth_eth_address(request.META)
-        try:
-            user = User.objects.get(username=eth_address)
-        except User.DoesNotExist:
-            return Response({
-                'error': 'User not found',
-            }, status=status.HTTP_400_BAD_REQUEST)
-        try:
-            profile = Profile.objects.get(user=user)
-        except User.DoesNotExist:
-            return Response({
-                'error': 'Profile not found',
-            }, status=status.HTTP_400_BAD_REQUEST)
+        user = request.user
+        profile = user.profile
         verifications = Verification.objects.filter(
             verifier=user, certificate__isnull=False,
             verifier_type=profile.active_profile_type).\
@@ -74,11 +53,7 @@ class VerificationViewSet(viewsets.ModelViewSet):
 
     @detail_route(methods=['post'])
     def reject_by_id(self, request, pk=None):
-        eth_address = get_auth_eth_address(request.META)
-        try:
-            user = User.objects.get(username=eth_address)
-        except User.DoesNotExist:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
+        user = request.user
         try:
             verification = Verification.objects.get(
                 verifier=user, id=str(pk))
@@ -100,13 +75,7 @@ class VerificationViewSet(viewsets.ModelViewSet):
 
     @detail_route(methods=['post'])
     def set_pending_by_id(self, request, pk=None):
-        eth_address = get_auth_eth_address(request.META)
-        try:
-            user = User.objects.get(username__iexact=eth_address)
-        except User.DoesNotExist:
-            return Response({
-                'error': 'User not found',
-            }, status=status.HTTP_400_BAD_REQUEST)
+        user = request.user
         try:
             verification = Verification.objects.get(
                 verifier=user, id=pk)
@@ -118,9 +87,8 @@ class VerificationViewSet(viewsets.ModelViewSet):
 
     def create(self, request):
         data = request.data.copy()
-        eth_address = get_auth_eth_address(request.META)
         try:
-            granted_to = User.objects.get(username__iexact=eth_address)
+            granted_to = request.user
             verifier = User.objects.get(username__iexact=data['verifier'])
         except User.DoesNotExist:
             return Response({
