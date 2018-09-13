@@ -6,8 +6,8 @@ import time
 from celery import shared_task
 from .models import Connection, FileUpload
 from bdn.profiles.models import Profile
-from django.core.mail import BadHeaderError, send_mail
-from django.http import HttpResponse, HttpResponseRedirect
+# from django.core.mail import BadHeaderError, send_mail
+from django.http import HttpResponse  # , HttpResponseRedirect
 
 
 logger = logging.getLogger(__name__)
@@ -73,9 +73,11 @@ def inviting_emails(connections_file_id):
                      message.format(name='test name'),
                      from_email, [connections[connection].email]))
             if all_emails:
-                all_emails = [all_emails[i:i+chunk_size] for i in range(0, len(all_emails), chunk_size)]
+                all_emails = [all_emails[i:i+chunk_size] for i in range(
+                    0, len(all_emails), chunk_size)]
                 for item in all_emails:
-                    chunk = tuple(item)
+                    print('Linter')
+                    # chunk = tuple(item)
                     # send_chunk_of_emails.delay(chunk)
         else:
             return HttpResponse('Archive not found!')
@@ -84,16 +86,5 @@ def inviting_emails(connections_file_id):
 @shared_task
 def send_chunk_of_emails():
     pass
-
-
-
-
-
-
-
-
-
-
-
 
 # czc
