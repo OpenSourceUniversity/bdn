@@ -75,11 +75,12 @@ class Command(BaseCommand):
                             int(random_generator.randint(0,
                                 int(max_certificates)))
                         for course in range(0, nr_certificates):
+                            certificate_title = 'Course title ' + str(course+1)
                             Certificate.objects.create(
                                 holder=user,
                                 user_eth_address=eth_wallet,
                                 institution_title='Academy ' + faker.company(),
-                                certificate_title='Course title ' + str(course+1),
+                                certificate_title=certificate_title,
                                 learner_eth_address=eth_wallet,
                                 verified=False
                             )
