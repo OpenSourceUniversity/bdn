@@ -41,10 +41,17 @@ class VerificationViewSet(mixins.CreateModelMixin,
 
     def list(self, request):
         user = request.user
-        profile = user.profile
+        print(request.GET)
+        profile = str(request.GET.get('active_profile'))
+        if profile == 'Academy':
+            active_profile = 2
+        elif profile == 'Business':
+            active_profile = 3
+        else:
+            active_profile = 1
         verifications = Verification.objects.filter(
             verifier=user, certificate__isnull=False,
-            verifier_type=profile.active_profile_type).\
+            verifier_type=active_profile).\
             order_by('state', 'date_last_modified')
         serializer = VerificationSerializer(verifications, many=True)
         return Response(serializer.data)

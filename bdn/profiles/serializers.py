@@ -77,7 +77,7 @@ class LearnerViewProfileSerializer(serializers.ModelSerializer):
     certificates_count = SerializerMethodField('_certificates_count')
 
     def _certificates_count(self, obj):
-        return obj.user.certificate_set.all().count()
+        return obj.user.certificate_set.all().filter(granted_to_type=1).count()
 
     class Meta:
         model = Profile

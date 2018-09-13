@@ -38,7 +38,7 @@ class CertificateViewSet(mixins.RetrieveModelMixin,
 
     def list(self, request):
         certificates = Certificate.objects\
-            .filter(holder=request.user)\
+            .filter(holder=request.user, granted_to_type=1)\
             .order_by('certificate_title')
         serializer = CertificateViewProfileSerializer(certificates, many=True)
         return Response(serializer.data)
@@ -47,7 +47,7 @@ class CertificateViewSet(mixins.RetrieveModelMixin,
     def get_certificates_by_learner(self, request):
         eth_address = str(request.GET.get('eth_address')).lower()
         certificates = Certificate.objects\
-            .filter(holder__username__iexact=eth_address)\
+            .filter(holder__username__iexact=eth_address, granted_to_type=1)\
             .order_by('certificate_title')
         serializer = CertificateViewProfileSerializer(certificates, many=True)
         return Response(serializer.data)
