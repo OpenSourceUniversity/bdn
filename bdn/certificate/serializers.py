@@ -41,11 +41,17 @@ class CertificateViewProfileSerializer(serializers.ModelSerializer):
     skills = SkillSerializer(many=True, read_only=True)
     industries = IndustrySerializer(many=True, read_only=True)
 
+    holder_eth_address = serializers.\
+        SerializerMethodField('_holder_eth_address')
+
     verifications = serializers.\
         SerializerMethodField('_verifications')
 
     is_expired = serializers.\
         SerializerMethodField('_is_expired')
+
+    holder_names = serializers.\
+        SerializerMethodField('_holder_names')
 
     def _verifications(self, obj):
         from bdn.verification.serializers import VerificationCertificateSerializer  # noqa
@@ -65,11 +71,19 @@ class CertificateViewProfileSerializer(serializers.ModelSerializer):
         if obj.expiration_date:
             return obj.expiration_date < timezone.now()
 
+    def _holder_eth_address(self, obj):
+        return obj.holder.username
+
+    def _holder_names(self, obj):
+        return obj.holder.profile.full_name
+
     class Meta:
         model = Certificate
         fields = (
             'id',
             'holder',
+            'holder_names',
+            'holder_eth_address',
             'user_eth_address',
             'institution_title',
             'institution_link',
