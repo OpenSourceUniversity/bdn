@@ -1,15 +1,13 @@
 import csv
 import logging
-import smtplib
 import zipfile
 import codecs
 import time
-from django.conf import settings
 from celery import shared_task
 from .models import Connection, FileUpload
 from bdn.profiles.models import Profile
 from django.core.mail import BadHeaderError, send_mass_mail
-from django.http import HttpResponse  # , HttpResponseRedirect
+from django.http import HttpResponse
 
 
 logger = logging.getLogger(__name__)
@@ -60,7 +58,7 @@ def handle_onboarding(email):
 def inviting_emails(connections_file_id):
     subject = 'Test Subject {name}'
     message = 'This is a test message ... {name}'
-    from_email = 'dobromir.mail@gmail.com'
+    from_email = 'project@os.university'
     all_emails = []
     chunk_size = 500
     if subject and message and from_email:
@@ -78,34 +76,15 @@ def inviting_emails(connections_file_id):
                 all_emails = [all_emails[i:i+chunk_size] for i in range(
                     0, len(all_emails), chunk_size)]
                 for item in all_emails:
-                    print(item)
-                    # chunk = tuple(item)
-                    # send_chunk_of_emails.delay(chunk)
+                    send_chunk_of_emails(tuple(item))
         else:
             return HttpResponse('Archive not found!')
 
 
 @shared_task
-def send_chunk_of_emails():
-    message1 = (
-        'Subject here',
-        'Here is the message',
-        'dobromir.mail@gmail.com',
-        ['dobromir.kovachev@era.io'])
-    message2 = (
-        'Another Subject',
-        'Here is another message',
-        'dobromir.mail@gmail.com',
-        ['momchil.jambazov@era.io'])
-    # smtpObj = smtplib.SMTP(
-    #     host=settings.EMAIL_HOST,
-    #     port=settings.EMAIL_PORT,
-    #     local_hostname=settings.EMAIL_LOCALHOST)
-    smtpObj = smtplib.SMTP('localhost')
+def send_chunk_of_emails(messages):
     try:
-        smtpObj.send_mass_mail((message1, message2), fail_silently=False)
+        send_mass_mail((messages,), fail_silently=False)
     except BadHeaderError:
         return HttpResponse('Invalid header found.')
     return True
-
-# czc
