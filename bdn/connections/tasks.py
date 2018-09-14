@@ -1,12 +1,14 @@
 import csv
 import logging
+import smtplib
 import zipfile
 import codecs
 import time
+from django.conf import settings
 from celery import shared_task
 from .models import Connection, FileUpload
 from bdn.profiles.models import Profile
-# from django.core.mail import BadHeaderError, send_mail
+from django.core.mail import BadHeaderError, send_mass_mail
 from django.http import HttpResponse  # , HttpResponseRedirect
 
 
@@ -76,7 +78,7 @@ def inviting_emails(connections_file_id):
                 all_emails = [all_emails[i:i+chunk_size] for i in range(
                     0, len(all_emails), chunk_size)]
                 for item in all_emails:
-                    print('Linter')
+                    print(item)
                     # chunk = tuple(item)
                     # send_chunk_of_emails.delay(chunk)
         else:
@@ -85,6 +87,25 @@ def inviting_emails(connections_file_id):
 
 @shared_task
 def send_chunk_of_emails():
-    pass
+    message1 = (
+        'Subject here',
+        'Here is the message',
+        'dobromir.mail@gmail.com',
+        ['dobromir.kovachev@era.io'])
+    message2 = (
+        'Another Subject',
+        'Here is another message',
+        'dobromir.mail@gmail.com',
+        ['momchil.jambazov@era.io'])
+    # smtpObj = smtplib.SMTP(
+    #     host=settings.EMAIL_HOST,
+    #     port=settings.EMAIL_PORT,
+    #     local_hostname=settings.EMAIL_LOCALHOST)
+    smtpObj = smtplib.SMTP('localhost')
+    try:
+        smtpObj.send_mass_mail((message1, message2), fail_silently=False)
+    except BadHeaderError:
+        return HttpResponse('Invalid header found.')
+    return True
 
 # czc
