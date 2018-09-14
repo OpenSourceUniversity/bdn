@@ -219,6 +219,13 @@ STATIC_URL = '/static/'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
+# Email settings
+EMAIL_HOST = 'smtp'
+EMAIL_PORT = 25
+EMAIL_HOST_USER = 'localsmtp'
+EMAIL_HOST_PASSWORD = 'localsmtp'
+
+
 try:
     from .local_settings import *
 except ImportError:

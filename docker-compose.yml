@@ -34,6 +34,13 @@ services:
       - "5434:5432"
     volumes:
       - postgres:/var/lib/postgresql/data
+  smtp:
+    image: "catatnight/postfix"
+    ports:
+      - "25:25"
+    environment:
+      - maildomain=localhost
+      - smtp_user=localsmtp:localsmtp
   web:
     build:
       context: .
