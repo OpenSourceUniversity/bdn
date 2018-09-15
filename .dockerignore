@@ -1,0 +1,3 @@
+# ignore the media folder since files within it could break the builds and
+# make it fail with unexpected EOF error, since tar could not handle it
+media/*
