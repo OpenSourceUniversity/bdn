@@ -41,7 +41,6 @@ class VerificationViewSet(mixins.CreateModelMixin,
 
     def list(self, request):
         user = request.user
-        print(request.GET)
         profile = str(request.GET.get('active_profile'))
         if profile == 'Academy':
             active_profile = 2

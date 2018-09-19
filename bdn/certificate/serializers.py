@@ -24,6 +24,7 @@ class CertificateSerializer(serializers.ModelSerializer):
             'industries',
             'skills',
             'ipfs_hash',
+            'checksum_hash',
             'score',
             'duration',
             'expiration_date',

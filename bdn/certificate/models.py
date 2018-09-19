@@ -25,6 +25,7 @@ class Certificate(m.Model):
     score = m.FloatField(default=0.0, blank=True, null=True)
     duration = m.PositiveSmallIntegerField(blank=True, null=True)
     expiration_date = m.DateTimeField(blank=True, null=True)
+    checksum_hash = m.CharField(max_length=64, blank=True, null=True)
 
     def __str__(self):
         return self.certificate_title

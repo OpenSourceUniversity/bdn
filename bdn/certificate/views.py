@@ -22,7 +22,7 @@ class CertificateViewSet(mixins.RetrieveModelMixin,
                          mixins.ListModelMixin,
                          viewsets.GenericViewSet):
     queryset = Certificate.objects.all()
-    serializer_class = CertificateSerializer
+    serializer_class = CertificateViewProfileSerializer
     authentication_classes = (SignatureAuthentication,)
     permission_classes = (IsAuthenticated,)
 
