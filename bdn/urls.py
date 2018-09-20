@@ -29,6 +29,7 @@ from bdn.verification.views import VerificationViewSet
 from bdn.auth.views import SignUpViewSet
 from bdn.messaging.views import ThreadViewSet, MessageViewSet
 from bdn.notifications_extensions.views import NotificationViewSet
+from bdn.transaction.views import TransactionViewSet
 from rest_framework import routers
 
 
@@ -46,6 +47,7 @@ router.register(
     r'notifications', NotificationViewSet, base_name='Notification')
 router.register(r'signup', SignUpViewSet)
 router.register(r'messages', MessageViewSet, base_name='Message')
+router.register(r'transactions', TransactionViewSet, base_name='Transaction')
 
 
 urlpatterns = [

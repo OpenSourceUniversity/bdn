@@ -62,6 +62,7 @@ INSTALLED_APPS = [
     'bdn.verification',
     'bdn.messaging',
     'bdn.connections',
+    'bdn.transaction',
 ]
 
 MIDDLEWARE = [
