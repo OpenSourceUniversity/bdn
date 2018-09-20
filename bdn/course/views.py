@@ -31,9 +31,14 @@ class CourseViewSet(mixins.RetrieveModelMixin,
     def retrieve(self, request, pk=None):
         course = get_object_or_404(Course, id=pk)
         user = course.provider.user
-        profile = user.profile
-        serializerProfile = AcademyProfileSerializer(profile)
         serializerCourse = CourseSerializer(course)
+        try:
+            profile = user.profile
+        except AttributeError:
+            return Response({
+                'course': serializerCourse.data,
+            })
+        serializerProfile = AcademyProfileSerializer(profile)
         return Response({
             'course': serializerCourse.data,
             'academy': serializerProfile.data
