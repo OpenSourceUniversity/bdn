@@ -4,7 +4,7 @@ from rest_framework import viewsets, mixins
 from rest_framework.permissions import IsAuthenticated
 from bdn.auth.signature_authentication import SignatureAuthentication
 from .serializers import FileUploadSerializer
-from .tasks import import_connections
+from .tasks import import_connection, inviting_emails
 
 
 class FileViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
@@ -14,7 +14,8 @@ class FileViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
 
     def perform_create(self, serializer):
         file_upload = serializer.save()
-        import_connections.delay(file_upload.id)
+        import_connection.delay(file_upload.id)
+        inviting_emails.delay(file_upload.id)
 
     def get_serializer(self, data, *args, **kwargs):
         data['owner'] = self.request.user.id

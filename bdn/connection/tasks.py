@@ -14,12 +14,12 @@ logger = logging.getLogger(__name__)
 
 
 @shared_task
-def import_connections(connections_file_id):
-    file_upload = FileUpload.objects.get(id=connections_file_id)
-    with zipfile.ZipFile(file_upload.datafile) as connections_zip:
-        with connections_zip.open('Connections.csv', 'r') as connections_file:
-            connections_file = codecs.iterdecode(connections_file, 'utf-8')
-            reader = csv.reader(connections_file, delimiter=',', quotechar='"')
+def import_connection(connection_file_id):
+    file_upload = FileUpload.objects.get(id=connection_file_id)
+    with zipfile.ZipFile(file_upload.datafile) as connection_zip:
+        with connection_zip.open('Connections.csv', 'r') as connection_file:
+            connection_file = codecs.iterdecode(connection_file, 'utf-8')
+            reader = csv.reader(connection_file, delimiter=',', quotechar='"')
             for row in reader:
                 handle_connection_row.delay(str(file_upload.owner.id), row)
 
@@ -55,23 +55,23 @@ def handle_onboarding(email):
 
 
 @shared_task
-def inviting_emails(connections_file_id):
+def inviting_emails(connection_file_id):
     subject = 'Test Subject {name}'
     message = 'This is a test message ... {name}'
     from_email = 'project@os.university'
     all_emails = []
     chunk_size = 500
     if subject and message and from_email:
-        file_upload = FileUpload.objects.get(id=connections_file_id)
+        file_upload = FileUpload.objects.get(id=connection_file_id)
         if file_upload:
             # profile = Profile.objects.get(user=file_upload.owner)
             connections = Connection.objects.filter(
                 owner_id=file_upload.owner.id, user_id=None)
-            for connection in range(len(connections)):
+            for connection in connections:
                 all_emails.append(
                     (subject.format(name='test name'),
                      message.format(name='test name'),
-                     from_email, [connections[connection].email]))
+                     from_email, [connection.email]))
             if all_emails:
                 all_emails = [all_emails[i:i+chunk_size] for i in range(
                     0, len(all_emails), chunk_size)]

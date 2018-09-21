@@ -7,7 +7,7 @@ class Connection(m.Model):
     id = m.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     owner = m.ForeignKey(
         s.AUTH_USER_MODEL, on_delete=m.SET_NULL, null=True,
-        related_name='self_connections')
+        related_name='self_connection')
     user = m.ForeignKey(s.AUTH_USER_MODEL, on_delete=m.SET_NULL, null=True)
     first_name = m.CharField(max_length=70)
     last_name = m.CharField(max_length=70)

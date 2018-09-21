@@ -10,7 +10,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('connections', '0002_remove_fileupload_owner_eth_address'),
+        ('connection', '0002_remove_fileupload_owner_eth_address'),
     ]
 
     operations = [

@@ -32,11 +32,6 @@ class TransactionViewSet(mixins.CreateModelMixin,
     serializer_class = TransactionSerializer
     pagination_class = TransactionPagination
 
-    @staticmethod
-    def deny():
-        return Response({
-                    'status': 'denied'}, status=status.HTTP_401_UNAUTHORIZED)
-
     def get_queryset(self):
         username = self.request.user.username
         transactions = Transaction.objects.filter(
@@ -49,7 +44,6 @@ class TransactionViewSet(mixins.CreateModelMixin,
         data = request.data.copy()
         data['sender'] = sender
         data['receiver'] = data['receiver'].lower()
-        print(data)
         serializer = TransactionSerializer(data=data)
         if serializer.is_valid():
             transaction = serializer.save()
