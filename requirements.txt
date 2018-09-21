@@ -91,3 +91,4 @@ watchdog==0.8.3
 web3==4.5.0
 websockets==5.0.1
 zope.interface==4.5.0
+django-mail-templated==2.6.5

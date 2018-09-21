@@ -15,6 +15,8 @@ class Connection(m.Model):
     company_name = m.CharField(max_length=130, blank=True, null=True)
     position_title = m.CharField(max_length=130, blank=True, null=True)
     connected_on = m.DateTimeField(blank=True, null=True)
+    email_sent = m.BooleanField(default=False)
+    email_sent_on = m.DateTimeField(blank=True, null=True)
 
     def __str__(self):
         return '%s %s' % (self.first_name, self.last_name)
