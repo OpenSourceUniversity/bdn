@@ -140,8 +140,7 @@ class JobViewSet(mixins.RetrieveModelMixin,
                 'error': 'Company not found',
             }, status=status.HTTP_400_BAD_REQUEST)
         skills_post = request.data.get('skills', [])
-        skills_lower = [_.lower() for _ in skills_post]
-        skills = Skill.objects.filter(name__in=skills_lower)
+        skills = Skill.objects.filter(name__in=skills_post)
         industries = Industry.objects.filter(
             name__in=request.data.get('industries', []))
         serializer = JobSerializer(data=request.data)

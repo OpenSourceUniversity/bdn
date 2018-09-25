@@ -11,12 +11,12 @@ class JobApplication(m.Model):
     issuer = m.ForeignKey(
         settings.AUTH_USER_MODEL, blank=True, null=True, on_delete=m.SET_NULL,
         related_name='application_issuer')
-    state = FSMField(default='open')
+    state = FSMField(default='requested')
     date_created = m.DateTimeField(auto_now_add=True)
     date_last_modified = m.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return self.issuer
+        return self.issuer.username
 
     @transition(field=state, source=['requested'], target='approved')
     def move_to_approved(self):
