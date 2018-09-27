@@ -11,6 +11,8 @@ https://docs.djangoproject.com/en/2.0/ref/settings/
 """
 
 import os
+import glob
+import sys
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -65,6 +67,17 @@ INSTALLED_APPS = [
     'bdn.transaction',
     'bdn.job_application',
 ]
+
+# Import all apps from apps folder
+extra_apps_init = glob.glob(
+    os.path.join(BASE_DIR, "apps/*/*/__init__.py"))
+for extra_app_init in extra_apps_init:
+    package_path = '/'.join(extra_app_init.split('/')[:-2])
+    if package_path not in sys.path:
+        sys.path.append(package_path)
+    package_name = extra_app_init.split('/')[-2]
+    INSTALLED_APPS += [package_name]
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
