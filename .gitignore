@@ -9,6 +9,7 @@ __pycache__/
 # Distribution / packaging
 .Python
 build/
+apps/
 develop-eggs/
 dist/
 downloads/
@@ -120,3 +121,6 @@ celerybeat.pid
 .ethereum_data/
 
 media/
+
+# Ignore submodules
+.gitmodules
