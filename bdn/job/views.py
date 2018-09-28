@@ -126,6 +126,7 @@ class JobViewSet(mixins.RetrieveModelMixin,
         if job_position.company.user.username == eth_address:
             job_position.is_featured = True
             job_position.save()
+            return Response({'status': 'ok'})
         return Response({
             'status': 'denied'}, status=status.HTTP_401_UNAUTHORIZED)
 

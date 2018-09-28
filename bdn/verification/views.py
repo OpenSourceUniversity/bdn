@@ -98,7 +98,10 @@ class VerificationViewSet(mixins.CreateModelMixin,
             return Response({
                 'error': 'User not found',
             }, status=status.HTTP_400_BAD_REQUEST)
-
+        if granted_to == verifier:
+            return Response({
+                'error': 'You are not able to verify certificate by yourself',
+            }, status=status.HTTP_400_BAD_REQUEST)
         data['state'] = 'requested'
         data['granted_to'] = granted_to.id
         data['verifier'] = verifier.id
