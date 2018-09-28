@@ -14,7 +14,7 @@ from bdn.industry.models import Industry
 from bdn.skill.models import Skill
 from bdn.provider.models import Provider
 from bdn.profiles.serializers import AcademyProfileSerializer
-from .serializers import CourseSerializer
+from .serializers import CourseSerializer, CourseCreateSerializer
 from .models import Course
 
 
@@ -117,13 +117,23 @@ class CourseViewSet(mixins.RetrieveModelMixin,
         eth_address = get_auth_eth_address(request.META)
         course = get_object_or_404(Course, id=pk)
         if course.provider.user.username == eth_address:
-            serializer = self.get_serializer(
+            serializer = CourseCreateSerializer(
                 data=request.data, instance=course, partial=True)
             if serializer.is_valid():
                 serializer.save()
                 return Response({'status': 'ok'})
             return Response(serializer.errors,
                             status=status.HTTP_400_BAD_REQUEST)
+        return Response({
+            'status': 'denied'}, status=status.HTTP_401_UNAUTHORIZED)
+
+    @detail_route(methods=['post'])
+    def mark_featured_by_id(self, request, pk=None):
+        eth_address = get_auth_eth_address(request.META)
+        course = get_object_or_404(Course, id=pk)
+        if course.provider.user.username == eth_address:
+            course.is_featured = True
+            course.save()
         return Response({
             'status': 'denied'}, status=status.HTTP_401_UNAUTHORIZED)
 
@@ -140,7 +150,7 @@ class CourseViewSet(mixins.RetrieveModelMixin,
         skills = Skill.objects.filter(name__in=skills_lower)
         industries = Industry.objects.filter(
             name__in=request.data.get('industries', []))
-        serializer = CourseSerializer(data=request.data)
+        serializer = CourseCreateSerializer(data=request.data)
         if serializer.is_valid():
             course = serializer.save(
                 provider=provider, industries=industries, skills=skills)

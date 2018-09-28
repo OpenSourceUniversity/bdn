@@ -31,3 +31,30 @@ class JobSerializer(serializers.ModelSerializer):
             'languages',
             'is_featured',
         )
+
+
+class JobCreateSerializer(serializers.ModelSerializer):
+    industries = IndustrySerializer(many=True, read_only=True)
+    skills = SkillSerializer(many=True, read_only=True)
+    company = CompanySerializer(many=False, read_only=True)
+
+    class Meta:
+        model = Job
+        fields = (
+            'id',
+            'title',
+            'location',
+            'salary',
+            'overview',
+            'skills',
+            'description',
+            'external_link',
+            'image_url',
+            'company',
+            'industries',
+            'posted',
+            'closes',
+            'experience',
+            'hours',
+            'languages',
+        )

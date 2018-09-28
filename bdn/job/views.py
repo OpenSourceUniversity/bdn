@@ -16,7 +16,7 @@ from bdn.industry.models import Industry
 from bdn.skill.models import Skill
 from bdn.profiles.serializers import CompanyProfileSerializer
 from .models import Job
-from .serializers import JobSerializer
+from .serializers import JobSerializer, JobCreateSerializer
 
 
 class JobViewSet(mixins.RetrieveModelMixin,
@@ -109,13 +109,23 @@ class JobViewSet(mixins.RetrieveModelMixin,
         eth_address = get_auth_eth_address(request.META)
         job_position = get_object_or_404(Job, id=pk)
         if job_position.company.user.username == eth_address:
-            serializer = self.get_serializer(
+            serializer = JobCreateSerializer(
                 data=request.data, instance=job_position, partial=True)
             if serializer.is_valid():
                 serializer.save()
                 return Response({'status': 'ok'})
             return Response(serializer.errors,
                             status=status.HTTP_400_BAD_REQUEST)
+        return Response({
+            'status': 'denied'}, status=status.HTTP_401_UNAUTHORIZED)
+
+    @detail_route(methods=['post'])
+    def mark_featured_by_id(self, request, pk=None):
+        eth_address = get_auth_eth_address(request.META)
+        job_position = get_object_or_404(Job, id=pk)
+        if job_position.company.user.username == eth_address:
+            job_position.is_featured = True
+            job_position.save()
         return Response({
             'status': 'denied'}, status=status.HTTP_401_UNAUTHORIZED)
 
@@ -143,7 +153,7 @@ class JobViewSet(mixins.RetrieveModelMixin,
         skills = Skill.objects.filter(name__in=skills_post)
         industries = Industry.objects.filter(
             name__in=request.data.get('industries', []))
-        serializer = JobSerializer(data=request.data)
+        serializer = JobCreateSerializer(data=request.data)
         if serializer.is_valid():
             job = serializer.save(
                 company=company, industries=industries, skills=skills)

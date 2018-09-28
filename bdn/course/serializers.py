@@ -24,3 +24,23 @@ class CourseSerializer(serializers.ModelSerializer):
             'skills',
             'is_featured',
         )
+
+
+class CourseCreateSerializer(serializers.ModelSerializer):
+    industries = IndustrySerializer(many=True, read_only=True)
+    skills = SkillSerializer(many=True, read_only=True)
+    provider = ProviderSerializer(many=False, read_only=True)
+
+    class Meta:
+        model = Course
+        fields = (
+            'id',
+            'title',
+            'description',
+            'external_link',
+            'image_url',
+            'provider',
+            'tutor',
+            'industries',
+            'skills',
+        )
