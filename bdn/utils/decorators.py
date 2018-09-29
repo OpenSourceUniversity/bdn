@@ -107,7 +107,8 @@ def _check_decoratable(origin, install=True):
 
             for attr_name in origin.__dict__.keys():
                 if attr_name not in decoratable_method.__dict__:
-                    decoratable_method.__dict__[attr_name] = origin.__dict__[attr_name]
+                    decoratable_method\
+                        .__dict__[attr_name] = origin.__dict__[attr_name]
 
             if install:
                 setattr(cls, origin.__name__, decoratable_method)
