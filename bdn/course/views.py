@@ -58,7 +58,7 @@ class CourseViewSet(mixins.RetrieveModelMixin,
         qs = Course.objects.all()
         qs = qs.filter(self.industry_filter())
         qs = qs.filter(self.featured_filter())
-        return qs
+        return qs.order_by('-is_featured')
 
     def industry_filter(self):
         filtered_industries_ids = self.request.query_params.get(
