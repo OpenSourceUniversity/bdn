@@ -192,6 +192,7 @@ REST_FRAMEWORK = {
 
 
 AUTH_USER_MODEL = 'bdn_auth.User'
+AUTH_USER_ADMIN = 'bdn_auth.UserAdmin'
 
 
 # Password validation
