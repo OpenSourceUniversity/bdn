@@ -69,7 +69,8 @@ class ProfileViewSet(mixins.CreateModelMixin,
     @list_route(methods=['get'])
     def get_learners(self, request):
         profiles = Profile.objects.filter(
-            public_profile=True).order_by('first_name')
+            public_profile=True, first_name__isnull=False)\
+            .order_by('first_name')
         serializer = LearnerViewProfileSerializer(profiles, many=True)
         return Response(serializer.data)
 
