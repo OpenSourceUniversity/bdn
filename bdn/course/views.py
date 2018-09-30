@@ -134,6 +134,7 @@ class CourseViewSet(mixins.RetrieveModelMixin,
         if course.provider.user.username == eth_address:
             course.is_featured = True
             course.save()
+            return Response({'status': 'ok'})
         return Response({
             'status': 'denied'}, status=status.HTTP_401_UNAUTHORIZED)
 

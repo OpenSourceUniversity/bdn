@@ -14,7 +14,6 @@ class Job(m.Model):
     overview = m.TextField(max_length=500)
     skills = m.ManyToManyField(Skill)
     description = m.TextField()
-    external_link = m.URLField(blank=True, null=True)
     image_url = m.URLField(blank=True, null=True)
     company = m.ForeignKey(
         Company, blank=True, null=True, on_delete=m.SET_NULL)

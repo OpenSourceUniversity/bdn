@@ -15,6 +15,7 @@ class CourseSerializer(serializers.ModelSerializer):
         fields = (
             'id',
             'title',
+            'program_title',
             'description',
             'external_link',
             'image_url',
@@ -22,6 +23,7 @@ class CourseSerializer(serializers.ModelSerializer):
             'tutor',
             'industries',
             'skills',
+            'duration',
             'is_featured',
         )
 
@@ -36,6 +38,7 @@ class CourseCreateSerializer(serializers.ModelSerializer):
         fields = (
             'id',
             'title',
+            'program_title',
             'description',
             'external_link',
             'image_url',
@@ -43,4 +46,12 @@ class CourseCreateSerializer(serializers.ModelSerializer):
             'tutor',
             'industries',
             'skills',
+            'duration',
         )
+
+    def to_internal_value(self, data):
+        if data.get('score', None) == '':
+            data.pop('score')
+        if data.get('duration', None) == '':
+            data.pop('duration')
+        return super(CourseCreateSerializer, self).to_internal_value(data)
