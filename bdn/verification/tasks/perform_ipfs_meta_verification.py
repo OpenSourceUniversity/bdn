@@ -1,6 +1,3 @@
-import logging
-import requests
-import json
 import bdn.contract
 from bdn.verification.models import Verification
 from bdn.certificate.models import Certificate
@@ -9,41 +6,25 @@ from django.core.exceptions import ValidationError
 from notifications.signals import notify
 from celery import shared_task
 from bdn.verification.exceptions import (
-    NoArgumentsError, IpfsDataAttributeError,
-    GrantedToUserDoesNotExist, VerifierUserDoesNotExist,
-    VerifierUserValidationError, VerificationDoesNotExist,
-    VerificationValidationError, CertificateDoesNotExist,
-    CertificateValidationError, BlockchainVerificationError,
-    JsonDecodeError)
-
-
-IPFS_HOST = 'https://ipfs.io/ipfs/'
-
-logger = logging.getLogger(__name__)
+    IpfsDataAttributeError, GrantedToUserDoesNotExist,
+    VerifierUserDoesNotExist, VerifierUserValidationError,
+    VerificationDoesNotExist, VerificationValidationError,
+    CertificateDoesNotExist, CertificateValidationError,
+    BlockchainVerificationError)
 
 
 @shared_task
-def perform_ipfs_meta_verification(entry):
-    tx_hash = entry['transactionHash']
-    block_hash = entry['blockHash']
-    block_number = int(entry['blockNumber'])
-    entry_args = entry['args']
-    meta_ipfs_hash = entry_args.get('ipfsHash', '')
-    granted_to_eth = entry_args.get('grantedTo', '').lower()
-    if not meta_ipfs_hash or not granted_to_eth:
-        raise NoArgumentsError(
-            "Event triggered without providing IPFS meta hash or "
-            "granted to ETH address")
-    ipfs_link = IPFS_HOST + meta_ipfs_hash
-    try:
-        verification_ipfs_data = requests.get(ipfs_link).json()
-    except json.decoder.JSONDecodeError:
-        raise JsonDecodeError('Can not decode IPFS data')
+def perform_ipfs_meta_verification(
+        verification_ipfs_data, tx_hash,
+        block_hash, block_number, meta_ipfs_hash):
     try:
         verifier_id = verification_ipfs_data.get('verifier')
         verification_id = verification_ipfs_data.get('id')
+        granted_to_eth = verification_ipfs_data.get(
+            'granted_to_eth_address')
     except AttributeError:
-        raise IpfsDataAttributeError('verification_ipfs_data AttributeError')
+        raise IpfsDataAttributeError(
+            'verification_ipfs_data AttributeError')
     try:
         granted_to = User.objects.get(username=granted_to_eth)
     except User.DoesNotExist:
