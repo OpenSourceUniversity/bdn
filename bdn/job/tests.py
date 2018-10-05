@@ -41,8 +41,7 @@ class JobTests(TestCase):
                 'location': 'test',
                 'overview': 'test',
                 'description': 'test',
-                'hours': 'test',
-                'external_link': 'http://example.com/',
+                'hours': 1,
             },
             HTTP_AUTH_SIGNATURE='0xe646de646dde9cee6875e3845428ce6fc13d41086e8a7f6531d1d526598cc4104122e01c38255d1e1d595710986d193f52e3dbc47cb01cb554d8e4572d6920361c',
             HTTP_AUTH_ETH_ADDRESS='D2BE64317Eb1832309DF8c8C18B09871809f3735'
