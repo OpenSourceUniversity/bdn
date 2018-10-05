@@ -4,10 +4,10 @@ import zipfile
 import codecs
 import time
 from celery import shared_task
-from .models import Connection, FileUpload
 from bdn.profiles.models import Profile
-from django.core.mail import BadHeaderError, send_mass_mail
-from django.http import HttpResponse
+from mail_templated import EmailMessage
+from .models import Connection, FileUpload
+from .serializers import ConnectionSerializer
 
 
 logger = logging.getLogger(__name__)
@@ -20,7 +20,11 @@ def import_connection(connection_file_id):
         with connection_zip.open('Connections.csv', 'r') as connection_file:
             connection_file = codecs.iterdecode(connection_file, 'utf-8')
             reader = csv.reader(connection_file, delimiter=',', quotechar='"')
-            for row in reader:
+            print(reader)
+            for index, row in enumerate(reader):
+                # Skip the header
+                if index == 0:
+                    continue
                 handle_connection_row.delay(str(file_upload.owner.id), row)
 
 
@@ -43,6 +47,7 @@ def handle_connection_row(owner, row):
         user_id=handle_onboarding(email)
     )
     connection.save()
+    inviting_emails.delay(ConnectionSerializer(connection).data)
 
 
 @shared_task
@@ -55,36 +60,14 @@ def handle_onboarding(email):
 
 
 @shared_task
-def inviting_emails(connection_file_id):
-    subject = 'Test Subject {name}'
-    message = 'This is a test message ... {name}'
+def inviting_emails(connection):
     from_email = 'project@os.university'
-    all_emails = []
-    chunk_size = 500
-    if subject and message and from_email:
-        file_upload = FileUpload.objects.get(id=connection_file_id)
-        if file_upload:
-            # profile = Profile.objects.get(user=file_upload.owner)
-            connections = Connection.objects.filter(
-                owner_id=file_upload.owner.id, user_id=None)
-            for connection in connections:
-                all_emails.append(
-                    (subject.format(name='test name'),
-                     message.format(name='test name'),
-                     from_email, [connection.email]))
-            if all_emails:
-                all_emails = [all_emails[i:i+chunk_size] for i in range(
-                    0, len(all_emails), chunk_size)]
-                for item in all_emails:
-                    send_chunk_of_emails(tuple(item))
-        else:
-            return HttpResponse('Archive not found!')
-
-
-@shared_task
-def send_chunk_of_emails(messages):
-    try:
-        send_mass_mail((messages,), fail_silently=False)
-    except BadHeaderError:
-        return HttpResponse('Invalid header found.')
-    return True
+    message = EmailMessage(
+        'mail/sec1.tpl',
+        {
+            'first_name': connection['first_name'],
+            'last_name': connection['last_name'],
+        },
+        from_email,
+        to=[connection['email']])
+    message.send()

@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     'haystack',
     'rest_framework',
     'corsheaders',
+    'mail_templated',
     'bdn.auth',
     'bdn.industry',
     'bdn.certificate',

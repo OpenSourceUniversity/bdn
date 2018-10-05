@@ -21,7 +21,7 @@ class Job(m.Model):
     posted = m.DateField(auto_now_add=True)
     closes = m.DateField(blank=True, null=True)
     experience = m.CharField(max_length=130, blank=True, null=True)
-    hours = m.CharField(max_length=130)
+    hours = m.PositiveSmallIntegerField(blank=True, null=True)
     languages = ArrayField(m.CharField(
         max_length=70, blank=True, null=True), default=[])
     is_featured = m.BooleanField(default=False)
