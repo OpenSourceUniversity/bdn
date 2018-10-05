@@ -83,6 +83,7 @@ for extra_app_init in extra_apps_init:
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',  # Should be after SecurityMiddleware
     'django.contrib.sessions.middleware.SessionMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -134,7 +135,7 @@ DATABASES = {
         'NAME': os.environ.get('DB_NAME', 'postgres'),
         'USER': os.environ.get('DB_USER', 'postgres'),
         'PASSWORD': os.environ.get('DB_PASSWORD', ''),
-        'HOST': os.environ.get('DB_HOST', os.environ.get('POSTGRES_SERVICE_HOST', 'postgres')),
+        'HOST': os.environ.get('DB_HOST', os.environ.get('POSTGRES_SERVICE_HOST', 'db')),
         'PORT': int(os.environ.get('DB_PORT', os.environ.get('POSTGRES_SERVICE_PORT', '5432'))),
     }
 }
@@ -237,6 +238,8 @@ USE_TZ = True
 STATIC_URL = '/static/'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Email settings
 EMAIL_HOST = 'smtp'

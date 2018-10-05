@@ -29,6 +29,7 @@ django-celery-results==1.0.1
 django-cors-headers==2.2.0
 django-fsm==2.6.0
 django-haystack==2.8.1
+django-mail-templated==2.6.5
 django-model-utils==3.1.2
 django-notifications-hq==1.5.0
 djangorestframework==3.7.7
@@ -90,5 +91,5 @@ vine==1.1.4
 watchdog==0.8.3
 web3==4.5.0
 websockets==5.0.1
+whitenoise==4.1
 zope.interface==4.5.0
-django-mail-templated==2.6.5
