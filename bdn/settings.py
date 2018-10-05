@@ -31,6 +31,7 @@ ALLOWED_HOSTS = [
     '192.168.99.100',
     'localhost',
     '127.0.0.1',
+    'app.os.university',
 ]
 
 
@@ -130,10 +131,11 @@ ASGI_APPLICATION = "bdn.routing.application"
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'postgres',
-        'USER': 'postgres',
-        'HOST': 'db',
-        'PORT': 5432,
+        'NAME': os.environ.get('DB_NAME', 'postgres'),
+        'USER': os.environ.get('DB_USER', 'postgres'),
+        'PASSWORD': os.environ.get('DB_PASSWORD', ''),
+        'HOST': os.environ.get('DB_HOST', os.environ.get('POSTGRES_SERVICE_HOST', 'postgres')),
+        'PORT': int(os.environ.get('DB_PORT', os.environ.get('POSTGRES_SERVICE_PORT', '5432'))),
     }
 }
 
@@ -161,9 +163,9 @@ DJANGO_NOTIFICATIONS_CONFIG = {
 
 # Redis
 
-REDIS_HOST = 'redis'
-REDIS_PORT = 6379
-REDIS_DB = 0
+REDIS_HOST = os.environ.get('REDIS_HOST', 'redis')
+REDIS_PORT = int(os.environ.get('REDIS_PORT', '6379'))
+REDIS_DB = int(os.environ.get('REDIS_DB', '0'))
 
 # Channels
 
