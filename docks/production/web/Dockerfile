@@ -6,5 +6,6 @@ ADD requirements.txt /code/
 RUN apk add --no-cache gcc g++ make linux-headers musl-dev libffi-dev postgresql-dev gmp-dev
 RUN pip install -r requirements.txt
 ADD . /code/
+RUN python manage.py collectstatic
 EXPOSE 8000
 CMD ["daphne", "bdn.asgi:application", "-b", "0.0.0.0", "-p", "8000"]
