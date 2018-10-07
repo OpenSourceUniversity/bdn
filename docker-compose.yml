@@ -48,6 +48,7 @@ services:
     command: python manage.py runserver 0.0.0.0:8000
     environment:
       - ETHEREUM_NODE=http://ganache:8545
+      - DJANGO_DEBUG=true
     volumes:
       - .:/code
     ports:
@@ -94,6 +95,8 @@ services:
       - DJANGO_SETTINGS_MODULE=bdn.settings
       - ETHEREUM_NODE=http://ganache:8545
     command: python start-celery-for-dev.py
+    environment:
+      - DJANGO_DEBUG=true
     volumes:
       - .:/code
     depends_on:
