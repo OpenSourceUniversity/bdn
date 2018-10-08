@@ -11,9 +11,9 @@ class Job(m.Model):
     title = m.CharField(max_length=130)
     location = m.CharField(max_length=130)
     salary = m.CharField(max_length=130, blank=True, null=True)
-    overview = m.TextField(max_length=500)
+    overview = m.TextField(max_length=5000)
     skills = m.ManyToManyField(Skill)
-    description = m.TextField()
+    description = m.TextField(max_length=5000)
     image_url = m.URLField(blank=True, null=True)
     company = m.ForeignKey(
         Company, blank=True, null=True, on_delete=m.SET_NULL)

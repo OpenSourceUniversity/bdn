@@ -10,7 +10,7 @@ class Course(m.Model):
     title = m.CharField(max_length=130)
     program_title = m.CharField(
         max_length=130, blank=True, null=True, default=None)
-    description = m.TextField()
+    description = m.TextField(max_length=5000)
     external_link = m.URLField(default='https://os.university')
     image_url = m.URLField(blank=True, null=True)
     provider = m.ForeignKey(
