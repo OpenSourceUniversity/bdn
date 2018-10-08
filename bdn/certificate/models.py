@@ -11,10 +11,10 @@ class Certificate(m.Model):
     holder = m.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=m.SET_NULL, null=True)
     user_eth_address = m.CharField(max_length=42, default='None')
-    institution_title = m.CharField(max_length=70)
+    institution_title = m.CharField(max_length=130)
     institution_link = m.URLField()
-    program_title = m.CharField(max_length=70, blank=True, null=True)
-    certificate_title = m.CharField(max_length=70)
+    program_title = m.CharField(max_length=130, blank=True, null=True)
+    certificate_title = m.CharField(max_length=130)
     course_link = m.URLField(blank=True, null=True)
     granted_to_type = m.PositiveSmallIntegerField(
         default=ProfileType.LEARNER,

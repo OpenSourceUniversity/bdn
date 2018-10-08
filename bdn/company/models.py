@@ -9,7 +9,7 @@ class Company(m.Model):
         verbose_name_plural = 'Companies'
 
     id = m.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    name = m.CharField(max_length=70)
+    name = m.CharField(max_length=130)
     user = m.OneToOneField(
         settings.AUTH_USER_MODEL, on_delete=m.SET_NULL, null=True)
     verified = m.BooleanField(default=False)

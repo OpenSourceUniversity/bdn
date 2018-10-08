@@ -33,7 +33,7 @@ class Message(m.Model):
     sender = m.ForeignKey(
         settings.AUTH_USER_MODEL, verbose_name="Author",
         related_name="messages", on_delete=m.CASCADE)
-    text = m.TextField(verbose_name="Message text")
+    text = m.TextField(verbose_name="Message text", max_length=4096)
     read = m.BooleanField(verbose_name="Read", default=False)
     created = m.DateTimeField(auto_now_add=True)
 

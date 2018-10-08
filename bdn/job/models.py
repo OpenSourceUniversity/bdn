@@ -23,7 +23,7 @@ class Job(m.Model):
     experience = m.CharField(max_length=130, blank=True, null=True)
     hours = m.PositiveSmallIntegerField(blank=True, null=True)
     languages = ArrayField(m.CharField(
-        max_length=70, blank=True, null=True), default=[])
+        max_length=130, blank=True, null=True), default=[])
     is_featured = m.BooleanField(default=False)
 
     def __str__(self):
