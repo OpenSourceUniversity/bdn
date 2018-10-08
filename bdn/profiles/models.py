@@ -22,9 +22,9 @@ class Profile(m.Model):
     user = m.OneToOneField(settings.AUTH_USER_MODEL, on_delete=m.CASCADE)
     full_name = m.CharField(max_length=70, blank=True, null=True)
     learner_email = m.EmailField(max_length=130, blank=True, null=True)
-    learner_position = m.CharField(max_length=70, blank=True, null=True)
+    learner_position = m.CharField(max_length=130, blank=True, null=True)
     learner_specialisation = m.CharField(
-        max_length=70, blank=True, null=True)
+        max_length=130, blank=True, null=True)
     learner_about = m.TextField(max_length=2048, blank=True, null=True)
     public_profile = m.BooleanField(default=True)
     learner_site = m.CharField(max_length=70, blank=True, null=True)
