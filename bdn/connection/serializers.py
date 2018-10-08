@@ -18,8 +18,7 @@ class ConnectionSerializer(serializers.ModelSerializer):
         model = Connection
         fields = (
             'owner_id',
-            'first_name',
-            'last_name',
+            'full_name',
             'email',
             'company_name',
             'position_title',

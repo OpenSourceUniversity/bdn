@@ -14,8 +14,7 @@ class ProfileTests(TestCase):
         request = self.factory.post(
             '/api/v1/profile/',
             data={
-                'first_name': 'test',
-                'last_name': 'test',
+                'full_name': 'test',
                 'learner_email': 'test@test.com',
             },
             HTTP_AUTH_SIGNATURE='0xe646de646dde9cee6875e3845428ce6fc13d41086e8a7f6531d1d526598cc4104122e01c38255d1e1d595710986d193f52e3dbc47cb01cb554d8e4572d6920361c',

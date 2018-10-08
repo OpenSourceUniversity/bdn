@@ -30,16 +30,14 @@ def import_connection(connection_file_id):
 
 @shared_task
 def handle_connection_row(owner, row):
-    first_name = row[0]
-    last_name = row[1]
+    full_name = '{} {}'.format(row[0], row[1])
     email = row[2]
     company = row[3]
     position = row[4]
     connected_on = time.strptime(row[5].strip(), "%m/%d/%y, %I:%M %p")
     connection = Connection(
         owner_id=owner,
-        first_name=first_name,
-        last_name=last_name,
+        full_name=full_name,
         email=email,
         company_name=company,
         position_title=position,
@@ -65,8 +63,7 @@ def inviting_emails(connection):
     message = EmailMessage(
         'mail/sec1.tpl',
         {
-            'first_name': connection['first_name'],
-            'last_name': connection['last_name'],
+            'full_name': connection['full_name'],
         },
         from_email,
         to=[connection['email']])

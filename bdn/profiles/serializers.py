@@ -18,8 +18,7 @@ class ProfileSerializer(serializers.ModelSerializer):
         fields = (
             'active_profile_type',
             'user',
-            'first_name',
-            'last_name',
+            'full_name',
             'learner_email',
             'learner_position',
             'learner_specialisation',
@@ -57,8 +56,7 @@ class LearnerProfileSerializer(serializers.ModelSerializer):
         model = Profile
         fields = (
             'user',
-            'first_name',
-            'last_name',
+            'full_name',
             'learner_email',
             'learner_position',
             'learner_specialisation',
@@ -83,8 +81,7 @@ class LearnerViewProfileSerializer(serializers.ModelSerializer):
         model = Profile
         fields = (
             'user',
-            'first_name',
-            'last_name',
+            'full_name',
             'learner_position',
             'learner_specialisation',
             'learner_about',

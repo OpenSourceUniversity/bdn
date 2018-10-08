@@ -62,8 +62,7 @@ class Command(BaseCommand):
                 if int(profile) < int(countLearners) and countLearners > 0:
                     profile_obj = Profile.objects.get(user=user)
                     profile_obj.active_profile_type = 1
-                    profile_obj.first_name = faker.name().split()[0]
-                    profile_obj.last_name = faker.name().split()[1]
+                    profile_obj.full_name = faker.name().split()[0]
                     profile_obj.learner_email = faker.email()
                     profile_obj.learner_position = faker.job()
                     profile_obj.learner_specialisation = "Specialization ..."

@@ -9,8 +9,7 @@ class Connection(m.Model):
         s.AUTH_USER_MODEL, on_delete=m.SET_NULL, null=True,
         related_name='self_connection')
     user = m.ForeignKey(s.AUTH_USER_MODEL, on_delete=m.SET_NULL, null=True)
-    first_name = m.CharField(max_length=70)
-    last_name = m.CharField(max_length=70)
+    full_name = m.CharField(max_length=70)
     email = m.CharField(max_length=130, blank=True, null=True)
     company_name = m.CharField(max_length=130, blank=True, null=True)
     position_title = m.CharField(max_length=130, blank=True, null=True)
@@ -19,7 +18,7 @@ class Connection(m.Model):
     email_sent_on = m.DateTimeField(blank=True, null=True)
 
     def __str__(self):
-        return '%s %s' % (self.first_name, self.last_name)
+        return self.full_name
 
 
 class FileUpload(m.Model):

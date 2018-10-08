@@ -20,8 +20,7 @@ class Profile(m.Model):
         default=ProfileType.LEARNER,
         choices=[(_.value, _.name) for _ in ProfileType])
     user = m.OneToOneField(settings.AUTH_USER_MODEL, on_delete=m.CASCADE)
-    first_name = m.CharField(max_length=70, blank=True, null=True)
-    last_name = m.CharField(max_length=70, blank=True, null=True)
+    full_name = m.CharField(max_length=70, blank=True, null=True)
     learner_email = m.EmailField(max_length=70, blank=True, null=True)
     learner_position = m.CharField(max_length=70, blank=True, null=True)
     learner_specialisation = m.CharField(
@@ -49,10 +48,6 @@ class Profile(m.Model):
 
     def __str__(self):
         return self.user.username
-
-    @property
-    def full_name(self):
-        return '{} {}'.format(self.first_name, self.last_name)
 
     def name_by_profile_type(self, profile_type):
         NAME_FIELDS = {
