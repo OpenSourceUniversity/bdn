@@ -34,6 +34,7 @@ ALLOWED_HOSTS = [
     'localhost',
     '127.0.0.1',
     'bdn.os.university',
+    'dapp.os.university',
 ]
 
 
