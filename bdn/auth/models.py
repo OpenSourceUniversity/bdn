@@ -22,6 +22,8 @@ class SignUp(m.Model):
     step = m.PositiveSmallIntegerField(
         default=SignUpStep.EMAIL,
         choices=[(_.value, _.name) for _ in SignUpStep])
+    modified = m.DateTimeField(auto_now=True)
+    email_sent = m.BooleanField(default=False)
 
     def __str__(self):
         return self.email
