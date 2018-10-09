@@ -13,6 +13,8 @@ https://docs.djangoproject.com/en/2.0/ref/settings/
 import os
 import glob
 import sys
+import sentry_sdk
+from sentry_sdk.integrations.django import DjangoIntegration
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -246,6 +248,15 @@ EMAIL_HOST = 'smtp'
 EMAIL_PORT = 25
 EMAIL_HOST_USER = 'localsmtp'
 EMAIL_HOST_PASSWORD = 'localsmtp'
+
+
+# Sentry
+sentry_dsn = os.environ.get('SENTRY_DSN')
+if sentry_dsn:
+    sentry_sdk.init(
+        dsn=sentry_dsn,
+        integrations=[DjangoIntegration()]
+    )
 
 
 try:
