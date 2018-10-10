@@ -94,9 +94,8 @@ services:
     environment:
       - DJANGO_SETTINGS_MODULE=bdn.settings
       - ETHEREUM_NODE=http://ganache:8545
-    command: python start-celery-for-dev.py
-    environment:
       - DJANGO_DEBUG=true
+    command: python start-celery-for-dev.py
     volumes:
       - .:/code
     depends_on:
