@@ -28,7 +28,7 @@ class ThreadConsumer(AsyncConsumer):
             self.channel_name)
 
     async def chat_message(self, message_data):
-        logger.error("sending message", message_data)
+        logger.info("sending message", message_data)
         await self.send({
             "type": "websocket.send",
             "text": json.dumps(message_data['payload']),

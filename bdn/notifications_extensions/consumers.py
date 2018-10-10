@@ -26,7 +26,7 @@ class NotificationConsumer(AsyncConsumer):
             self.channel_name)
 
     async def notification_send(self, notification_data):
-        logger.error("sending notification", notification_data)
+        logger.info("sending notification", notification_data)
         await self.send({
             "type": "websocket.send",
             "text": json.dumps(notification_data['payload']),
