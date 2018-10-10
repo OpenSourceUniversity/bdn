@@ -17,6 +17,7 @@ RUN mkdir /code/
 WORKDIR /code/
 COPY . /code/
 RUN python manage.py collectstatic
+RUN rm -f celerybeat.pid
 EXPOSE 8000
 ENV PATH="/usr/local/lib/python3.6/bin/:${PATH}"
 CMD ["daphne", "bdn.asgi:application", "-b", "0.0.0.0", "-p", "8000"]
