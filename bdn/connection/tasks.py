@@ -7,7 +7,7 @@ from celery import shared_task
 from bdn.auth.models import User
 from mail_templated import EmailMessage
 from .models import Connection, FileUpload
-from .serializers import ConnectionSerializer
+# from .serializers import ConnectionSerializer
 
 
 logger = logging.getLogger(__name__)
