@@ -13,6 +13,8 @@ https://docs.djangoproject.com/en/2.0/ref/settings/
 import os
 import glob
 import sys
+import sentry_sdk
+from sentry_sdk.integrations.django import DjangoIntegration
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -31,7 +33,8 @@ ALLOWED_HOSTS = [
     '192.168.99.100',
     'localhost',
     '127.0.0.1',
-    'app.os.university',
+    'bdn.os.university',
+    'dapp.os.university',
 ]
 
 
@@ -165,7 +168,7 @@ DJANGO_NOTIFICATIONS_CONFIG = {
 # Redis
 
 REDIS_HOST = os.environ.get('REDIS_HOST', 'redis')
-REDIS_PORT = int(os.environ.get('REDIS_PORT', '6379'))
+REDIS_PORT = int(os.environ.get('REDIS_PORT', '6379').split(':')[-1])
 REDIS_DB = int(os.environ.get('REDIS_DB', '0'))
 
 # Channels
@@ -246,6 +249,15 @@ EMAIL_HOST = 'smtp'
 EMAIL_PORT = 25
 EMAIL_HOST_USER = 'localsmtp'
 EMAIL_HOST_PASSWORD = 'localsmtp'
+
+
+# Sentry
+sentry_dsn = os.environ.get('SENTRY_DSN')
+if sentry_dsn:
+    sentry_sdk.init(
+        dsn=sentry_dsn,
+        integrations=[DjangoIntegration()]
+    )
 
 
 try:
