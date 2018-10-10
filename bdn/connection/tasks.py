@@ -55,8 +55,8 @@ def handle_connection_row(owner, row):
     )
     if created:
         connection.save()
-        if not onboarded_user:
-            inviting_emails.delay(ConnectionSerializer(connection).data)
+        # if not onboarded_user:
+        #     inviting_emails.delay(ConnectionSerializer(connection).data)
 
 
 @shared_task
