@@ -21,6 +21,8 @@ class SignUpViewSet(mixins.CreateModelMixin,
         if not (request.user.is_anonymous) and not (request.user.email):
             request.user.email = data['email']
             request.user.save()
+            request.user.profile.learner_email = data['email']
+            request.user.profile.save()
         serializer = SignUpSerializer(
             data=data, instance=sign_up, partial=True)
         if serializer.is_valid():
