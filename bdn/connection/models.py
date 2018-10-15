@@ -19,13 +19,3 @@ class Connection(m.Model):
 
     def __str__(self):
         return self.full_name
-
-
-class FileUpload(m.Model):
-    created = m.DateTimeField(auto_now_add=True)
-    owner = m.ForeignKey(
-        s.AUTH_USER_MODEL, on_delete=m.SET_NULL, null=True)
-    datafile = m.FileField()
-
-    def __str__(self):
-        return self.datafile.path

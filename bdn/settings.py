@@ -249,6 +249,7 @@ EMAIL_HOST = 'smtp'
 EMAIL_PORT = 25
 EMAIL_HOST_USER = 'localsmtp'
 EMAIL_HOST_PASSWORD = 'localsmtp'
+DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'project@os.university')
 
 
 # Sentry

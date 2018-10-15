@@ -1,16 +1,5 @@
 from rest_framework import serializers
-from .models import FileUpload, Connection
-
-
-class FileUploadSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = FileUpload
-        fields = (
-            'created',
-            'owner',
-            'datafile',
-        )
+from .models import Connection
 
 
 class ConnectionSerializer(serializers.ModelSerializer):
