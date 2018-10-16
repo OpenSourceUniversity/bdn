@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 from rest_framework import status, viewsets, mixins
 from rest_framework.decorators import detail_route, list_route
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.pagination import LimitOffsetPagination
 from bdn.auth.signature_authentication import SignatureAuthentication
 from rest_framework.response import Response
 from .models import Profile, ProfileType
@@ -21,6 +22,7 @@ class ProfileViewSet(mixins.CreateModelMixin,
                      mixins.ListModelMixin,
                      viewsets.GenericViewSet):
     serializer_class = ProfileSerializer
+    pagination_class = LimitOffsetPagination
     authentication_classes = (SignatureAuthentication,)
     permission_classes = (IsAuthenticated,)
     queryset = Profile.objects.all()
@@ -55,6 +57,10 @@ class ProfileViewSet(mixins.CreateModelMixin,
         profiles = Profile.objects\
             .filter(user__provider__isnull=False)\
             .order_by('academy_name')
+        page = self.paginate_queryset(profiles)
+        if page is not None:
+            serializer = AcademyProfileSerializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
         serializer = AcademyProfileSerializer(profiles, many=True)
         return Response(serializer.data)
 
@@ -63,6 +69,10 @@ class ProfileViewSet(mixins.CreateModelMixin,
         profiles = Profile.objects\
             .filter(user__company__isnull=False)\
             .order_by('company_name')
+        page = self.paginate_queryset(profiles)
+        if page is not None:
+            serializer = CompanyProfileSerializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
         serializer = CompanyProfileSerializer(profiles, many=True)
         return Response(serializer.data)
 
@@ -71,6 +81,10 @@ class ProfileViewSet(mixins.CreateModelMixin,
         profiles = Profile.objects.filter(
             public_profile=True, full_name__isnull=False)\
             .order_by('full_name')
+        page = self.paginate_queryset(profiles)
+        if page is not None:
+            serializer = LearnerViewProfileSerializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
         serializer = LearnerViewProfileSerializer(profiles, many=True)
         return Response(serializer.data)
 

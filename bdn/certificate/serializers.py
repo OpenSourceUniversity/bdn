@@ -54,6 +54,9 @@ class CertificateViewProfileSerializer(serializers.ModelSerializer):
     holder_names = serializers.\
         SerializerMethodField('_holder_names')
 
+    checksum = serializers.\
+        SerializerMethodField('_checksum')
+
     def _verifications(self, obj):
         from bdn.verification.serializers import VerificationCertificateSerializer  # noqa
         verifiers = obj.verification_set.all().filter(
@@ -78,6 +81,10 @@ class CertificateViewProfileSerializer(serializers.ModelSerializer):
     def _holder_names(self, obj):
         return obj.holder.profile.full_name
 
+    def _checksum(self, obj):
+        if self.context and self.context['request'].user == obj.holder:
+            return obj.checksum_hash
+
     class Meta:
         model = Certificate
         fields = (
@@ -99,4 +106,5 @@ class CertificateViewProfileSerializer(serializers.ModelSerializer):
             'verifications',
             'ipfs_hash',
             'is_expired',
+            'checksum',
         )

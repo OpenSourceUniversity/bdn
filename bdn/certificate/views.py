@@ -28,7 +28,8 @@ class CertificateViewSet(mixins.RetrieveModelMixin,
 
     def retrieve(self, request, pk=None):
         certificate = Certificate.objects.get(id=pk)
-        serializer = CertificateViewProfileSerializer(certificate)
+        serializer = CertificateViewProfileSerializer(
+            certificate, context={'request': request})
         return Response(serializer.data)
 
     @staticmethod
