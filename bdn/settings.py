@@ -37,6 +37,8 @@ ALLOWED_HOSTS = [
     'dapp.os.university',
 ]
 
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
 
 # Application definition
 
