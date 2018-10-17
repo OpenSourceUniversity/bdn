@@ -1,0 +1,5 @@
+{{ object.full_name }}
+{{ object.company_name }}
+{{ object.company_email }}
+{{ object.academy_name }}
+{{ object.academy_email }}

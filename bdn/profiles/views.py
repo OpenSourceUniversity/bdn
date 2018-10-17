@@ -1,12 +1,14 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+from django.db.models import Q
+from haystack.query import SearchQuerySet
+from rest_framework.response import Response
 from rest_framework import status, viewsets, mixins
 from rest_framework.decorators import detail_route, list_route
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.pagination import LimitOffsetPagination
 from bdn.auth.signature_authentication import SignatureAuthentication
-from rest_framework.response import Response
 from .models import Profile, ProfileType
 from bdn.provider.models import Provider
 from bdn.company.models import Company
@@ -54,39 +56,67 @@ class ProfileViewSet(mixins.CreateModelMixin,
 
     @list_route(methods=['get'])
     def get_academies(self, request):
-        profiles = Profile.objects\
-            .filter(user__provider__isnull=False)\
-            .order_by('academy_name')
-        page = self.paginate_queryset(profiles)
-        if page is not None:
-            serializer = AcademyProfileSerializer(page, many=True)
-            return self.get_paginated_response(serializer.data)
-        serializer = AcademyProfileSerializer(profiles, many=True)
-        return Response(serializer.data)
+        return self._get_profiles_by_type(
+            request,
+            AcademyProfileSerializer,
+            Q(user__provider__isnull=False),
+            'academy_name')
 
     @list_route(methods=['get'])
     def get_businesses(self, request):
-        profiles = Profile.objects\
-            .filter(user__company__isnull=False)\
-            .order_by('company_name')
-        page = self.paginate_queryset(profiles)
-        if page is not None:
-            serializer = CompanyProfileSerializer(page, many=True)
-            return self.get_paginated_response(serializer.data)
-        serializer = CompanyProfileSerializer(profiles, many=True)
-        return Response(serializer.data)
+        return self._get_profiles_by_type(
+            request,
+            CompanyProfileSerializer,
+            Q(user__company__isnull=False),
+            'company_name')
 
     @list_route(methods=['get'])
     def get_learners(self, request):
-        profiles = Profile.objects.filter(
-            public_profile=True, full_name__isnull=False)\
-            .order_by('full_name')
+        return self._get_profiles_by_type(
+            request,
+            LearnerViewProfileSerializer,
+            Q(public_profile=True, full_name__isnull=False),
+            'full_name')
+
+    def _get_profiles_by_type(
+            self, request, serializer_cls, filter_query, name_field):
+
+        search_query = self.request.GET.get('q')
+        if search_query:
+            sqs = SearchQuerySet().filter(**{name_field: search_query})\
+                .models(Profile)
+            profiles = [result.object for result in sqs if result.object]
+        else:
+            profiles = Profile.objects.filter(filter_query)\
+                .order_by(name_field)
+
         page = self.paginate_queryset(profiles)
         if page is not None:
-            serializer = LearnerViewProfileSerializer(page, many=True)
+            serializer = serializer_cls(page, many=True)
             return self.get_paginated_response(serializer.data)
-        serializer = LearnerViewProfileSerializer(profiles, many=True)
+
+        serializer = serializer_cls(profiles, many=True)
         return Response(serializer.data)
+
+    @list_route(methods=['get'])
+    def autocomplete(self, request):
+        AUTOCOMPLETE_SIZE = 10
+        query = request.GET.get('q', '')
+        name_field = request.GET.get('name_field', 'full_name')
+        sqs = SearchQuerySet()\
+            .filter(**{'{}_auto'.format(name_field): query})\
+            .models(Profile)
+        result = []
+        result_set = set()
+        for r in sqs:
+            if AUTOCOMPLETE_SIZE == len(result_set):
+                break
+            if r.object:
+                name = getattr(r.object, name_field)
+                if name not in result_set:
+                    result.append(name)
+                    result_set.add(name)
+        return Response(result, status=status.HTTP_200_OK)
 
     @list_route(methods=['post'])
     def set_active_profile(self, request):
