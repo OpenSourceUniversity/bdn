@@ -247,11 +247,12 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 STATICFILES_STORAGE = 'bdn.storage.WhiteNoiseStaticFilesStorage'
 
 # Email settings
-EMAIL_HOST = 'smtp'
-EMAIL_PORT = 25
-EMAIL_HOST_USER = 'localsmtp'
-EMAIL_HOST_PASSWORD = 'localsmtp'
+EMAIL_HOST = os.environ.get('EMAIL_HOST', 'smtp')
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', 'localsmtp')
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', 'localsmtp')
+EMAIL_PORT = int(os.environ.get('EMAIL_PORT', 25))
 DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'project@os.university')
+EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS', 'false') == 'true'
 
 
 # Sentry
