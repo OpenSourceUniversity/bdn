@@ -5,7 +5,8 @@ from bdn.course.models import Course
 from bdn.provider.models import Provider
 from bdn.skill.models import Skill
 from bdn.industry.models import Industry
-from bdn.course.management.commands.industry_ralations_to_linkedin import LinkedinIndustryRelation
+from bdn.course.management.commands.industry_ralations_to_linkedin import \
+ LinkedinIndustryRelation
 
 
 class Command(BaseCommand):
@@ -30,9 +31,11 @@ class Command(BaseCommand):
             industry, _ = Industry.objects.get_or_create(name=industry_name)
 
         with open(file_path) as f:
-            courses = csv.reader(f, delimiter=',') if is_csv else json.load(f)
-                # courses = json.load(f)
-            print(courses)
+            if is_csv:
+                courses = csv.reader(f, delimiter=',')
+                print('dasdasdas')
+            else:
+                courses = json.load(f)
             for course in courses:
                 if is_csv:
                     title = course[1]
@@ -45,7 +48,7 @@ class Command(BaseCommand):
                     if image_url[-3:] != 'jpg' and image_url[-3:] != 'png':
                         image_url = ''
                     if course[2].strip() == '' or course[1].strip() == '' or \
-                    course[3].strip() == '' or course[5].strip() == '':
+                       course[3].strip() == '' or course[5].strip() == '':
                         continue
                     provider, _ = Provider.objects.get_or_create(
                         name=course[2].strip()
@@ -61,7 +64,8 @@ class Command(BaseCommand):
                             provider=provider,
                             tutor=tutor
                             )
-                        industry_list = industry_linkedin.class_central(course[5])
+                        industry_list = \
+                            industry_linkedin.class_central(course[5])
                         if len(industry_list) > 0:
                             for industry_name in industry_list:
                                 industry, _ = Industry.objects.get_or_create(
