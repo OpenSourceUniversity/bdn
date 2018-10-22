@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 
 from rest_framework import viewsets, status, mixins
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.response import Response
 from rest_framework.decorators import detail_route
 from notifications.signals import notify
@@ -19,6 +20,7 @@ class VerificationViewSet(mixins.CreateModelMixin,
     authentication_classes = (SignatureAuthentication,)
     permission_classes = (IsAuthenticated,)
     serializer_class = VerificationSerializer
+    pagination_class = LimitOffsetPagination
     queryset = Verification.objects.none()
 
     @staticmethod
@@ -52,6 +54,10 @@ class VerificationViewSet(mixins.CreateModelMixin,
             verifier=user, certificate__isnull=False,
             verifier_type=active_profile).\
             order_by('state', 'date_last_modified')
+        page = self.paginate_queryset(verifications)
+        if page is not None:
+            serializer = VerificationSerializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
         serializer = VerificationSerializer(verifications, many=True)
         return Response(serializer.data)
 
