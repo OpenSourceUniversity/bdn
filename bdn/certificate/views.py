@@ -3,7 +3,8 @@ from __future__ import unicode_literals
 
 import datetime
 from rest_framework import viewsets, status, mixins
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import (IsAuthenticated,
+                                        IsAuthenticatedOrReadOnly)
 from rest_framework.response import Response
 from rest_framework.decorators import detail_route, list_route
 from bdn.auth.signature_authentication import SignatureAuthentication
@@ -24,7 +25,14 @@ class CertificateViewSet(mixins.RetrieveModelMixin,
     queryset = Certificate.objects.all()
     serializer_class = CertificateViewProfileSerializer
     authentication_classes = (SignatureAuthentication,)
-    permission_classes = (IsAuthenticated,)
+
+    def get_permissions(self):
+        if self.action and (
+                self.action in ('retrieve', 'get_certificates_by_learner')):
+            self.permission_classes = [IsAuthenticatedOrReadOnly, ]
+        else:
+            self.permission_classes = [IsAuthenticated, ]
+        return super(self.__class__, self).get_permissions()
 
     def retrieve(self, request, pk=None):
         certificate = Certificate.objects.get(id=pk)

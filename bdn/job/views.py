@@ -6,7 +6,8 @@ from rest_framework import status, viewsets, mixins
 from rest_framework.decorators import list_route, detail_route
 from bdn.auth.models import User
 from rest_framework.pagination import LimitOffsetPagination
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import (IsAuthenticated,
+                                        IsAuthenticatedOrReadOnly)
 from rest_framework.response import Response
 from bdn.auth.utils import get_auth_eth_address
 from haystack.query import SearchQuerySet
@@ -27,7 +28,14 @@ class JobViewSet(mixins.RetrieveModelMixin,
     serializer_class = JobSerializer
     pagination_class = LimitOffsetPagination
     authentication_classes = (SignatureAuthentication,)
-    permission_classes = (IsAuthenticated,)
+
+    def get_permissions(self):
+        if self.action and (
+                self.action in ('get_by_company')):
+            self.permission_classes = [IsAuthenticatedOrReadOnly, ]
+        else:
+            self.permission_classes = [IsAuthenticated, ]
+        return super(self.__class__, self).get_permissions()
 
     def retrieve(self, request, pk=None):
         job = get_object_or_404(Job, id=pk)

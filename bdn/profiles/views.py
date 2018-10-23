@@ -6,7 +6,8 @@ from haystack.query import SearchQuerySet
 from rest_framework.response import Response
 from rest_framework import status, viewsets, mixins
 from rest_framework.decorators import detail_route, list_route
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import (IsAuthenticated,
+                                        IsAuthenticatedOrReadOnly)
 from rest_framework.pagination import LimitOffsetPagination
 from bdn.auth.signature_authentication import SignatureAuthentication
 from .models import Profile, ProfileType
@@ -26,8 +27,15 @@ class ProfileViewSet(mixins.CreateModelMixin,
     serializer_class = ProfileSerializer
     pagination_class = LimitOffsetPagination
     authentication_classes = (SignatureAuthentication,)
-    permission_classes = (IsAuthenticated,)
     queryset = Profile.objects.all()
+
+    def get_permissions(self):
+        if self.action and (self.action in (
+                'get_academy', 'get_learner', 'get_business')):
+            self.permission_classes = [IsAuthenticatedOrReadOnly, ]
+        else:
+            self.permission_classes = [IsAuthenticated, ]
+        return super(self.__class__, self).get_permissions()
 
     def list(self, request):
         user = request.user
