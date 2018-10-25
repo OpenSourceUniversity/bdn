@@ -24,7 +24,7 @@ variables:
 cache:
   paths:
   - ~/.cache/pip/
-  - /code/apps/
+  - /code/
 
 before_script:
   - python -V
