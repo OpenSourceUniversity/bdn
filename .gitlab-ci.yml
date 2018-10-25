@@ -48,7 +48,7 @@ coverage:
 build_production:
   stage: build_production
   script:
-    - git clone https://gitlab-ci-token:${CI_JOB_TOKEN}@git.codeideo.com:edu-ico/bdn-proprietary.git
+    - git clone https://gitlab-ci-token:${CI_JOB_TOKEN}@git.codeideo.com/edu-ico/bdn-proprietary.git
   only:
     - master
 
