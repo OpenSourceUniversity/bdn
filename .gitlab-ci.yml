@@ -9,7 +9,6 @@ services:
 stages:
   - lint
   - test
-  - build_production
   - release_production
 
 variables:
@@ -47,18 +46,13 @@ coverage:
   - COVERAGE="`coverage report | python -c "import sys; print(sys.stdin.read().split()[-1])"`" python scripts/update_wiki_coverage.py
   coverage: '/TOTAL.+ ([0-9]{1,3}%)/'
 
-build_production:
-  stage: build_production
-  script:
-    - git clone https://gitlab-ci-token:${CI_JOB_TOKEN}@git.codeideo.com/edu-ico/bdn-proprietary.git /code/apps/bdn-proprietary/
-  only:
-    - master
-
 release_production:
   before_script: []
   stage: release_production
   image: docker:stable
   script:
+    - apk add git
+    - git clone https://gitlab-ci-token:${CI_JOB_TOKEN}@git.codeideo.com/edu-ico/bdn-proprietary.git apps/bdn-proprietary/
     - docker info
     - docker login -u gitlab-ci-token -p ${CI_BUILD_TOKEN} ${CI_REGISTRY}
     - docker build -t ${CONTAINER_IMAGE_LATEST} . -f docks/production/web/Dockerfile
