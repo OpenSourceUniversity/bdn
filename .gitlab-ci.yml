@@ -24,7 +24,7 @@ variables:
 cache:
   paths:
   - ~/.cache/pip/
-  - ~/apps/
+  - /code/apps/
 
 before_script:
   - python -V
@@ -48,7 +48,7 @@ coverage:
 build_production:
   stage: build_production
   script:
-    - git clone https://gitlab-ci-token:${CI_JOB_TOKEN}@git.codeideo.com/edu-ico/bdn-proprietary.git
+    - git clone https://gitlab-ci-token:${CI_JOB_TOKEN}@git.codeideo.com/edu-ico/bdn-proprietary.git /code/apps/bdn-proprietary/
   only:
     - master
 
