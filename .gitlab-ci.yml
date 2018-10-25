@@ -17,16 +17,14 @@ variables:
   ETHEREUM_NODE: http://ganache:8545
   DJANGO_SETTINGS_MODULE: bdn.settings
   DATABASE_URL: "postgresql://postgres:postgres@postgres:5432/ci"
+  CONTAINER_IMAGE: ${CI_REGISTRY}/${CI_PROJECT_PATH}:${CI_BUILD_REF_NAME}_${CI_BUILD_REF}
+  CONTAINER_IMAGE_LATEST: ${CI_REGISTRY}/${CI_PROJECT_PATH}:latest
+  DOCKER_DRIVER: overlay2
 
 cache:
   paths:
   - ~/.cache/pip/
   - ~/apps/
-
-variables:
-  CONTAINER_IMAGE: ${CI_REGISTRY}/${CI_PROJECT_PATH}:${CI_BUILD_REF_NAME}_${CI_BUILD_REF}
-  CONTAINER_IMAGE_LATEST: ${CI_REGISTRY}/${CI_PROJECT_PATH}:latest
-  DOCKER_DRIVER: overlay2
 
 before_script:
   - python -V
