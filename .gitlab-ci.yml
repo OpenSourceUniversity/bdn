@@ -6,6 +6,12 @@ services:
   - redis:latest
   - docker:dind
 
+stages:
+  - lint
+  - test
+  - build_production
+  - release_production
+
 variables:
   POSTGRES_DB: ci
   ETHEREUM_NODE: http://ganache:8545
@@ -29,12 +35,12 @@ before_script:
   - cp bdn/ci_settings.py bdn/local_settings.py
 
 styling:
-  stage: build
+  stage: lint
   script:
   - flake8
 
 coverage:
-  stage: build
+  stage: test
   script:
   - coverage run --source='.' manage.py test
   - coverage report --skip-covered
