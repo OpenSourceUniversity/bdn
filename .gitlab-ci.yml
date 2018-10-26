@@ -53,6 +53,7 @@ release_production:
   script:
     - apk add git
     - git clone https://gitlab-ci-token:${CI_JOB_TOKEN}@git.codeideo.com/edu-ico/bdn-proprietary.git apps/bdn-proprietary/
+    - rm bdn/local_settings.py
     - docker info
     - docker login -u gitlab-ci-token -p ${CI_BUILD_TOKEN} ${CI_REGISTRY}
     - docker build -t ${CONTAINER_IMAGE_LATEST} . -f docks/production/web/Dockerfile
