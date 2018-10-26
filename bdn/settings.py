@@ -73,6 +73,7 @@ INSTALLED_APPS = [
     'bdn.connection',
     'bdn.transaction',
     'bdn.job_application',
+    'bdn.user_settings',
 ]
 
 # Import all apps from apps folder
