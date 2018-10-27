@@ -10,7 +10,6 @@ class UserSettingsSerializer(serializers.ModelSerializer):
             'user',
             'subscribed',
             'news_subscribed',
-            'wallet',
             'save_wallet',
         )
 
