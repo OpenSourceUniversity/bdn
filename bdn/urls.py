@@ -31,6 +31,7 @@ from bdn.messaging.views import ThreadViewSet, MessageViewSet
 from bdn.notifications_extensions.views import NotificationViewSet
 from bdn.transaction.views import TransactionViewSet
 from bdn.job_application.views import JobApplicationViewSet
+from bdn.user_settings.views import UserSettingsViewSet
 from rest_framework import routers
 
 
@@ -51,6 +52,7 @@ router.register(r'messages', MessageViewSet, base_name='Message')
 router.register(r'transactions', TransactionViewSet, base_name='Transaction')
 router.register(
     r'job-applications', JobApplicationViewSet, base_name='Applications')
+router.register(r'user-settings', UserSettingsViewSet)
 
 
 urlpatterns = [

@@ -20,7 +20,7 @@ class SignUpViewSet(mixins.CreateModelMixin,
         user = User.objects.filter(email=data['email']).first()
         if user:
             return Response(
-                {'error': 'Email duplicate, please use another email'},
+                {'error': 'Email duplicate, please use another one'},
                 status=status.HTTP_400_BAD_REQUEST)
         else:
             sign_up, _ = SignUp.objects.get_or_create(
