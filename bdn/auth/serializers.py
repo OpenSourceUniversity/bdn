@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import SignUp
+from .models import SignUp, User
 
 
 class SignUpSerializer(serializers.ModelSerializer):
@@ -9,4 +9,14 @@ class SignUpSerializer(serializers.ModelSerializer):
             'id',
             'email',
             'step',
+        )
+
+
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = (
+            'id',
+            'email',
+            'username',
         )
