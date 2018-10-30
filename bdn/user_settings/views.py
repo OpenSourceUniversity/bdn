@@ -28,6 +28,9 @@ class UserSettingsViewSet(mixins.CreateModelMixin,
     @list_route(methods=['post'])
     def get_wallet(self, request):
         user_email = request.data['email']
+        if not user_email:
+            return Response({'error': 'Wallet not stored'},
+                            status=status.HTTP_400_BAD_REQUEST)
         user = get_object_or_404(User, email=user_email)
         user_settings = get_object_or_404(UserSettings, user=user)
         if user_settings.password:
