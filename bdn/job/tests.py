@@ -32,6 +32,12 @@ class JobTests(TestCase):
         # Create job
         eth_address = '0xD2BE64317Eb1832309DF8c8C18B09871809f3735'.lower()
         user, _ = User.objects.get_or_create(username=eth_address)
+        have_allowance = True
+        try:
+            user.allowance.featured_jobs = 1
+            user.allowance.save()
+        except AttributeError:
+            have_allowance = False
         company = Company(user=user, name='test')
         company.save()
         request = self.factory.post(
@@ -147,7 +153,28 @@ class JobTests(TestCase):
         response = view(request, pk=wrong_pk)
         self.assertEqual(response.status_code, 404)
 
+        # Edit the job with wrong company
+        wrong_username = '0xD2BE64317Eb1832309DF8c8C18B09871809f3736'.lower()
+        wrong_user, _ = User.objects.get_or_create(username=wrong_username)
+        company.user = wrong_user
+        company.save()
+        request = self.factory.post(
+            '/api/v1/jobs/{}/edit_by_id/'.format(job_pk),
+            data={
+                'title': 'test editted',
+                'description': 'test',
+                'external_link': 'http://example.com/',
+            },
+            HTTP_AUTH_SIGNATURE='0xe646de646dde9cee6875e3845428ce6fc13d41086e8a7f6531d1d526598cc4104122e01c38255d1e1d595710986d193f52e3dbc47cb01cb554d8e4572d6920361c',
+            HTTP_AUTH_ETH_ADDRESS='D2BE64317Eb1832309DF8c8C18B09871809f3735'
+        )
+        view = JobViewSet.as_view({'post': 'edit_by_id'})
+        response = view(request, pk=job_pk)
+        self.assertEqual(response.status_code, 401)
+
         # Edit the job
+        company.user = user
+        company.save()
         request = self.factory.post(
             '/api/v1/jobs/{}/edit_by_id/'.format(job_pk),
             data={
@@ -162,7 +189,76 @@ class JobTests(TestCase):
         response = view(request, pk=job_pk)
         self.assertEqual(response.status_code, 200)
 
+        # Edit the job with serializer error
+        request = self.factory.post(
+            '/api/v1/jobs/{}/edit_by_id/'.format(job_pk),
+            data={
+                'title': '',
+                'description': 'test',
+                'external_link': 'http://example.com/',
+            },
+            HTTP_AUTH_SIGNATURE='0xe646de646dde9cee6875e3845428ce6fc13d41086e8a7f6531d1d526598cc4104122e01c38255d1e1d595710986d193f52e3dbc47cb01cb554d8e4572d6920361c',
+            HTTP_AUTH_ETH_ADDRESS='D2BE64317Eb1832309DF8c8C18B09871809f3735'
+        )
+        view = JobViewSet.as_view({'post': 'edit_by_id'})
+        response = view(request, pk=job_pk)
+        self.assertEqual(response.status_code, 400)
+
+        # Mark as feautered
+        request = self.factory.post(
+            '/api/v1/jobs/{}/mark_featured_by_id/'.format(job_pk),
+            data={
+            },
+            HTTP_AUTH_SIGNATURE='0xe646de646dde9cee6875e3845428ce6fc13d41086e8a7f6531d1d526598cc4104122e01c38255d1e1d595710986d193f52e3dbc47cb01cb554d8e4572d6920361c',
+            HTTP_AUTH_ETH_ADDRESS='D2BE64317Eb1832309DF8c8C18B09871809f3735'
+        )
+        view = JobViewSet.as_view({'post': 'mark_featured_by_id'})
+        response = view(request, pk=job_pk)
+        self.assertEqual(response.status_code, 200)
+
+        if have_allowance:
+            request = self.factory.post(
+                '/api/v1/jobs/',
+                data={
+                    'title': 'test2',
+                    'location': 'test2',
+                    'overview': 'test2',
+                    'description': 'test2',
+                    'hours': 2,
+                },
+                HTTP_AUTH_SIGNATURE='0xe646de646dde9cee6875e3845428ce6fc13d41086e8a7f6531d1d526598cc4104122e01c38255d1e1d595710986d193f52e3dbc47cb01cb554d8e4572d6920361c',
+                HTTP_AUTH_ETH_ADDRESS='D2BE64317Eb1832309DF8c8C18B09871809f3735'
+            )
+            response = JobViewSet.as_view({'post': 'create'})(request)
+            self.assertEqual(response.status_code, 200)
+            job_pk = str(response.data['pk'])
+
+            request = self.factory.post(
+                '/api/v1/jobs/{}/mark_featured_by_id/'.format(job_pk),
+                data={
+                },
+                HTTP_AUTH_SIGNATURE='0xe646de646dde9cee6875e3845428ce6fc13d41086e8a7f6531d1d526598cc4104122e01c38255d1e1d595710986d193f52e3dbc47cb01cb554d8e4572d6920361c',
+                HTTP_AUTH_ETH_ADDRESS='D2BE64317Eb1832309DF8c8C18B09871809f3735'
+            )
+            view = JobViewSet.as_view({'post': 'mark_featured_by_id'})
+            response = view(request, pk=job_pk)
+            self.assertEqual(response.status_code, 400)
+
+        # Delete denied
+        company.user = wrong_user
+        company.save()
+        url = '/api/v1/jobs/{}/delete_by_id/'.format(job_pk)
+        request = self.factory.post(
+            url,
+            HTTP_AUTH_SIGNATURE='0xe646de646dde9cee6875e3845428ce6fc13d41086e8a7f6531d1d526598cc4104122e01c38255d1e1d595710986d193f52e3dbc47cb01cb554d8e4572d6920361c',
+            HTTP_AUTH_ETH_ADDRESS='D2BE64317Eb1832309DF8c8C18B09871809f3735')
+        view = JobViewSet.as_view({'post': 'delete_by_id'})
+        response = view(request, pk=job_pk)
+        self.assertEqual(response.status_code, 401)
+
         # Delete it
+        company.user = user
+        company.save()
         url = '/api/v1/jobs/{}/delete_by_id/'.format(job_pk)
         request = self.factory.post(
             url,
