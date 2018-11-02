@@ -86,6 +86,31 @@ class CertificateTests(TestCase):
         response = view(request, pk=certificate_pk)
         self.assertEqual(response.status_code, 200)
 
+        # Isuuer Active Profile type is not learner
+
+        eth_address = '0xD2BE64317Eb1832309DF8c8C18B09871809f3735'.lower()
+        user, _ = User.objects.get_or_create(username=eth_address)
+        user.profile.active_profile_type = 2
+        user.profile.save()
+        another_holder = User.objects.get_or_create(username='0x0123321')
+        request = self.factory.post(
+            '/api/v1/certificates/',
+            data={
+                'institution_title': 'test',
+                'institution_link': 'http://example.com',
+                'certificate_title': 'test',
+                'holder_eth_address': '0x0123321',
+                'granted_to_type': 1,
+                'score': '',
+                'duration': '',
+                'skills': ['Python'],
+            },
+            HTTP_AUTH_SIGNATURE='0xe646de646dde9cee6875e3845428ce6fc13d41086e8a7f6531d1d526598cc4104122e01c38255d1e1d595710986d193f52e3dbc47cb01cb554d8e4572d6920361c',
+            HTTP_AUTH_ETH_ADDRESS='D2BE64317Eb1832309DF8c8C18B09871809f3735'
+        )
+        response = CertificateViewSet.as_view({'post': 'create'})(request)
+        self.assertEqual(response.status_code, 200)
+
     def test_delete_certificate_not_holded_by_user(self):
         User.objects.get_or_create(username='0x0')
         certificate = Certificate(**{

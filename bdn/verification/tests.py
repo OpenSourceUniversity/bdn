@@ -10,7 +10,7 @@ from .tasks import (
     listen_ethereum_ipfs_hash_storage, perform_ipfs_meta_verification)
 from .views import VerificationViewSet
 from bdn.verification.exceptions import (
-    NoArgumentsError, IpfsDataAttributeError,
+    IpfsDataAttributeError, BlockchainVerificationError,
     GrantedToUserDoesNotExist, VerifierUserDoesNotExist,
     VerifierUserValidationError, VerificationDoesNotExist,
     VerificationValidationError, CertificateDoesNotExist,
@@ -109,272 +109,225 @@ class PerformIpfsMetaTests(TestCase):
             certificate=self.certificate, verifier=self.verifier, state='pending')
         self.verification.save()
 
-    @patch('requests.get', fake_ipfs_request_get([
+    @patch('bdn.contract.w3.eth', fake_get_transaction(
         {
-            'verifier': '3482b1bb-cb39-4fcd-91c2-690c48223a51',
-            'id': '9ffd6ed3-fa64-4beb-903e-b1c4fd6d0c99',
-            'certificate': {
-                'id': '0cb19a83-d3c9-491b-99a3-374ebb01c43f',
+            'from': '0x05',
+        }
+    ))
+    def test_verification_task(self):
+        perform_ipfs_meta_verification(
+            {
+                'granted_to_eth_address': '0x04',
+                'verifier': '3482b1bb-cb39-4fcd-91c2-690c48223a51',
+                'id': '9ffd6ed3-fa64-4beb-903e-b1c4fd6d0c99',
+                'certificate': {
+                    'id': '0cb19a83-d3c9-491b-99a3-374ebb01c43f',
+                },
             },
-        }
-    ]))
+            '0x03',
+            '0x02',
+            '1',
+            'QWERTY'
+            )
 
     @patch('bdn.contract.w3.eth', fake_get_transaction(
         {
-            'from': '0x05',
+            'from': '0x010',
         }
     ))
-    # def test_verification_task(self):
-    #     perform_ipfs_meta_verification({
-    #         'transactionHash': '0x03',
-    #         'blockHash': '0x02',
-    #         'blockNumber': '1',
-    #         'args': {
-    #             'ipfsHash': 'QWERTY',
-    #             'grantedTo': '0x04',
-    #             },
-    #         })
-
-    # def test_no_ipfs_meta(self):
-    #     with self.assertRaises(NoArgumentsError):
-    #         perform_ipfs_meta_verification({
-    #             'transactionHash': '0x03',
-    #             'blockHash': '0x02',
-    #             'blockNumber': '1',
-    #             'args': {
-
-    #                 },
-    #             })
-    @patch('requests.get', fake_ipfs_request_get([
-        {
-            None,
-        }
-    ]))
-    @patch('bdn.contract.w3.eth', fake_get_transaction(
-        {
-            'from': '0x05',
-        }
-    ))
-    # def test_no_ipfs_data(self):
-    #     with self.assertRaises(IpfsDataAttributeError):
-    #         perform_ipfs_meta_verification({
-    #             'transactionHash': '0x03',
-    #             'blockHash': '0x02',
-    #             'blockNumber': '1',
-    #             'args': {
-    #                 'ipfsHash': 'QWERTY',
-    #                 'grantedTo': '0x04',
-    #                 },
-    #             })
-
-    @patch('requests.get', fake_ipfs_request_get([
-        {
-            'verifier': '3482b1bb-cb39-4fcd-91c2-690c48223a51',
-            'id': '9ffd6ed3-fa64-4beb-903e-b1c4fd6d0c99',
-            'certificate': {
-                'id': '0cb19a83-d3c9-491b-99a3-374ebb01c43f',
+    def test_no_ipfs_data(self):
+        with self.assertRaises(BlockchainVerificationError):
+            perform_ipfs_meta_verification(
+            {
+                'granted_to_eth_address': '0x04',
+                'verifier': '3482b1bb-cb39-4fcd-91c2-690c48223a51',
+                'id': '9ffd6ed3-fa64-4beb-903e-b1c4fd6d0c99',
+                'certificate': {
+                    'id': '0cb19a83-d3c9-491b-99a3-374ebb01c43f',
+                },
             },
-        }
-    ]))
-    @patch('bdn.contract.w3.eth', fake_get_transaction(
-        {
-            'from': '0x05',
-        }
-    ))
-    # def test_granted_to_does_not_exist(self):
-    #     with self.assertRaises(GrantedToUserDoesNotExist):
-    #         perform_ipfs_meta_verification({
-    #             'transactionHash': '0x03',
-    #             'blockHash': '0x02',
-    #             'blockNumber': '1',
-    #             'args': {
-    #                 'ipfsHash': 'QWERTY',
-    #                 'grantedTo': 'someDoesNotExistingUsername',
-    #                 },
-    #             })
+            '0x03',
+            '0x02',
+            '1',
+            'QWERTY'
+            )
 
-    @patch('requests.get', fake_ipfs_request_get([
-        {
-            'verifier': '4a066a6f-48e6-4e48-badd-addd90058571',
-            'id': '9ffd6ed3-fa64-4beb-903e-b1c4fd6d0c99',
-            'certificate': {
-                'id': '0cb19a83-d3c9-491b-99a3-374ebb01c43f',
-            },
-        }
-    ]))
     @patch('bdn.contract.w3.eth', fake_get_transaction(
         {
             'from': '0x05',
         }
     ))
-    # def test_verifier_does_not_exist(self):
-    #     with self.assertRaises(VerifierUserDoesNotExist):
-    #         perform_ipfs_meta_verification({
-    #             'transactionHash': '0x03',
-    #             'blockHash': '0x02',
-    #             'blockNumber': '1',
-    #             'args': {
-    #                 'ipfsHash': 'QWERTY',
-    #                 'grantedTo': '0x04',
-    #                 },
-    #             })
+    def test_granted_to_does_not_exist(self):
+        with self.assertRaises(GrantedToUserDoesNotExist):
+            perform_ipfs_meta_verification(
+                {
+                    'granted_to_eth_address': 'DoesNotExist',
+                    'verifier': '3482b1bb-cb39-4fcd-91c2-690c48223a51',
+                    'id': '9ffd6ed3-fa64-4beb-903e-b1c4fd6d0c99',
+                    'certificate': {
+                        'id': '0cb19a83-d3c9-491b-99a3-374ebb01c43f',
+                    },
+                },
+                '0x03',
+                '0x02',
+                '1',
+                'QWERTY'
+                )
 
-    @patch('requests.get', fake_ipfs_request_get([
-        {
-            'verifier': 'not_valid_id',
-            'id': '9ffd6ed3-fa64-4beb-903e-b1c4fd6d0c99',
-            'certificate': {
-                'id': '0cb19a83-d3c9-491b-99a3-374ebb01c43f',
-            },
-        }
-    ]))
     @patch('bdn.contract.w3.eth', fake_get_transaction(
         {
             'from': '0x05',
         }
     ))
-    # def test_verifier_not_valid_id(self):
-    #     with self.assertRaises(VerifierUserValidationError):
-    #         perform_ipfs_meta_verification({
-    #             'transactionHash': '0x03',
-    #             'blockHash': '0x02',
-    #             'blockNumber': '1',
-    #             'args': {
-    #                 'ipfsHash': 'QWERTY',
-    #                 'grantedTo': '0x04',
-    #                 },
-    #             })
+    def test_verifier_does_not_exist(self):
+        with self.assertRaises(VerifierUserDoesNotExist):
+            perform_ipfs_meta_verification(
+                {
+                    'granted_to_eth_address': '0x04',
+                    'verifier': '4a066a6f-48e6-4e48-badd-addd90058571',
+                    'id': '9ffd6ed3-fa64-4beb-903e-b1c4fd6d0c99',
+                    'certificate': {
+                        'id': '0cb19a83-d3c9-491b-99a3-374ebb01c43f',
+                    },
+                },
+                '0x03',
+                '0x02',
+                '1',
+                'QWERTY'
+                )
 
-    @patch('requests.get', fake_ipfs_request_get([
-        {
-            'verifier': '3482b1bb-cb39-4fcd-91c2-690c48223a51',
-            'id': '0f3693ba-8288-4345-b306-d881ee49a58d',
-            'certificate': {
-                'id': '0cb19a83-d3c9-491b-99a3-374ebb01c43f',
-            },
-        }
-    ]))
     @patch('bdn.contract.w3.eth', fake_get_transaction(
         {
             'from': '0x05',
         }
     ))
-    # def test_verification_does_not_exist(self):
-    #     with self.assertRaises(VerificationDoesNotExist):
-    #         perform_ipfs_meta_verification({
-    #             'transactionHash': '0x03',
-    #             'blockHash': '0x02',
-    #             'blockNumber': '1',
-    #             'args': {
-    #                 'ipfsHash': 'QWERTY',
-    #                 'grantedTo': '0x04',
-    #                 },
-    #             })
+    def test_verifier_not_valid_id(self):
+        with self.assertRaises(VerifierUserValidationError):
+            perform_ipfs_meta_verification(
+                {
+                    'granted_to_eth_address': '0x04',
+                    'verifier': 'not_valid_id',
+                    'id': '9ffd6ed3-fa64-4beb-903e-b1c4fd6d0c99',
+                    'certificate': {
+                        'id': '0cb19a83-d3c9-491b-99a3-374ebb01c43f',
+                    },
+                },
+                '0x03',
+                '0x02',
+                '1',
+                'QWERTY'
+                )
 
-    @patch('requests.get', fake_ipfs_request_get([
-        {
-            'verifier': '3482b1bb-cb39-4fcd-91c2-690c48223a51',
-            'id': 'not_valid_id',
-            'certificate': {
-                'id': '0cb19a83-d3c9-491b-99a3-374ebb01c43f',
-            },
-        }
-    ]))
     @patch('bdn.contract.w3.eth', fake_get_transaction(
         {
             'from': '0x05',
         }
     ))
-    # def test_verification_not_valid_id(self):
-    #     with self.assertRaises(VerificationValidationError):
-    #         perform_ipfs_meta_verification({
-    #             'transactionHash': '0x03',
-    #             'blockHash': '0x02',
-    #             'blockNumber': '1',
-    #             'args': {
-    #                 'ipfsHash': 'QWERTY',
-    #                 'grantedTo': '0x04',
-    #                 },
-    #             })
+    def test_verification_does_not_exist(self):
+        with self.assertRaises(VerificationDoesNotExist):
+            perform_ipfs_meta_verification(
+                {
+                    'granted_to_eth_address': '0x04',
+                    'verifier': '3482b1bb-cb39-4fcd-91c2-690c48223a51',
+                    'id': '0f3693ba-8288-4345-b306-d881ee49a58d',
+                    'certificate': {
+                        'id': '0cb19a83-d3c9-491b-99a3-374ebb01c43f',
+                    },
+                },
+                '0x03',
+                '0x02',
+                '1',
+                'QWERTY'
+                )
 
-    @patch('requests.get', fake_ipfs_request_get([
-        {
-            'verifier': '3482b1bb-cb39-4fcd-91c2-690c48223a51',
-            'id': '9ffd6ed3-fa64-4beb-903e-b1c4fd6d0c99',
-            'certificate': {
-                'id': '0cb19a83-d3c9-491b-99a3-374ebb01c43f',
-            },
-        }
-    ]))
     @patch('bdn.contract.w3.eth', fake_get_transaction(
         {
             'from': '0x05',
         }
     ))
-    # def test_verification_allready_verified(self):
-    #     self.verification.state = 'verified'
-    #     self.verification.save()
-    #     perform_ipfs_meta_verification({
-    #         'transactionHash': '0x03',
-    #         'blockHash': '0x02',
-    #         'blockNumber': '1',
-    #         'args': {
-    #             'ipfsHash': 'QWERTY',
-    #             'grantedTo': '0x04',
-    #             },
-    #         })
+    def test_verification_not_valid_id(self):
+        with self.assertRaises(VerificationValidationError):
+            perform_ipfs_meta_verification(
+                {
+                    'granted_to_eth_address': '0x04',
+                    'verifier': '3482b1bb-cb39-4fcd-91c2-690c48223a51',
+                    'id': 'not_valid_id',
+                    'certificate': {
+                        'id': '0cb19a83-d3c9-491b-99a3-374ebb01c43f',
+                    },
+                },
+                '0x03',
+                '0x02',
+                '1',
+                'QWERTY'
+                )
 
-    @patch('requests.get', fake_ipfs_request_get([
-        {
-            'verifier': '3482b1bb-cb39-4fcd-91c2-690c48223a51',
-            'id': '9ffd6ed3-fa64-4beb-903e-b1c4fd6d0c99',
-            'certificate': {
-                'id': 'afbf9bfb-4380-486c-bdb6-902197904995',
-            },
-        }
-    ]))
     @patch('bdn.contract.w3.eth', fake_get_transaction(
         {
             'from': '0x05',
         }
     ))
-    # def test_certificate_does_not_exist(self):
-    #     with self.assertRaises(CertificateDoesNotExist):
-    #         perform_ipfs_meta_verification({
-    #             'transactionHash': '0x03',
-    #             'blockHash': '0x02',
-    #             'blockNumber': '1',
-    #             'args': {
-    #                 'ipfsHash': 'QWERTY',
-    #                 'grantedTo': '0x04',
-    #                 },
-    #             })
+    def test_verification_allready_verified(self):
+        self.verification.state = 'verified'
+        self.verification.save()
+        perform_ipfs_meta_verification(
+            {
+                'granted_to_eth_address': '0x04',
+                'verifier': '3482b1bb-cb39-4fcd-91c2-690c48223a51',
+                'id': '9ffd6ed3-fa64-4beb-903e-b1c4fd6d0c99',
+                'certificate': {
+                    'id': '0cb19a83-d3c9-491b-99a3-374ebb01c43f',
+                },
+            },
+            '0x03',
+            '0x02',
+            '1',
+            'QWERTY'
+            )
 
-    @patch('requests.get', fake_ipfs_request_get([
-        {
-            'verifier': '3482b1bb-cb39-4fcd-91c2-690c48223a51',
-            'id': '9ffd6ed3-fa64-4beb-903e-b1c4fd6d0c99',
-            'certificate': {
-                'id': 'not_valid_id',
-            },
-        }
-    ]))
     @patch('bdn.contract.w3.eth', fake_get_transaction(
         {
             'from': '0x05',
         }
     ))
-    # def test_certificate_not_valid_id(self):
-    #     with self.assertRaises(CertificateValidationError):
-    #         perform_ipfs_meta_verification({
-    #             'transactionHash': '0x03',
-    #             'blockHash': '0x02',
-    #             'blockNumber': '1',
-    #             'args': {
-    #                 'ipfsHash': 'QWERTY',
-    #                 'grantedTo': '0x04',
-    #                 },
-    #             })
+    def test_certificate_does_not_exist(self):
+        with self.assertRaises(CertificateDoesNotExist):
+            perform_ipfs_meta_verification(
+                {
+                    'granted_to_eth_address': '0x04',
+                    'verifier': '3482b1bb-cb39-4fcd-91c2-690c48223a51',
+                    'id': '9ffd6ed3-fa64-4beb-903e-b1c4fd6d0c99',
+                    'certificate': {
+                        'id': 'afbf9bfb-4380-486c-bdb6-902197904995',
+                    },
+                },
+                '0x03',
+                '0x02',
+                '1',
+                'QWERTY'
+                )
+
+    @patch('bdn.contract.w3.eth', fake_get_transaction(
+        {
+            'from': '0x05',
+        }
+    ))
+    def test_certificate_not_valid_id(self):
+        with self.assertRaises(CertificateValidationError):
+            perform_ipfs_meta_verification(
+                {
+                    'granted_to_eth_address': '0x04',
+                    'verifier': '3482b1bb-cb39-4fcd-91c2-690c48223a51',
+                    'id': '9ffd6ed3-fa64-4beb-903e-b1c4fd6d0c99',
+                    'certificate': {
+                        'id': 'not_valid_id',
+                    },
+                },
+                '0x03',
+                '0x02',
+                '1',
+                'QWERTY'
+                )
 
     def tearDown(self):
         self.verification.delete()
@@ -406,7 +359,7 @@ class VerificationTests(TestCase):
             certificate=self.certificate, verifier=self.verifier, state='requested', granted_to=self.granted_to)
 
     def test_verification_create_and_then_get(self):
-        # Create verification
+    # Create verification
         request = self.factory.post(
             '/api/v1/verifications/',
             data={
@@ -421,9 +374,116 @@ class VerificationTests(TestCase):
         response = VerificationViewSet.as_view({'post': 'create'})(request)
         self.assertEqual(response.status_code, 200)
 
-    # List verifications
-        request = self.factory.get(
+    # Create verification
+        request = self.factory.post(
             '/api/v1/verifications/',
+            data={
+                'verifier': '0x05',
+                'granted_to_type': 1,
+                'verifier_type': 1,
+                'certificate': '0cb19a83-d3c9-491b-99a3-374ebb01c43f',
+            },
+            HTTP_AUTH_SIGNATURE='0xe646de646dde9cee6875e3845428ce6fc13d41086e8a7f6531d1d526598cc4104122e01c38255d1e1d595710986d193f52e3dbc47cb01cb554d8e4572d6920361c',
+            HTTP_AUTH_ETH_ADDRESS='D2BE64317Eb1832309DF8c8C18B09871809f3735',
+        )
+        response = VerificationViewSet.as_view({'post': 'create'})(request)
+        self.assertEqual(response.status_code, 400)
+
+        self.second_verifier.profile.academy_email = ''
+        self.second_verifier.profile.save()
+
+    # Create verification academy error
+        request = self.factory.post(
+            '/api/v1/verifications/',
+            data={
+                'verifier': '0x05',
+                'granted_to_type': 1,
+                'verifier_type': 2,
+                'certificate': '0cb19a83-d3c9-491b-99a3-374ebb01c43f',
+            },
+            HTTP_AUTH_SIGNATURE='0xe646de646dde9cee6875e3845428ce6fc13d41086e8a7f6531d1d526598cc4104122e01c38255d1e1d595710986d193f52e3dbc47cb01cb554d8e4572d6920361c',
+            HTTP_AUTH_ETH_ADDRESS='D2BE64317Eb1832309DF8c8C18B09871809f3735',
+        )
+        response = VerificationViewSet.as_view({'post': 'create'})(request)
+        self.assertEqual(response.status_code, 400)
+
+        self.second_verifier.profile.academy_email = 'test@test.com'
+        self.second_verifier.profile.save()
+
+    # Create verification business error
+        request = self.factory.post(
+            '/api/v1/verifications/',
+            data={
+                'verifier': '0x05',
+                'granted_to_type': 1,
+                'verifier_type': 3,
+                'certificate': '0cb19a83-d3c9-491b-99a3-374ebb01c43f',
+            },
+            HTTP_AUTH_SIGNATURE='0xe646de646dde9cee6875e3845428ce6fc13d41086e8a7f6531d1d526598cc4104122e01c38255d1e1d595710986d193f52e3dbc47cb01cb554d8e4572d6920361c',
+            HTTP_AUTH_ETH_ADDRESS='D2BE64317Eb1832309DF8c8C18B09871809f3735',
+        )
+        response = VerificationViewSet.as_view({'post': 'create'})(request)
+        self.assertEqual(response.status_code, 400)
+
+        self.certificate = Certificate(
+            id='0cb19a83-d3c9-491b-99a3-374ebb01c43f',
+            institution_title='test',
+            institution_link='http://test.com/',
+            certificate_title='test',
+        )
+        self.certificate.save()
+
+    # Create verification verifier error
+        request = self.factory.post(
+            '/api/v1/verifications/',
+            data={
+                'verifier': '0xd2be64317eb1832309df8c8c18b09871809f3735',
+                'granted_to_type': 1,
+                'verifier_type': 2,
+                'certificate': '0cb19a83-d3c9-491b-99a3-374ebb01c43f',
+            },
+            HTTP_AUTH_SIGNATURE='0xe646de646dde9cee6875e3845428ce6fc13d41086e8a7f6531d1d526598cc4104122e01c38255d1e1d595710986d193f52e3dbc47cb01cb554d8e4572d6920361c',
+            HTTP_AUTH_ETH_ADDRESS='D2BE64317Eb1832309DF8c8C18B09871809f3735',
+        )
+        response = VerificationViewSet.as_view({'post': 'create'})(request)
+        self.assertEqual(response.status_code, 400)
+
+    # Create verification serializer
+        request = self.factory.post(
+            '/api/v1/verifications/',
+            data={
+                'verifier': '0x05',
+                'granted_to_type': 1,
+                'verifier_type': 4,
+                'certificate': '0cb19a83-d3c9-491b-99a3-374ebb01c43f',
+            },
+            HTTP_AUTH_SIGNATURE='0xe646de646dde9cee6875e3845428ce6fc13d41086e8a7f6531d1d526598cc4104122e01c38255d1e1d595710986d193f52e3dbc47cb01cb554d8e4572d6920361c',
+            HTTP_AUTH_ETH_ADDRESS='D2BE64317Eb1832309DF8c8C18B09871809f3735',
+        )
+        response = VerificationViewSet.as_view({'post': 'create'})(request)
+        self.assertEqual(response.status_code, 400)
+
+    # List verifications Academy
+        request = self.factory.get(
+            '/api/v1/verifications/?active_profile=Academy',
+            HTTP_AUTH_SIGNATURE='0xe646de646dde9cee6875e3845428ce6fc13d41086e8a7f6531d1d526598cc4104122e01c38255d1e1d595710986d193f52e3dbc47cb01cb554d8e4572d6920361c',
+            HTTP_AUTH_ETH_ADDRESS='D2BE64317Eb1832309DF8c8C18B09871809f3735',
+        )
+        response = VerificationViewSet.as_view({'get': 'list'})(request)
+        self.assertEqual(response.status_code, 200)
+
+    # List verifications Business
+        request = self.factory.get(
+            '/api/v1/verifications/?active_profile=Business',
+            HTTP_AUTH_SIGNATURE='0xe646de646dde9cee6875e3845428ce6fc13d41086e8a7f6531d1d526598cc4104122e01c38255d1e1d595710986d193f52e3dbc47cb01cb554d8e4572d6920361c',
+            HTTP_AUTH_ETH_ADDRESS='D2BE64317Eb1832309DF8c8C18B09871809f3735',
+        )
+        response = VerificationViewSet.as_view({'get': 'list'})(request)
+        self.assertEqual(response.status_code, 200)
+
+    # List verifications Learner
+        request = self.factory.get(
+            '/api/v1/verifications/?active_profile=Learner',
             HTTP_AUTH_SIGNATURE='0xe646de646dde9cee6875e3845428ce6fc13d41086e8a7f6531d1d526598cc4104122e01c38255d1e1d595710986d193f52e3dbc47cb01cb554d8e4572d6920361c',
             HTTP_AUTH_ETH_ADDRESS='D2BE64317Eb1832309DF8c8C18B09871809f3735',
         )
@@ -446,6 +506,15 @@ class VerificationTests(TestCase):
             HTTP_AUTH_ETH_ADDRESS='D2BE64317Eb1832309DF8c8C18B09871809f3735',
         )
         response = VerificationViewSet.as_view({'post': 'set_pending_by_id'})(request, pk=self.verification.pk)
+        self.assertEqual(response.status_code, 200)
+
+    # set open by id verification
+        request = self.factory.post(
+            '/api/v1/verifications/{}/set_open_by_id'.format(self.verification.pk),
+            HTTP_AUTH_SIGNATURE='0xe646de646dde9cee6875e3845428ce6fc13d41086e8a7f6531d1d526598cc4104122e01c38255d1e1d595710986d193f52e3dbc47cb01cb554d8e4572d6920361c',
+            HTTP_AUTH_ETH_ADDRESS='D2BE64317Eb1832309DF8c8C18B09871809f3735',
+        )
+        response = VerificationViewSet.as_view({'post': 'set_open_by_id'})(request, pk=self.verification.pk)
         self.assertEqual(response.status_code, 200)
 
         self.verification.state = 'requested'

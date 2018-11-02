@@ -5,10 +5,6 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 
 
-def avatar_upload_path(instance, filename):
-    return 'avatars/{0}/{1}'.format(instance.id, filename)
-
-
 class ProfileType(IntEnum):
     LEARNER = 1
     ACADEMY = 2

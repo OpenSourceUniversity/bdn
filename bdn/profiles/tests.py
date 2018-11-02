@@ -10,12 +10,13 @@ class ProfileTests(TestCase):
         self.factory = RequestFactory()
 
     def test_profiles_create_and_then_get(self):
-        # Create learner profile
+    # Create learner profile
         request = self.factory.post(
             '/api/v1/profile/',
             data={
                 'full_name': 'test',
                 'learner_email': 'test@test.com',
+                'learner_avatar': 'test',
             },
             HTTP_AUTH_SIGNATURE='0xe646de646dde9cee6875e3845428ce6fc13d41086e8a7f6531d1d526598cc4104122e01c38255d1e1d595710986d193f52e3dbc47cb01cb554d8e4572d6920361c',
             HTTP_AUTH_ETH_ADDRESS='D2BE64317Eb1832309DF8c8C18B09871809f3735',
@@ -31,6 +32,7 @@ class ProfileTests(TestCase):
                 'academy_name': 'test',
                 'academy_website': 'http://test.com',
                 'learner_email': 'test@test.com',
+                'academy_logo': 'test',
             },
             HTTP_AUTH_SIGNATURE='0xe646de646dde9cee6875e3845428ce6fc13d41086e8a7f6531d1d526598cc4104122e01c38255d1e1d595710986d193f52e3dbc47cb01cb554d8e4572d6920361c',
             HTTP_AUTH_ETH_ADDRESS='D2BE64317Eb1832309DF8c8C18B09871809f3735',
@@ -46,12 +48,125 @@ class ProfileTests(TestCase):
                 'company_name': 'test',
                 'company_website': 'http://test.com',
                 'company_email': 'test@test.com',
+                'company_logo': 'test',
             },
             HTTP_AUTH_SIGNATURE='0xe646de646dde9cee6875e3845428ce6fc13d41086e8a7f6531d1d526598cc4104122e01c38255d1e1d595710986d193f52e3dbc47cb01cb554d8e4572d6920361c',
             HTTP_AUTH_ETH_ADDRESS='D2BE64317Eb1832309DF8c8C18B09871809f3735',
             HTTP_PROFILE_TYPE='3',
         )
         response = ProfileViewSet.as_view({'post': 'create'})(request)
+        self.assertEqual(response.status_code, 200)
+
+    # Create learner profile None Avatar
+        request = self.factory.post(
+            '/api/v1/profile/',
+            data={
+                'full_name': 'test',
+                'learner_email': 'test@test.com',
+            },
+            HTTP_AUTH_SIGNATURE='0xe646de646dde9cee6875e3845428ce6fc13d41086e8a7f6531d1d526598cc4104122e01c38255d1e1d595710986d193f52e3dbc47cb01cb554d8e4572d6920361c',
+            HTTP_AUTH_ETH_ADDRESS='D2BE64317Eb1832309DF8c8C18B09871809f3735',
+            HTTP_PROFILE_TYPE='1',
+        )
+        response = ProfileViewSet.as_view({'post': 'create'})(request)
+        self.assertEqual(response.status_code, 200)
+
+    # Create academy profile None Avatar
+        request = self.factory.post(
+            '/api/v1/profile/',
+            data={
+                'academy_name': 'test',
+                'academy_website': 'http://test.com',
+                'learner_email': 'test@test.com',
+            },
+            HTTP_AUTH_SIGNATURE='0xe646de646dde9cee6875e3845428ce6fc13d41086e8a7f6531d1d526598cc4104122e01c38255d1e1d595710986d193f52e3dbc47cb01cb554d8e4572d6920361c',
+            HTTP_AUTH_ETH_ADDRESS='D2BE64317Eb1832309DF8c8C18B09871809f3735',
+            HTTP_PROFILE_TYPE='2',
+        )
+        response = ProfileViewSet.as_view({'post': 'create'})(request)
+        self.assertEqual(response.status_code, 200)
+
+    # Create business profile None Avatar
+        request = self.factory.post(
+            '/api/v1/profile/',
+            data={
+                'company_name': 'test',
+                'company_website': 'http://test.com',
+                'company_email': 'test@test.com',
+            },
+            HTTP_AUTH_SIGNATURE='0xe646de646dde9cee6875e3845428ce6fc13d41086e8a7f6531d1d526598cc4104122e01c38255d1e1d595710986d193f52e3dbc47cb01cb554d8e4572d6920361c',
+            HTTP_AUTH_ETH_ADDRESS='D2BE64317Eb1832309DF8c8C18B09871809f3735',
+            HTTP_PROFILE_TYPE='3',
+        )
+        response = ProfileViewSet.as_view({'post': 'create'})(request)
+        self.assertEqual(response.status_code, 200)
+
+    # Create wrong profile type
+        request = self.factory.post(
+            '/api/v1/profile/',
+            data={
+                'company_name': 'test',
+                'company_website': 'http://test.com',
+                'company_email': 'test@test.com',
+            },
+            HTTP_AUTH_SIGNATURE='0xe646de646dde9cee6875e3845428ce6fc13d41086e8a7f6531d1d526598cc4104122e01c38255d1e1d595710986d193f52e3dbc47cb01cb554d8e4572d6920361c',
+            HTTP_AUTH_ETH_ADDRESS='D2BE64317Eb1832309DF8c8C18B09871809f3735',
+            HTTP_PROFILE_TYPE='4',
+        )
+        response = ProfileViewSet.as_view({'post': 'create'})(request)
+        self.assertEqual(response.status_code, 400)
+
+    # Create learner profile Serializer Errors
+        request = self.factory.post(
+            '/api/v1/profile/',
+            data={
+                'full_name': 'test',
+                'learner_email': 'wrong_email_type',
+            },
+            HTTP_AUTH_SIGNATURE='0xe646de646dde9cee6875e3845428ce6fc13d41086e8a7f6531d1d526598cc4104122e01c38255d1e1d595710986d193f52e3dbc47cb01cb554d8e4572d6920361c',
+            HTTP_AUTH_ETH_ADDRESS='D2BE64317Eb1832309DF8c8C18B09871809f3735',
+            HTTP_PROFILE_TYPE='1',
+        )
+        response = ProfileViewSet.as_view({'post': 'create'})(request)
+        self.assertEqual(response.status_code, 400)
+
+    # Create academy profile provider Serializer Errors
+        request = self.factory.post(
+            '/api/v1/profile/',
+            data={
+                'academy_name': '',
+                'academy_website': 'http://test.com',
+                'academy_email': 'wrong_email_type',
+            },
+            HTTP_AUTH_SIGNATURE='0xe646de646dde9cee6875e3845428ce6fc13d41086e8a7f6531d1d526598cc4104122e01c38255d1e1d595710986d193f52e3dbc47cb01cb554d8e4572d6920361c',
+            HTTP_AUTH_ETH_ADDRESS='D2BE64317Eb1832309DF8c8C18B09871809f3735',
+            HTTP_PROFILE_TYPE='2',
+        )
+        response = ProfileViewSet.as_view({'post': 'create'})(request)
+        self.assertEqual(response.status_code, 400)
+
+    # Create business profile company Serializer Errors
+        request = self.factory.post(
+            '/api/v1/profile/',
+            data={
+                'company_name': '',
+                'company_website': 'http://test.com',
+                'company_email': 'wrong_email_type',
+            },
+            HTTP_AUTH_SIGNATURE='0xe646de646dde9cee6875e3845428ce6fc13d41086e8a7f6531d1d526598cc4104122e01c38255d1e1d595710986d193f52e3dbc47cb01cb554d8e4572d6920361c',
+            HTTP_AUTH_ETH_ADDRESS='D2BE64317Eb1832309DF8c8C18B09871809f3735',
+            HTTP_PROFILE_TYPE='3',
+        )
+        response = ProfileViewSet.as_view({'post': 'create'})(request)
+        self.assertEqual(response.status_code, 400)
+
+    # Get autocomplete
+        request = self.factory.get(
+            '/api/v1/profile/autocomplete?q=tes',
+            HTTP_AUTH_SIGNATURE='0xe646de646dde9cee6875e3845428ce6fc13d41086e8a7f6531d1d526598cc4104122e01c38255d1e1d595710986d193f52e3dbc47cb01cb554d8e4572d6920361c',
+            HTTP_AUTH_ETH_ADDRESS='D2BE64317Eb1832309DF8c8C18B09871809f3735',
+        )
+        response = ProfileViewSet.as_view({'get': 'autocomplete'})(request)
         self.assertEqual(response.status_code, 200)
 
     # Get profile
@@ -65,6 +180,7 @@ class ProfileTests(TestCase):
 
         eth_address = '0xD2BE64317Eb1832309DF8c8C18B09871809f3735'.lower()
         user, _ = User.objects.get_or_create(username=eth_address)
+
     # Get learner profile
         request = self.factory.get(
                 '/api/v1/profile/{}/get_learner/'.format(user.username),
@@ -74,14 +190,31 @@ class ProfileTests(TestCase):
         response = ProfileViewSet.as_view({'get': 'get_learner'})(request, pk=user.username)
         self.assertEqual(response.status_code, 200)
 
+    # Get acadeny profile
+        request = self.factory.get(
+                '/api/v1/profile/{}/get_academy/'.format(user.username),
+                HTTP_AUTH_SIGNATURE='0xe646de646dde9cee6875e3845428ce6fc13d41086e8a7f6531d1d526598cc4104122e01c38255d1e1d595710986d193f52e3dbc47cb01cb554d8e4572d6920361c',
+                HTTP_AUTH_ETH_ADDRESS='D2BE64317Eb1832309DF8c8C18B09871809f3735',
+            )
+        response = ProfileViewSet.as_view({'get': 'get_academy'})(request, pk=user.username)
+        self.assertEqual(response.status_code, 200)
+
+    # Get business profile
+        request = self.factory.get(
+                '/api/v1/profile/{}/get_business/'.format(user.username),
+                HTTP_AUTH_SIGNATURE='0xe646de646dde9cee6875e3845428ce6fc13d41086e8a7f6531d1d526598cc4104122e01c38255d1e1d595710986d193f52e3dbc47cb01cb554d8e4572d6920361c',
+                HTTP_AUTH_ETH_ADDRESS='D2BE64317Eb1832309DF8c8C18B09871809f3735',
+            )
+        response = ProfileViewSet.as_view({'get': 'get_business'})(request, pk=user.username)
+        self.assertEqual(response.status_code, 200)
+
     # Get academies
         request = self.factory.get(
-                '/api/v1/profile/get_academies/',
+                '/api/v1/profile/get_academies/?q=test',
                 HTTP_AUTH_SIGNATURE='0xe646de646dde9cee6875e3845428ce6fc13d41086e8a7f6531d1d526598cc4104122e01c38255d1e1d595710986d193f52e3dbc47cb01cb554d8e4572d6920361c',
                 HTTP_AUTH_ETH_ADDRESS='D2BE64317Eb1832309DF8c8C18B09871809f3735',
             )
         response = ProfileViewSet.as_view({'get': 'get_academies'})(request)
-        self.assertEqual(len(response.data), 1)
         self.assertEqual(response.status_code, 200)
 
     # Get businesses

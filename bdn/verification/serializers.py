@@ -36,9 +36,6 @@ class VerificationCertificateSerializer(serializers.ModelSerializer):
     verifier_name = serializers.\
         SerializerMethodField('_verifier_name')
 
-    def _granted_to_eth_address(self, obj):
-        return obj.granted_to.username
-
     def _verifier_eth_address(self, obj):
         return obj.verifier.username
 

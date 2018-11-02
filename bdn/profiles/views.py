@@ -183,6 +183,9 @@ class ProfileViewSet(mixins.CreateModelMixin,
             else:
                 return Response(company_serializer.errors,
                                 status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response({'error': 'Wrong active profile type'},
+                            status=status.HTTP_400_BAD_REQUEST)
         if serializer.is_valid():
             serializer.save()
             return Response({'status': 'ok'})

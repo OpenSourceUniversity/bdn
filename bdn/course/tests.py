@@ -166,6 +166,7 @@ class CourseTests(TestCase):
         self.assertEqual(response.status_code, 401)
 
         # # Mark as feautered with wrong provider
+
         # request = self.factory.post(
         #     '/api/v1/courses/{}/mark_featured_by_id/'.format(course_pk),
         #     data={

@@ -110,21 +110,17 @@ class JobApplicationViewSet(mixins.CreateModelMixin,
                 'id': duplicate_job_application.id,
             }, status=status.HTTP_400_BAD_REQUEST)
         serializer = JobApplicationSerializer(data=data)
-        if serializer.is_valid():
-            job_application = serializer.save()
-            notify.send(
-                issuer,
-                recipient=job.company.user,
-                verb='submitted',
-                action_object=job_application,
-                **{
-                    'actor_active_profile_type': 1,
-                    'recipient_active_profile_type': 3,
-                }
-            )
-            response = Response(JobApplicationSerializer(job_application).data)
-        else:
-            print(serializer.errors)
-            response = Response(serializer.errors,
-                                status=status.HTTP_400_BAD_REQUEST)
+        serializer.is_valid()
+        job_application = serializer.save()
+        notify.send(
+            issuer,
+            recipient=job.company.user,
+            verb='submitted',
+            action_object=job_application,
+            **{
+                'actor_active_profile_type': 1,
+                'recipient_active_profile_type': 3,
+            }
+        )
+        response = Response(JobApplicationSerializer(job_application).data)
         return response
