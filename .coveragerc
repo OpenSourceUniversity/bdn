@@ -9,7 +9,7 @@ omit =
     */apps.py
     */tests.py
     apps/bdn-proprietary/*
-    bdn/utils/decorators.py
+    bdn/settings.py
 
 [report]
 # Regexes for lines to exclude from consideration

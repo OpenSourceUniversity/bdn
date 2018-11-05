@@ -61,7 +61,9 @@ class UserSettingsViewSet(mixins.CreateModelMixin,
                 user_settings.save()
                 return Response({'status': 'ok'})
         except KeyError:
-            if request.data['save_wallet']:
+            is_save = request.data.get(
+                'save_wallet', False) in ['True', 'true', True]
+            if is_save:
                 password = make_password(request.data['password'])
                 wallet = request.data['wallet']
                 user_settings.password = password
