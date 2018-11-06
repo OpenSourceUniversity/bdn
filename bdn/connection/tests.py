@@ -59,7 +59,8 @@ class ConnectionTasksTests(TestCase):
         connection['full_name'] = 'test'
         connection['email'] = 'test2@email.com'
         inviting_emails(
-            connection
+            connection,
+            'https://os.university'
             )
 
 class ConnectionViewsTests(TestCase):
