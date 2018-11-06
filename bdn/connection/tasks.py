@@ -5,6 +5,7 @@ from bdn.auth.models import User
 from mail_templated import EmailMessage
 from .models import Connection
 from django.conf import settings
+# from bdn.unsubscribe.models import Unsubscribe
 # from .serializers import ConnectionSerializer
 
 
@@ -40,16 +41,23 @@ def handle_connection_row(owner, row):
     if created:
         connection.save()
         # if not onboarded_user:
-        #     inviting_emails.delay(ConnectionSerializer(connection).data)
+        #     unsubscribe, _ = Unsubscribe.objects.get_or_create(
+        #         email=email)
+        #     if unsubscribe.subscribed:
+        #         inviting_emails.delay(
+        #             ConnectionSerializer(
+        #                 connection).data,
+        #             unsubscribe.unsubscribe_link)
 
 
 @shared_task
-def inviting_emails(connection):
+def inviting_emails(connection, unsubscribe_link):
     from_email = settings.DEFAULT_FROM_EMAIL
     message = EmailMessage(
         'mail/sec1.tpl',
         {
             'full_name': connection['full_name'],
+            'unsubscribe_link': unsubscribe_link,
         },
         from_email,
         to=[connection['email']])

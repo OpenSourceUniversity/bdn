@@ -74,6 +74,7 @@ INSTALLED_APPS = [
     'bdn.transaction',
     'bdn.job_application',
     'bdn.user_settings',
+    'bdn.unsubscribe',
 ]
 
 # Import all apps from apps folder
