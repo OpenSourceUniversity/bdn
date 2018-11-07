@@ -17,6 +17,21 @@ class UserSettingsSerializer(serializers.ModelSerializer):
         )
 
 
+class UserSettingsGetSerializer(serializers.ModelSerializer):
+    user = UserSerializer(many=False, read_only=True)
+
+    class Meta:
+        model = UserSettings
+        fields = (
+            'id',
+            'user',
+            'subscribed',
+            'news_subscribed',
+            'save_wallet',
+            'email_verified',
+        )
+
+
 class UserSettingsWalletSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserSettings

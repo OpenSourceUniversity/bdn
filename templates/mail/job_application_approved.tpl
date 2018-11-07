@@ -2,7 +2,7 @@
 
 {% block subject %}Open Source University - Your application for {{ job_title }} is APPROVED{% endblock %}
 
-{% block header_title %}Your application for {{ job_title }} is APPROVED{% endblock %}
+{% block header_title %}Your application for {{ job_title }} is APPROVED by {{ issuer_name }}{% endblock %}
 
 {% block html %}
 <!-- container_400 -->
@@ -30,7 +30,7 @@
             <div class="editable-text">
               <span class="text_container">
                 <multiline>
-                  <a href="#" style="text-decoration: none; color: #ffffff;">
+                  <a href="https://os.university/static/user-manual.pdf" style="text-decoration: none; color: #ffffff;">
                     Read User Manual
                   </a>
                 </multiline>

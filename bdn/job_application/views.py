@@ -11,6 +11,7 @@ from rest_framework.decorators import detail_route, list_route
 from notifications.signals import notify
 from bdn.auth.signature_authentication import SignatureAuthentication
 from bdn.job.models import Job
+from bdn.utils.send_email_tasks import approved_job_application_email
 from .models import JobApplication
 from .serializers import (
     JobApplicationSerializer, JobApplicationViewSerializer,
@@ -82,6 +83,12 @@ class JobApplicationViewSet(mixins.CreateModelMixin,
         else:
             job_application.move_to_approved()
             verb = 'approved'
+            if job_application.issuer.usersettings.subscribed:
+                approved_job_application_email.delay(
+                    job_application.job.title,
+                    job_application.job.company.name,
+                    job_application.issuer.email
+                    )
         job_application.save()
         notify.send(
             job_application.job.company.user,

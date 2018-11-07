@@ -30,7 +30,7 @@
             <div class="editable-text">
               <span class="text_container">
                 <multiline>
-                  <a href="#" style="text-decoration: none; color: #ffffff;">
+                  <a href="https://os.university/static/user-manual.pdf" style="text-decoration: none; color: #ffffff;">
                     Read User Manual
                   </a>
                 </multiline>

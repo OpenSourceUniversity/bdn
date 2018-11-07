@@ -140,7 +140,7 @@ img{
 									<table width="50%" align="left" border="0" cellspacing="0" cellpadding="0">
 										<tr>
 											<td align="left">
-												<a href="#" class="editable-img">
+												<a href="https://os.university/" class="editable-img">
 													<img editable="true" mc:edit="image001" src="https://dapp.os.university/images/mail/os-uni-logo-full.png" width="175" style="display:block; line-height:0; font-size:0; border:0;" border="0" alt="logo" />
 												</a>
 											</td>
@@ -154,7 +154,7 @@ img{
 										<tr><td height="3"></td></tr>
 										<tr>
 											<td align="right">
-												<a href="#" style="border-style: none !important; display: block; border: 0 !important;" class="editable-img">
+												<a href="mailto:support@os.university" style="border-style: none !important; display: block; border: 0 !important;" class="editable-img">
 													<img editable="true" mc:edit="image002" src="https://dapp.os.university/images/mail/options.png" style="display:block; line-height:0; font-size:0; border:0;" border="0" alt="options" />
 												</a>
 											</td>
@@ -259,7 +259,7 @@ img{
 									<div class="editable-text" style="line-height: 2;">
 										<span class="text_container">
 											<multiline>
-												You are receving this newsletter because you subscribed to our mailing list via :<a href="#" style="color: #F06621;text-decoration: none;"> dapp.os.university</a>
+												You are receving this newsletter because you subscribed to our mailing list via :<a href="https://dapp.os.university" style="color: #F06621;text-decoration: none;"> dapp.os.university</a>
 											</multiline>
 										</span>
 									</div>
@@ -274,7 +274,7 @@ img{
 									<div class="editable-text">
 										<span class="text_container">
 											<multiline>
-												<a href="#" class="text_color_929292" style="color:#929292; text-decoration: none;">Visit FAQ</a>
+												<a href="https://os.university/faq/" class="text_color_929292" style="color:#929292; text-decoration: none;">Visit FAQ</a>
 											</multiline>
 										</span>
 									</div>
@@ -289,7 +289,7 @@ img{
 									<div class="editable-text">
 										<span class="text_container">
 											<multiline>
-												<a href="#" class="text_color_929292" style="color:#929292; text-decoration: none; display: block;">Unsubscribe</a>
+												<a href="{{ unsubscribe_link }}" class="text_color_929292" style="color:#929292; text-decoration: none; display: block;">Unsubscribe</a>
 											</multiline>
 										</span>
 									</div>
@@ -313,7 +313,7 @@ img{
 										<tr>
 											<!-- facebook -->
 											<td align="center" width="30">
-												<a href="#" style="border-style: none !important; display: inline-block;; border: 0 !important;" class="editable-img">
+												<a href="https://www.facebook.com/OpenSourceUni/" style="border-style: none !important; display: inline-block;; border: 0 !important;" class="editable-img">
 													<img editable="true" mc:edit="image004" src="https://dapp.os.university/images/mail/icon-fb.png" width="30" style="display:block; line-height:0; font-size:0; border:0;" border="0" alt="" />
 												</a>
 											</td>
@@ -323,7 +323,7 @@ img{
 
 											<!-- twitter -->
 											<td align="center" width="30">
-												<a href="#" style="border-style: none !important; display: inline-block; border: 0 !important;" class="editable-img">
+												<a href="https://twitter.com/OpenSource_Uni" style="border-style: none !important; display: inline-block; border: 0 !important;" class="editable-img">
 													<img editable="true" mc:edit="image005" src="https://dapp.os.university/images/mail/icon-twitter.png" width="30" style="display:block; line-height:0; font-size:0; border:0;" border="0" alt="" />
 												</a>
 											</td>

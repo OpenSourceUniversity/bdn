@@ -3,6 +3,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
 from bdn.auth.signature_authentication import SignatureAuthentication
 from bdn.auth.models import User
+from bdn.utils.send_email_tasks import verification_email
 from .serializers import SignUpSerializer
 from .models import SignUp
 
@@ -17,19 +18,24 @@ class SignUpViewSet(mixins.CreateModelMixin,
     def create(self, request):
         data = request.data.copy()
         data['email'] = data['email'].lower()
-        user = User.objects.filter(email=data['email']).first()
+        user = User.objects.filter(email__iexact=data['email']).first()
         if user:
             return Response(
                 {'error': 'Email duplicate, please use another one'},
                 status=status.HTTP_400_BAD_REQUEST)
         else:
             sign_up, _ = SignUp.objects.get_or_create(
-                        email=data['email'])
+                        email__iexact=data['email'])
             if not (request.user.is_anonymous) and not (request.user.email):
                 request.user.email = data['email']
                 request.user.save()
                 request.user.profile.learner_email = data['email']
                 request.user.profile.save()
+                if not (request.user.usersettings.email_verified):
+                    verification_email.delay(
+                        request.user.usersettings.email_verification_link,
+                        request.user.email
+                        )
             serializer = SignUpSerializer(
                 data=data, instance=sign_up, partial=True)
             if serializer.is_valid():

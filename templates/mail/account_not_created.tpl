@@ -30,7 +30,7 @@
             <div class="editable-text">
               <span class="text_container">
                 <multiline>
-                  <a href="#" style="text-decoration: none; color: #ffffff;">
+                  <a href="https://dapp.os.university/#/onboarding" style="text-decoration: none; color: #ffffff;">
                     Start Now
                   </a>
                 </multiline>

@@ -1,13 +1,17 @@
 from django.shortcuts import get_object_or_404
 from django.contrib.auth.hashers import check_password, make_password
 from rest_framework.decorators import list_route
+from django.http import HttpResponseRedirect
+from django.core.exceptions import ValidationError
 from rest_framework import status, viewsets, mixins
 from rest_framework.response import Response
 from rest_framework.permissions import (IsAuthenticated,
                                         AllowAny)
 from bdn.auth.signature_authentication import SignatureAuthentication
 from bdn.auth.models import User
-from .serializers import UserSettingsSerializer, UserSettingsWalletSerializer
+from .serializers import (UserSettingsSerializer,
+                          UserSettingsWalletSerializer,
+                          UserSettingsGetSerializer)
 from .models import UserSettings
 
 
@@ -31,7 +35,7 @@ class UserSettingsViewSet(mixins.CreateModelMixin,
         if not user_email:
             return Response({'error': 'Wallet not stored'},
                             status=status.HTTP_400_BAD_REQUEST)
-        user = get_object_or_404(User, email=user_email)
+        user = get_object_or_404(User, email__iexact=user_email)
         user_settings = get_object_or_404(UserSettings, user=user)
         if user_settings.password:
             if check_password(
@@ -78,20 +82,21 @@ class UserSettingsViewSet(mixins.CreateModelMixin,
 
     def list(self, request):
         user_settings = get_object_or_404(UserSettings, user=request.user)
-        serializer_user_settings = UserSettingsSerializer(user_settings)
+        serializer_user_settings = UserSettingsGetSerializer(user_settings)
         return Response(serializer_user_settings.data)
 
     def create(self, request):
         user_settings = UserSettings.objects.get(
                     user=request.user)
-        if (request.user.email != request.data['email']):
-            user = User.objects.filter(email=request.data['email']).first()
+        if (request.user.email.lower() != request.data['email'].lower()):
+            user = User.objects.filter(
+                email__iexact=request.data['email']).first()
             if user:
                 return Response(
                     {'error': 'Email duplicate, please use another one'},
                     status=status.HTTP_400_BAD_REQUEST)
             else:
-                request.user.email = request.data['email']
+                request.user.email = request.data['email'].lower()
                 request.user.save()
         serializer = UserSettingsSerializer(
             data=request.data, instance=user_settings, partial=True)
@@ -101,3 +106,18 @@ class UserSettingsViewSet(mixins.CreateModelMixin,
         else:
             return Response(serializer.errors,
                             status=status.HTTP_400_BAD_REQUEST)
+
+
+def email_verification(request, user_settings_id, token):
+    try:
+        user_settings = UserSettings.objects.all().filter(
+            id=user_settings_id,
+            email_verification_token=token).first()
+    except ValidationError:
+        return HttpResponseRedirect('/deny/')
+    if user_settings:
+        user_settings.email_verified = True
+        user_settings.save()
+        return HttpResponseRedirect('/email-verified/')
+    else:
+        return HttpResponseRedirect('/deny/')

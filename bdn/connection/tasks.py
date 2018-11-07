@@ -2,11 +2,10 @@ import logging
 import time
 from celery import shared_task
 from bdn.auth.models import User
-from mail_templated import EmailMessage
 from .models import Connection
-from django.conf import settings
-# from bdn.unsubscribe.models import Unsubscribe
-# from .serializers import ConnectionSerializer
+from bdn.utils.send_email_tasks import inviting_email
+from bdn.unsubscribe.models import Unsubscribe
+from .serializers import ConnectionSerializer
 
 
 logger = logging.getLogger(__name__)
@@ -22,7 +21,7 @@ def handle_onboarding(email):
 
 
 @shared_task
-def handle_connection_row(owner, row):
+def handle_connection_row(owner_id, row):
     full_name = '{} {}'.format(row[0], row[1])
     email = row[2].lower()
     company = row[3]
@@ -30,7 +29,7 @@ def handle_connection_row(owner, row):
     connected_on = time.strptime(row[5].strip(), "%m/%d/%y, %I:%M %p")
     onboarded_user = handle_onboarding(email)
     connection, created = Connection.objects.get_or_create(
-        owner_id=owner,
+        owner_id=owner_id,
         full_name=full_name,
         email=email,
         company_name=company,
@@ -40,25 +39,14 @@ def handle_connection_row(owner, row):
     )
     if created:
         connection.save()
-        # if not onboarded_user:
-        #     unsubscribe, _ = Unsubscribe.objects.get_or_create(
-        #         email=email)
-        #     if unsubscribe.subscribed:
-        #         inviting_emails.delay(
-        #             ConnectionSerializer(
-        #                 connection).data,
-        #             unsubscribe.unsubscribe_link)
-
-
-@shared_task
-def inviting_emails(connection, unsubscribe_link):
-    from_email = settings.DEFAULT_FROM_EMAIL
-    message = EmailMessage(
-        'mail/sec1.tpl',
-        {
-            'full_name': connection['full_name'],
-            'unsubscribe_link': unsubscribe_link,
-        },
-        from_email,
-        to=[connection['email']])
-    message.send()
+        if not onboarded_user:
+            unsubscribe, _ = Unsubscribe.objects.get_or_create(
+                email=email)
+            if unsubscribe.subscribed:
+                owner = User.objects.get(id=owner_id)
+                owner_name = owner.profile.full_name
+                inviting_email.delay(
+                    ConnectionSerializer(
+                        connection).data,
+                    unsubscribe.unsubscribe_link,
+                    str(owner_name))

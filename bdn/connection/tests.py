@@ -5,7 +5,8 @@ from unittest.mock import MagicMock, patch
 from django.test import RequestFactory, TestCase
 from bdn.auth.models import User
 from bdn.celery import app as celeryapp
-from .tasks import handle_connection_row, inviting_emails
+from bdn.utils.send_email_tasks import inviting_email
+from .tasks import handle_connection_row
 from .views import FileViewSet
 
 
@@ -58,9 +59,10 @@ class ConnectionTasksTests(TestCase):
         connection = {}
         connection['full_name'] = 'test'
         connection['email'] = 'test2@email.com'
-        inviting_emails(
+        inviting_email(
             connection,
-            'https://os.university'
+            'https://os.university',
+            'test@email.com'
             )
 
 class ConnectionViewsTests(TestCase):

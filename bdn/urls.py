@@ -32,7 +32,7 @@ from bdn.messaging.views import ThreadViewSet, MessageViewSet
 from bdn.notifications_extensions.views import NotificationViewSet
 from bdn.transaction.views import TransactionViewSet
 from bdn.job_application.views import JobApplicationViewSet
-from bdn.user_settings.views import UserSettingsViewSet
+from bdn.user_settings.views import UserSettingsViewSet, email_verification
 from bdn.unsubscribe.views import unsubscribe
 from rest_framework import routers
 
@@ -62,10 +62,14 @@ urlpatterns = [
     path('ajax_select/', include(ajax_select_urls)),
     path('admin/', admin.site.urls),
     path('unsubscribe/<email_id>/<token>/', unsubscribe),
+    path('email-verification/<user_settings_id>/<token>/', email_verification),
     path('deny/', TemplateView.as_view(
-        template_name='unsubscribe/deny.html'), name="deny"),
+        template_name='pages/deny.html'), name="deny"),
     path('unsubscribed/', TemplateView.as_view(
-        template_name='unsubscribe/unsubscribed.html'), name="unsubscribed"),
+        template_name='pages/unsubscribed.html'), name="unsubscribed"),
+    path('email-verified/', TemplateView.as_view(
+        template_name='pages/email-verified.html'),
+        name="email-verified"),
 ]
 
 if settings.DEBUG:

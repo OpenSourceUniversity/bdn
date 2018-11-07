@@ -32,7 +32,7 @@
             <div class="editable-text">
               <span class="text_container">
                 <multiline>
-                  <a href="#" style="text-decoration: none; color: #ffffff;">
+                  <a href="{{ verification_link }}" style="text-decoration: none; color: #ffffff;">
                     Confirm Your Email
                   </a>
                 </multiline>

@@ -13,9 +13,16 @@ class UserSettings(m.Model):
     news_subscribed = m.BooleanField(default=True)
     save_wallet = m.BooleanField(default=True)
     wallet = m.TextField(null=True, blank=True, default=None)
+    email_verification_token = m.UUIDField(default=uuid.uuid4, editable=False)
+    email_verified = m.BooleanField(default=False)
 
     def __str__(self):
         return self.user.username
+
+    @property
+    def email_verification_link(self):
+        return 'https://bdn.os.university/email-verification/{}/{}/'.format(
+            self.id, self.email_verification_token)
 
 
 @receiver(post_save, sender=settings.AUTH_USER_MODEL)

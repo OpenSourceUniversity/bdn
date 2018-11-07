@@ -10,6 +10,7 @@ from rest_framework.decorators import detail_route
 from notifications.signals import notify
 from bdn.auth.models import User
 from bdn.auth.signature_authentication import SignatureAuthentication
+from bdn.utils.send_email_tasks import rejected_certificate_email
 from .models import Verification
 from .serializers import VerificationSerializer, VerificationCreateSerializer
 
@@ -79,6 +80,13 @@ class VerificationViewSet(mixins.CreateModelMixin,
                 'recipient_active_profile_type': verification.granted_to_type,
             }
         )
+        if verification.granted_to.usersettings.subscribed:
+            rejected_certificate_email.delay(
+                verification.certificate.certificate_title,
+                verification.verifier.profile.name_by_profile_type(
+                    verification.verifier_type),
+                verification.granted_to.email
+                )
         return Response({'status': 'ok'})
 
     @detail_route(methods=['post'])
