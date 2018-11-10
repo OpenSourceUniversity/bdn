@@ -79,10 +79,24 @@ def inviting_email(connection, unsubscribe_link, owner_name):
 
 
 @shared_task
-def verification_email(verification_link, send_to):
+def verification_email_on_create(verification_link, send_to):
     from_email = settings.DEFAULT_FROM_EMAIL
     message = EmailMessage(
         'mail/account_created.tpl',
+        {
+            'verification_link': verification_link,
+            'unsubscribe_link': 'https://dapp.os.university/#/settings',
+        },
+        from_email,
+        to=[send_to])
+    message.send()
+
+
+@shared_task
+def verification_email(verification_link, send_to):
+    from_email = settings.DEFAULT_FROM_EMAIL
+    message = EmailMessage(
+        'mail/email_verification.tpl',
         {
             'verification_link': verification_link,
             'unsubscribe_link': 'https://dapp.os.university/#/settings',

@@ -1,3 +1,4 @@
+import uuid
 from django.shortcuts import get_object_or_404
 from django.contrib.auth.hashers import check_password, make_password
 from rest_framework.decorators import list_route
@@ -8,6 +9,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import (IsAuthenticated,
                                         AllowAny)
 from bdn.auth.signature_authentication import SignatureAuthentication
+from bdn.utils.send_email_tasks import verification_email
 from bdn.auth.models import User
 from .serializers import (UserSettingsSerializer,
                           UserSettingsWalletSerializer,
@@ -97,7 +99,14 @@ class UserSettingsViewSet(mixins.CreateModelMixin,
                     status=status.HTTP_400_BAD_REQUEST)
             else:
                 request.user.email = request.data['email'].lower()
+                user_settings.email_verified = False
+                user_settings.email_verification_token = uuid.uuid4()
+                user_settings.save()
                 request.user.save()
+                verification_email.delay(
+                    user_settings.email_verification_link,
+                    request.user.email
+                    )
         serializer = UserSettingsSerializer(
             data=request.data, instance=user_settings, partial=True)
         if serializer.is_valid():

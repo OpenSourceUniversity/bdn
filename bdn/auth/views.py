@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
 from bdn.auth.signature_authentication import SignatureAuthentication
 from bdn.auth.models import User
-from bdn.utils.send_email_tasks import verification_email
+from bdn.utils.send_email_tasks import verification_email_on_create
 from .serializers import SignUpSerializer
 from .models import SignUp
 
@@ -32,7 +32,7 @@ class SignUpViewSet(mixins.CreateModelMixin,
                 request.user.profile.learner_email = data['email']
                 request.user.profile.save()
                 if not (request.user.usersettings.email_verified):
-                    verification_email.delay(
+                    verification_email_on_create.delay(
                         request.user.usersettings.email_verification_link,
                         request.user.email
                         )
