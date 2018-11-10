@@ -69,7 +69,7 @@ class Command(BaseCommand):
                         if len(industry_list) > 0:
                             for industry_name in industry_list:
                                 industry, _ = Industry.objects.get_or_create(
-                                    name=industry_name
+                                    name__iexact=industry_name
                                 )
                                 course_obj.industries.add(industry)
                     except Exception as e:
