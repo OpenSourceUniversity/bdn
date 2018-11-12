@@ -2,7 +2,8 @@
 from __future__ import unicode_literals
 
 from collections import OrderedDict
-from rest_framework import viewsets, status
+from django.shortcuts import get_object_or_404
+from rest_framework import viewsets, mixins
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -31,7 +32,9 @@ class NotificationPagination(LimitOffsetPagination):
         ]))
 
 
-class NotificationViewSet(viewsets.ModelViewSet):
+class NotificationViewSet(mixins.RetrieveModelMixin,
+                          mixins.ListModelMixin,
+                          viewsets.GenericViewSet):
     serializer_class = NotificationSerializer
     authentication_classes = (SignatureAuthentication,)
     permission_classes = (IsAuthenticated,)
@@ -55,36 +58,13 @@ class NotificationViewSet(viewsets.ModelViewSet):
     @detail_route(methods=['post'])
     def toggle_unread(self, request, pk=None):
         eth_address = get_auth_eth_address(request.META)
-        try:
-            notification = Notification.objects.get(
-                pk=pk, recipient__username__iexact=eth_address)
-            old_unread = notification.unread
-            notification.unread = not notification.unread
-            notification.save()
-            response = Response({
-                'old_unread': old_unread,
-                'new_unread': notification.unread,
-            })
-        except Notification.DoesNotExist:
-            response = Response({
-                'error': 'Notification not found'
-            }, status=status.HTTP_400_BAD_REQUEST)
+        notification = get_object_or_404(
+            Notification, pk=pk, recipient__username__iexact=eth_address)
+        old_unread = notification.unread
+        notification.unread = not notification.unread
+        notification.save()
+        response = Response({
+            'old_unread': old_unread,
+            'new_unread': notification.unread,
+        })
         return response
-
-    def create(self, request):
-        return self.deny()
-
-    def update(self, request):
-        return self.deny()
-
-    def partial_update(self, request):
-        return self.deny()
-
-    def destroy(self, request):
-        return self.deny()
-
-    @staticmethod
-    def deny():
-        return Response({
-            'status': 'denied'
-        }, status=status.HTTP_401_UNAUTHORIZED)

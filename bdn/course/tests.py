@@ -29,6 +29,12 @@ class CourseTests(TestCase):
         # Create course
         eth_address = '0xD2BE64317Eb1832309DF8c8C18B09871809f3735'.lower()
         user, _ = User.objects.get_or_create(username=eth_address)
+        have_allowance = True
+        try:
+            user.allowance.featured_courses = 1
+            user.allowance.save()
+        except AttributeError:
+            have_allowance = False
         provider = Provider(user=user, name='test')
         provider.save()
         request = self.factory.post(
@@ -67,6 +73,7 @@ class CourseTests(TestCase):
         response = CourseViewSet.as_view({'get': 'retrieve'})(request, pk=course_pk)
         self.assertEqual(response.status_code, 200)
 
+        # Retrieve the course wrong_pk
         wrong_pk = str(uuid.uuid4())
         request = self.factory.get(
             '/api/v1/courses/{}/'.format(wrong_pk),
@@ -80,6 +87,16 @@ class CourseTests(TestCase):
         industry_pks = '1427837e-babf-42c8-98ce-3517cb768249|some_wrong_uuid||'
         request = self.factory.get(
             '/api/v1/courses/?filter_industry={}&is_featured=1'.format(industry_pks),
+            HTTP_AUTH_SIGNATURE='0xe646de646dde9cee6875e3845428ce6fc13d41086e8a7f6531d1d526598cc4104122e01c38255d1e1d595710986d193f52e3dbc47cb01cb554d8e4572d6920361c',
+            HTTP_AUTH_ETH_ADDRESS='D2BE64317Eb1832309DF8c8C18B09871809f3735')
+        view = CourseViewSet.as_view({'get': 'list'})
+        response = view(request)
+        self.assertEqual(response.status_code, 200)
+
+        # Listing not featured
+        industry_pks = '1427837e-babf-42c8-98ce-3517cb768249|some_wrong_uuid||'
+        request = self.factory.get(
+            '/api/v1/courses/?filter_industry={}'.format(industry_pks),
             HTTP_AUTH_SIGNATURE='0xe646de646dde9cee6875e3845428ce6fc13d41086e8a7f6531d1d526598cc4104122e01c38255d1e1d595710986d193f52e3dbc47cb01cb554d8e4572d6920361c',
             HTTP_AUTH_ETH_ADDRESS='D2BE64317Eb1832309DF8c8C18B09871809f3735')
         view = CourseViewSet.as_view({'get': 'list'})
@@ -139,7 +156,29 @@ class CourseTests(TestCase):
         response = view(request, pk=wrong_pk)
         self.assertEqual(response.status_code, 404)
 
+        # Edit the course with wrong provider
+
+        wrong_username = '0xD2BE64317Eb1832309DF8c8C18B09871809f3736'.lower()
+        wrong_user, _ = User.objects.get_or_create(username=wrong_username)
+        provider.user = wrong_user
+        provider.save()
+        request = self.factory.post(
+            '/api/v1/courses/{}/edit_by_id/'.format(course_pk),
+            data={
+                'title': 'test editted',
+                'description': 'test',
+                'external_link': 'http://example.com/',
+            },
+            HTTP_AUTH_SIGNATURE='0xe646de646dde9cee6875e3845428ce6fc13d41086e8a7f6531d1d526598cc4104122e01c38255d1e1d595710986d193f52e3dbc47cb01cb554d8e4572d6920361c',
+            HTTP_AUTH_ETH_ADDRESS='D2BE64317Eb1832309DF8c8C18B09871809f3735'
+        )
+        view = CourseViewSet.as_view({'post': 'edit_by_id'})
+        response = view(request, pk=course_pk)
+        self.assertEqual(response.status_code, 401)
+
         # Edit the course
+        provider.user = user
+        provider.save()
         request = self.factory.post(
             '/api/v1/courses/{}/edit_by_id/'.format(course_pk),
             data={
@@ -154,7 +193,101 @@ class CourseTests(TestCase):
         response = view(request, pk=course_pk)
         self.assertEqual(response.status_code, 200)
 
+        # Edit the course with serializer error
+        request = self.factory.post(
+            '/api/v1/courses/{}/edit_by_id/'.format(course_pk),
+            data={
+                'title': '',
+                'description': 'test',
+                'external_link': 'http://example.com/',
+            },
+            HTTP_AUTH_SIGNATURE='0xe646de646dde9cee6875e3845428ce6fc13d41086e8a7f6531d1d526598cc4104122e01c38255d1e1d595710986d193f52e3dbc47cb01cb554d8e4572d6920361c',
+            HTTP_AUTH_ETH_ADDRESS='D2BE64317Eb1832309DF8c8C18B09871809f3735'
+        )
+        view = CourseViewSet.as_view({'post': 'edit_by_id'})
+        response = view(request, pk=course_pk)
+        self.assertEqual(response.status_code, 400)
+
+        # Mark as feautered
+        request = self.factory.post(
+            '/api/v1/courses/{}/mark_featured_by_id/'.format(course_pk),
+            data={
+            },
+            HTTP_AUTH_SIGNATURE='0xe646de646dde9cee6875e3845428ce6fc13d41086e8a7f6531d1d526598cc4104122e01c38255d1e1d595710986d193f52e3dbc47cb01cb554d8e4572d6920361c',
+            HTTP_AUTH_ETH_ADDRESS='D2BE64317Eb1832309DF8c8C18B09871809f3735'
+        )
+        view = CourseViewSet.as_view({'post': 'mark_featured_by_id'})
+        response = view(request, pk=course_pk)
+        self.assertEqual(response.status_code, 200)
+
+        # Mark as feautered with wrong provider
+        # provider.user = wrong_user
+        # provider.save()
+        # request = self.factory.post(
+        #     '/api/v1/courses/{}/mark_featured_by_id/'.format(course_pk),
+        #     data={
+        #     },
+        #     HTTP_AUTH_SIGNATURE='0xe646de646dde9cee6875e3845428ce6fc13d41086e8a7f6531d1d526598cc4104122e01c38255d1e1d595710986d193f52e3dbc47cb01cb554d8e4572d6920361c',
+        #     HTTP_AUTH_ETH_ADDRESS='D2BE64317Eb1832309DF8c8C18B09871809f3735'
+        # )
+        # view = CourseViewSet.as_view({'post': 'mark_featured_by_id'})
+        # response = view(request, pk=course_pk)
+        # self.assertEqual(response.status_code, 401)
+
+        # provider.user = user
+        # provider.save()
+
+        if have_allowance:
+            request = self.factory.post(
+                '/api/v1/courses/',
+                data={
+                    'title': 'test2',
+                    'description': 'test2',
+                    'external_link': 'http://example2.com/',
+                },
+                HTTP_AUTH_SIGNATURE='0xe646de646dde9cee6875e3845428ce6fc13d41086e8a7f6531d1d526598cc4104122e01c38255d1e1d595710986d193f52e3dbc47cb01cb554d8e4572d6920361c',
+                HTTP_AUTH_ETH_ADDRESS='D2BE64317Eb1832309DF8c8C18B09871809f3735'
+            )
+            response = CourseViewSet.as_view({'post': 'create'})(request)
+            self.assertEqual(response.status_code, 200)
+            course_pk = str(response.data['pk'])
+
+            request = self.factory.post(
+                '/api/v1/courses/{}/mark_featured_by_id/'.format(course_pk),
+                data={
+                },
+                HTTP_AUTH_SIGNATURE='0xe646de646dde9cee6875e3845428ce6fc13d41086e8a7f6531d1d526598cc4104122e01c38255d1e1d595710986d193f52e3dbc47cb01cb554d8e4572d6920361c',
+                HTTP_AUTH_ETH_ADDRESS='D2BE64317Eb1832309DF8c8C18B09871809f3735'
+            )
+            view = CourseViewSet.as_view({'post': 'mark_featured_by_id'})
+            response = view(request, pk=course_pk)
+            self.assertEqual(response.status_code, 400)
+
+        # Delete denied
+        provider.user = wrong_user
+        provider.save()
+        url = '/api/v1/courses/{}/delete_by_id/'.format(course_pk)
+        request = self.factory.post(
+            url,
+            HTTP_AUTH_SIGNATURE='0xe646de646dde9cee6875e3845428ce6fc13d41086e8a7f6531d1d526598cc4104122e01c38255d1e1d595710986d193f52e3dbc47cb01cb554d8e4572d6920361c',
+            HTTP_AUTH_ETH_ADDRESS='D2BE64317Eb1832309DF8c8C18B09871809f3735')
+        view = CourseViewSet.as_view({'post': 'delete_by_id'})
+        response = view(request, pk=course_pk)
+        self.assertEqual(response.status_code, 401)
+
+        provider.user = None
+        provider.save()
+        # Retrieve the course Attribute Error
+        request = self.factory.get(
+            '/api/v1/courses/{}/'.format(course_pk),
+            HTTP_AUTH_SIGNATURE='0xe646de646dde9cee6875e3845428ce6fc13d41086e8a7f6531d1d526598cc4104122e01c38255d1e1d595710986d193f52e3dbc47cb01cb554d8e4572d6920361c',
+            HTTP_AUTH_ETH_ADDRESS='D2BE64317Eb1832309DF8c8C18B09871809f3735')
+        response = CourseViewSet.as_view({'get': 'retrieve'})(request, pk=course_pk)
+        self.assertEqual(response.status_code, 200)
+
         # Delete it
+        provider.user = user
+        provider.save()
         url = '/api/v1/courses/{}/delete_by_id/'.format(course_pk)
         request = self.factory.post(
             url,

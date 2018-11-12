@@ -1,8 +1,8 @@
 {% extends "mail/base.tpl" %}
 
-{% block subject %}Open Source University - Certificate {{ certificate_title }} was successfully uploaded{% endblock %}
+{% block subject %}{{ full_name }} - your connection {{ owner_name }} from LinkedIn invites you to OSU DApp{% endblock %}
 
-{% block header_title %}Your certificate {{ certificate_title }} successfully uploaded by {{ issuer_name }} {% endblock %}
+{% block header_title %}Your connection {{ owner_name }} invites you to OSU DApp{% endblock %}
 
 {% block html %}
 <!-- container_400 -->
@@ -12,7 +12,10 @@
       <div class="editable-text" style="line-height: 2;">
         <span class="text_container">
           <multiline>
-            To be able to verify gained knowledge and skills please follow the steps below.
+            Hello {{ full_name }},
+            {{ owner_name }} joined Open Source University DApp and already started to verify gained certificates, diplomas, skills, and professional expertise.
+            By verifying your skills and certificates, you’re building the necessary credibility needed in order the professional opportunities you want to get.
+            Your achievements have been presented automatically in a secure maner to businesses searching for candidates with particular experience.
           </multiline>
         </span>
       </div>
@@ -30,8 +33,8 @@
             <div class="editable-text">
               <span class="text_container">
                 <multiline>
-                  <a href="https://os.university/static/user-manual.pdf" style="text-decoration: none; color: #ffffff;">
-                    Read User Manual
+                  <a href="https://dapp.os.university/#/onboarding" style="text-decoration: none; color: #ffffff;">
+                    Don’t wait and join now
                   </a>
                 </multiline>
               </span>

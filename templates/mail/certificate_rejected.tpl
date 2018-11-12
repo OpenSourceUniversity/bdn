@@ -12,6 +12,7 @@
       <div class="editable-text" style="line-height: 2;">
         <span class="text_container">
           <multiline>
+            Your certificate {{ certificate_title }} was rejected by {{ issuer_name }}.
             Please make sure that the information and skills related to {{ certificate_title }} are correct. Another possible issue is if the certificate is related to another course or issuer (academy or tutor). You can find other possible issues here:
           </multiline>
         </span>
@@ -30,7 +31,7 @@
             <div class="editable-text">
               <span class="text_container">
                 <multiline>
-                  <a href="#" style="text-decoration: none; color: #ffffff;">
+                  <a href="https://os.university/static/user-manual.pdf" style="text-decoration: none; color: #ffffff;">
                     Read User Manual
                   </a>
                 </multiline>

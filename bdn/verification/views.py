@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, status, mixins
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.pagination import LimitOffsetPagination
@@ -9,6 +10,7 @@ from rest_framework.decorators import detail_route
 from notifications.signals import notify
 from bdn.auth.models import User
 from bdn.auth.signature_authentication import SignatureAuthentication
+from bdn.utils.send_email_tasks import rejected_certificate_email
 from .models import Verification
 from .serializers import VerificationSerializer, VerificationCreateSerializer
 
@@ -64,11 +66,8 @@ class VerificationViewSet(mixins.CreateModelMixin,
     @detail_route(methods=['post'])
     def reject_by_id(self, request, pk=None):
         user = request.user
-        try:
-            verification = Verification.objects.get(
-                verifier=user, id=str(pk))
-        except Verification.DoesNotExist:
-            return self.deny()
+        verification = get_object_or_404(
+            Verification, verifier=user, id=str(pk))
         verification.move_to_rejected()
         verification.save()
         notify.send(
@@ -81,29 +80,36 @@ class VerificationViewSet(mixins.CreateModelMixin,
                 'recipient_active_profile_type': verification.granted_to_type,
             }
         )
+        if verification.granted_to.usersettings.subscribed:
+            rejected_certificate_email.delay(
+                verification.certificate.certificate_title,
+                verification.verifier.profile.name_by_profile_type(
+                    verification.verifier_type),
+                verification.granted_to.email
+                )
         return Response({'status': 'ok'})
 
     @detail_route(methods=['post'])
     def set_pending_by_id(self, request, pk=None):
         user = request.user
-        try:
-            verification = Verification.objects.get(
-                verifier=user, id=pk)
-        except Verification.DoesNotExist:
-            return self.deny()
+        verification = get_object_or_404(Verification, verifier=user, id=pk)
         verification.move_to_pending()
+        verification.save()
+        return Response({'status': 'ok'})
+
+    @detail_route(methods=['post'])
+    def set_open_by_id(self, request, pk=None):
+        user = request.user
+        verification = get_object_or_404(Verification, verifier=user, id=pk)
+        verification.move_to_open()
         verification.save()
         return Response({'status': 'ok'})
 
     def create(self, request):
         data = request.data.copy()
-        try:
-            granted_to = request.user
-            verifier = User.objects.get(username__iexact=data['verifier'])
-        except User.DoesNotExist:
-            return Response({
-                'error': 'User not found',
-            }, status=status.HTTP_400_BAD_REQUEST)
+        granted_to = request.user
+        verifier = get_object_or_404(
+            User, username__iexact=data['verifier'])
         if granted_to == verifier:
             return Response({
                 'error': 'You are not able to verify certificate by yourself',

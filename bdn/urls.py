@@ -17,6 +17,7 @@ from django.contrib import admin
 from django.urls import include, path
 from django.conf import settings
 from django.conf.urls.static import static
+from django.views.generic import TemplateView
 from ajax_select import urls as ajax_select_urls
 from bdn.certificate.views import CertificateViewSet
 from bdn.profiles.views import ProfileViewSet
@@ -31,7 +32,8 @@ from bdn.messaging.views import ThreadViewSet, MessageViewSet
 from bdn.notifications_extensions.views import NotificationViewSet
 from bdn.transaction.views import TransactionViewSet
 from bdn.job_application.views import JobApplicationViewSet
-from bdn.user_settings.views import UserSettingsViewSet
+from bdn.user_settings.views import UserSettingsViewSet, email_verification
+from bdn.unsubscribe.views import unsubscribe
 from rest_framework import routers
 
 
@@ -59,6 +61,15 @@ urlpatterns = [
     path('api/v1/', include((router.urls, 'rest_framework'))),
     path('ajax_select/', include(ajax_select_urls)),
     path('admin/', admin.site.urls),
+    path('unsubscribe/<email_id>/<token>/', unsubscribe),
+    path('email-verification/<user_settings_id>/<token>/', email_verification),
+    path('deny/', TemplateView.as_view(
+        template_name='pages/deny.html'), name="deny"),
+    path('unsubscribed/', TemplateView.as_view(
+        template_name='pages/unsubscribed.html'), name="unsubscribed"),
+    path('email-verified/', TemplateView.as_view(
+        template_name='pages/email-verified.html'),
+        name="email-verified"),
 ]
 
 if settings.DEBUG:

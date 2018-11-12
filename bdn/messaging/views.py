@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 from collections import OrderedDict
 from django.db.models import Q
 from django.utils import timezone
+from django.shortcuts import get_object_or_404
 from rest_framework import status, viewsets, mixins
 from rest_framework.decorators import list_route, detail_route
 from rest_framework.pagination import LimitOffsetPagination
@@ -18,8 +19,8 @@ from .serializers import (
 
 class ThreadViewSet(mixins.CreateModelMixin,
                     mixins.RetrieveModelMixin,
-                    mixins.ListModelMixin,
                     mixins.DestroyModelMixin,
+                    mixins.ListModelMixin,
                     viewsets.GenericViewSet):
     serializer_class = ThreadGetSerializer
     pagination_class = LimitOffsetPagination
@@ -33,7 +34,7 @@ class ThreadViewSet(mixins.CreateModelMixin,
     def destroy(self, request, pk=None):
         issuer = request.user
         thread_id = pk
-        thread = Thread.objects.get(pk=thread_id)
+        thread = get_object_or_404(Thread, id=thread_id)
         if thread.owner == issuer or thread.opponent == issuer:
             thread.delete()
             response = Response({'status': 'ok'})
@@ -106,28 +107,17 @@ class MessageViewSet(mixins.CreateModelMixin,
         request = self.request
         thread_id = request.GET.get('thread_id')
         issuer = request.user
-        try:
-            thread = Thread.objects.get(Q(
-                    pk=thread_id, owner=issuer) | Q(
-                    pk=thread_id, opponent=issuer))
-        except Thread.DoesNotExist:
-            return Response({
-                'error': 'Thread not found',
-            }, status=status.HTTP_400_BAD_REQUEST)
+        thread = get_object_or_404(Thread, Q(
+                pk=thread_id, owner=issuer) | Q(
+                pk=thread_id, opponent=issuer))
         messages = Message.objects.filter(thread=thread)
         messages.exclude(sender=issuer).update(read=True)
         return messages
 
     @detail_route(methods=['post'])
     def mark_as_read_by_id(self, request, pk=None):
-        message_id = str(pk)
         issuer = request.user
-        try:
-            message = Message.objects.get(pk=message_id)
-        except Message.DoesNotExist:
-            return Response({
-                'error': 'Message not found',
-            }, status=status.HTTP_400_BAD_REQUEST)
+        message = get_object_or_404(Message, pk=pk)
         if message.thread.owner == issuer or message.thread.opponent == issuer:
             message.read = True
             message.save()
@@ -137,12 +127,7 @@ class MessageViewSet(mixins.CreateModelMixin,
         thread_id = request.data.get('threadID')
         sender = request.user
         data = request.data.copy()
-        try:
-            thread = Thread.objects.get(pk=thread_id)
-        except Thread.DoesNotExist:
-            return Response({
-                'error': 'Thread not found',
-            }, status=status.HTTP_400_BAD_REQUEST)
+        thread = get_object_or_404(Thread, pk=thread_id)
         data['sender'] = sender.id
         data['thread'] = thread.id
         serializer = MessageSerializer(data=data)

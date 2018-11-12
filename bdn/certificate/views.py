@@ -2,11 +2,13 @@
 from __future__ import unicode_literals
 
 import datetime
+from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, status, mixins
 from rest_framework.permissions import (IsAuthenticated,
                                         IsAuthenticatedOrReadOnly)
 from rest_framework.response import Response
 from rest_framework.decorators import detail_route, list_route
+from bdn.utils.send_email_tasks import certificate_upload_email
 from bdn.auth.signature_authentication import SignatureAuthentication
 from bdn.auth.utils import get_auth_eth_address
 from bdn.auth.models import User
@@ -63,7 +65,7 @@ class CertificateViewSet(mixins.RetrieveModelMixin,
 
     @detail_route(methods=['post'])
     def delete_by_id(self, request, pk=None):
-        certificate = Certificate.objects.get(id=str(pk))
+        certificate = get_object_or_404(Certificate, id=str(pk))
         if certificate.holder == request.user:
             certificate.delete()
             return Response({'status': 'ok'})
@@ -100,6 +102,20 @@ class CertificateViewSet(mixins.RetrieveModelMixin,
                     verifier=request.user, verifier_type=issuer_type,
                     granted_to_type=int(data['granted_to_type']))
                 verification.save()
+                if holder.usersettings.subscribed:
+                    certificate_upload_email.delay(
+                        certificate.certificate_title,
+                        request.user.profile.name_by_profile_type(
+                            issuer_type),
+                        holder.email
+                        )
+            elif holder.usersettings.subscribed:
+                certificate_upload_email.delay(
+                    certificate.certificate_title,
+                    holder.profile.name_by_profile_type(
+                        issuer_type),
+                    holder.email
+                    )
             return Response({
                 'status': 'ok',
                 'certificate_pk': certificate.pk,

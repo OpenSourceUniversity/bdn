@@ -8,7 +8,15 @@ Welcome to osu-bdn's documentation!
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
+   :caption: User Documentation:
+
+   getting-started
+
+.. toctree::
+   :maxdepth: 2
+   :caption: API Reference:
+
+   certificate
 
 
 
@@ -16,5 +24,4 @@ Indices and tables
 ==================
 
 * :ref:`genindex`
-* :ref:`modindex`
 * :ref:`search`

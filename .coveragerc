@@ -7,6 +7,9 @@ omit =
     start-celery-for-dev.py
     bdn/ci_settings.py
     */apps.py
+    */tests.py
+    apps/bdn-proprietary/*
+    bdn/settings.py
 
 [report]
 # Regexes for lines to exclude from consideration

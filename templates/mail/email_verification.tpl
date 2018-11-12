@@ -1,8 +1,8 @@
 {% extends "mail/base.tpl" %}
 
-{% block subject %}Open Source University - Certificate {{ certificate_title }} was successfully uploaded{% endblock %}
+{% block subject %}Your OS.University account's email has been changed{% endblock %}
 
-{% block header_title %}Your certificate {{ certificate_title }} successfully uploaded by {{ issuer_name }} {% endblock %}
+{% block header_title %}Email Verification{% endblock %}
 
 {% block html %}
 <!-- container_400 -->
@@ -12,7 +12,8 @@
       <div class="editable-text" style="line-height: 2;">
         <span class="text_container">
           <multiline>
-            To be able to verify gained knowledge and skills please follow the steps below.
+            Congratulations! Your account's email has been changed.
+            Next step is to confirm your email.
           </multiline>
         </span>
       </div>
@@ -30,8 +31,8 @@
             <div class="editable-text">
               <span class="text_container">
                 <multiline>
-                  <a href="https://os.university/static/user-manual.pdf" style="text-decoration: none; color: #ffffff;">
-                    Read User Manual
+                  <a href="{{ verification_link }}" style="text-decoration: none; color: #ffffff;">
+                    Confirm Your Email
                   </a>
                 </multiline>
               </span>
@@ -39,6 +40,21 @@
           </td>
         </tr>
       </table><!-- END button -->
+    </td>
+  </tr>
+
+  <!-- horizontal gap -->
+  <tr><td height="50"></td></tr>
+
+  <tr>
+    <td mc:edit="text003" align="center" class="text_color_282828" style="color: #282828; font-size: 15px; line-height: 2; font-weight: 500; font-family: lato, Helvetica, sans-serif; mso-line-height-rule: exactly;">
+      <div class="editable-text" style="line-height: 2;">
+        <span class="text_container">
+          <multiline>
+            In case you did not create the account on OS.University, please ignore this email.
+          </multiline>
+        </span>
+      </div>
     </td>
   </tr>
 

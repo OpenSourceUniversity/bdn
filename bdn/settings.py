@@ -74,6 +74,7 @@ INSTALLED_APPS = [
     'bdn.transaction',
     'bdn.job_application',
     'bdn.user_settings',
+    'bdn.unsubscribe',
 ]
 
 # Import all apps from apps folder
@@ -159,6 +160,8 @@ HAYSTACK_CONNECTIONS = {
         'INDEX_NAME': 'haystack',
     },
 }
+
+# HAYSTACK_SIGNAL_PROCESSOR = 'haystack.signals.RealtimeSignalProcessor'
 
 
 # Django notifications

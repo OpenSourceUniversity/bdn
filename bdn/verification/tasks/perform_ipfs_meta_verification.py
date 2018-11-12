@@ -5,6 +5,7 @@ from bdn.auth.models import User
 from django.core.exceptions import ValidationError
 from notifications.signals import notify
 from celery import shared_task
+from bdn.utils.send_email_tasks import verified_certificate_email
 from bdn.verification.exceptions import (
     IpfsDataAttributeError, GrantedToUserDoesNotExist,
     VerifierUserDoesNotExist, VerifierUserValidationError,
@@ -74,3 +75,10 @@ def perform_ipfs_meta_verification(
             'recipient_active_profile_type': verification.granted_to_type
         }
     )
+    if granted_to.usersettings.subscribed:
+        verified_certificate_email.delay(
+            certificate.certificate_title,
+            verifier.profile.name_by_profile_type(
+                verification.verifier_type),
+            granted_to.email
+            )

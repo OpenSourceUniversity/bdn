@@ -48,10 +48,3 @@ class CourseCreateSerializer(serializers.ModelSerializer):
             'skills',
             'duration',
         )
-
-    def to_internal_value(self, data):
-        if data.get('score', None) == '':
-            data.pop('score')
-        if data.get('duration', None) == '':
-            data.pop('duration')
-        return super(CourseCreateSerializer, self).to_internal_value(data)

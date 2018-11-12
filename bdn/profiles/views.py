@@ -15,6 +15,7 @@ from bdn.provider.models import Provider
 from bdn.company.models import Company
 from bdn.provider.serializers import ProviderSerializer
 from bdn.company.serializers import CompanySerializer
+from bdn.utils.send_email_tasks import profile_created_email
 from .utils import get_profile_by_type
 from .serializers import (
     ProfileSerializer, LearnerProfileSerializer, AcademyProfileSerializer,
@@ -183,7 +184,30 @@ class ProfileViewSet(mixins.CreateModelMixin,
             else:
                 return Response(company_serializer.errors,
                                 status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response({'error': 'Wrong active profile type'},
+                            status=status.HTTP_400_BAD_REQUEST)
         if serializer.is_valid():
+            if profile_type == ProfileType.LEARNER:
+                if not profile.full_name:
+                    profile_created_email.delay(
+                        'Learner',
+                        request.user.email
+                        )
+            elif profile_type == ProfileType.ACADEMY:
+                if (not profile.academy_name and not profile.academy_website
+                        and not profile.academy_email):
+                    profile_created_email.delay(
+                        'Academy',
+                        request.user.email
+                        )
+            elif profile_type == ProfileType.BUSINESS:
+                if (not profile.company_name and not profile.company_website
+                        and not profile.company_email):
+                    profile_created_email.delay(
+                        'Business',
+                        request.user.email
+                        )
             serializer.save()
             return Response({'status': 'ok'})
         else:
