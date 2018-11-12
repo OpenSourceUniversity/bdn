@@ -2,6 +2,7 @@
 from __future__ import unicode_literals
 
 import datetime
+from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, status, mixins
 from rest_framework.permissions import (IsAuthenticated,
                                         IsAuthenticatedOrReadOnly)
@@ -64,7 +65,7 @@ class CertificateViewSet(mixins.RetrieveModelMixin,
 
     @detail_route(methods=['post'])
     def delete_by_id(self, request, pk=None):
-        certificate = Certificate.objects.get(id=str(pk))
+        certificate = get_object_or_404(Certificate, id=str(pk))
         if certificate.holder == request.user:
             certificate.delete()
             return Response({'status': 'ok'})
