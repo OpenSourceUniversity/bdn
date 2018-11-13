@@ -30,8 +30,8 @@ Certificate model in database contains next fields:
     - ``checksum_hash`` (CharField)
 
 
-CertificateViewSet
-==================
+Certificate View Set
+====================
 
 ----------------------
 Create new certificate

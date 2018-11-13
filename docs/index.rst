@@ -18,6 +18,8 @@ Welcome to osu-bdn's documentation!
 
    certificate
    verification
+   course
+   job
 
 
 
