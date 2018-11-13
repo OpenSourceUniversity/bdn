@@ -11,7 +11,7 @@ Certificate model in database contains next fields:
 
 - Required:
     - ``id`` (uuid)
-    - ``holder`` (ForeignKey to user, setting to Null, if user was deleted)(
+    - ``holder`` (ForeignKey to user, setting to Null, if user was deleted)
     - ``user_eth_address`` (CharField)
     - ``institution_title`` (CharField)
     - ``institution_link`` (URLField)
@@ -20,18 +20,18 @@ Certificate model in database contains next fields:
     - ``ipfs_hash`` (CharField)
 
 - Optional:
-    - ``program_title`` = (CharField)
-    - ``course_link`` = (URLField)
-    - ``industries`` = (ManyToManyField)
-    - ``skills`` = (ManyToManyField)
-    - ``score`` = (FloatField)
-    - ``duration`` = (PositiveSmallIntegerField)
-    - ``expiration_date`` = (DateTimeField)
-    - ``checksum_hash`` = (CharField)
+    - ``program_title`` (CharField)
+    - ``course_link`` (URLField)
+    - ``industries`` (ManyToManyField)
+    - ``skills`` (ManyToManyField)
+    - ``score`` (FloatField)
+    - ``duration`` (PositiveSmallIntegerField)
+    - ``expiration_date`` (DateTimeField)
+    - ``checksum_hash`` (CharField)
 
 
-CertificateViewSet
-==================
+Certificate View Set
+====================
 
 ----------------------
 Create new certificate
