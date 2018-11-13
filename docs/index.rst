@@ -17,6 +17,7 @@ Welcome to osu-bdn's documentation!
    :caption: API Reference:
 
    certificate
+   verification
 
 
 
