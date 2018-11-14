@@ -12,41 +12,60 @@ Prerequisites
 Installing
 ----------
 
-Create project directory and execute the following command in order to clone the project:
-    ``git clone https://git.codeideo.com/edu-ico/platform.git``
+.. code-block:: console
+
+    git clone https://git.codeideo.com/edu-ico/platform.git
 
 Running
 -------
 
-- Increase the VM max map count:
-    #. ``docker-machine ssh``
-    #. ``sudo sysctl -w vm.max_map_count=262144``
-    #. ``exit``
+Increase the VM max map count:
+
+.. code-block:: console
+
+     docker-machine ssh
+     sudo sysctl -w vm.max_map_count=262144
+     exit
 
 Within the project directory execute the following commands:
-    #. ``docker-compose up``
-    #. ``docker-compose run web python manage.py migrate``
+
+.. code-block:: console
+
+    docker-compose up
+    docker-compose run web python manage.py migrate
 
 Open your browser on this address and you will be able so see django administration page: http://localhost:8000/
 
 To setup local user for administration panel execute:
-    ``docker-compose run web python manage.py createsuperuser``
+
+.. code-block:: console
+
+    docker-compose run web python manage.py createsuperuser
 
 In OSUni platform directory execute:
-    #. ``rm -R build``
-    #. ``truffle migrate (with Ganache/Test RPC working).``
 
-After successful compilation copy from OSUni platform directory - ./build/contracts/* to ./bdn/contracts/*
+.. code-block:: console
+
+    rm -R build
+    truffle migrate (with Ganache/Test RPC working).
+
+After successful compilation copy from OSUni platform directory - ``./build/contracts/*`` to ``./bdn/contracts/*``
 
 In BDN project folder run:
-    ``docker-compose run web python manage.py certificate_syncer``
+
+.. code-block:: console
+
+    docker-compose run web python manage.py certificate_syncer
 
 Running the tests
 -----------------
 
 To simulate certificates adding in OSUni platform directory execute:
-    #. ``truffle exec scripts/faker.js``
-    #. ``coverage run --source='.' manage.py test && coverage html --skip-covered``
+
+.. code-block:: console
+
+    truffle exec scripts/faker.js
+    coverage run --source='.' manage.py test && coverage html --skip-covered
 
 Coding style
 ------------
